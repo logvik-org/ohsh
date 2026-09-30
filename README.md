@@ -27,6 +27,7 @@ libraries?"* - and hands you plain `.src` lists you can feed anywhere.
 - 📂 Resolves module dependencies recursively, across libraries.
 - 🔁 Detects circular dependencies and exits with an error naming the cycle.
 - 📝 Emits ordered, per-library source lists for Verilog and VHDL.
+- 📚 Writes the order to compile the libraries in.
 - ✅ Validates that every referenced source file actually exists.
 - 🐍 Pure Python, zero runtime dependencies.
 
@@ -55,12 +56,13 @@ ohsh will:
 2. Resolve dependencies for `MODULE` (the top-level).
 3. Generate ordered Verilog and VHDL source lists per library.
 4. Write them as `<lib>_verilog.src` / `<lib>_vhdl.src` in the output directory.
+5. Write the library compile order to `libraries.src`.
 
 ### Options
 
 | Option              | Description                                                            | Default      |
 |---------------------|------------------------------------------------------------------------|--------------|
-| `-t`, `--top-dir`   | Project top-level directory; base for manifest discovery.              | cwd          |
+| `-t`, `--top-dir`   | Project top-level directory, the base for manifest discovery.          | cwd          |
 | `-w`, `--work`      | Name of the work library.                                              | `work`       |
 | `-o`, `--output`    | Output directory for the `.src` lists.                                 | cwd          |
 | `-v`, `--verbose`   | Verbose (DEBUG) console logging.                                       | off          |
@@ -78,12 +80,21 @@ Produces:
 
 ```
 src_lists/
+├── libraries.src
 ├── mylib_verilog.src
 └── mylib_vhdl.src
 ```
 
-Each `.src` file contains absolute paths to the source files, one per line, in
-compilation order.
+Each `<lib>_verilog.src` / `<lib>_vhdl.src` file contains absolute paths to the
+source files, one per line, in compilation order.
+
+`libraries.src` lists the library names, one per line, in the order to compile
+them: each library comes after the libraries it uses. Compile the libraries in
+this order rather than hard-coding it. If libraries depend on each other in a
+loop (a module in `libA` uses `libB` and a module in `libB` uses `libA`), no
+such order exists. ohsh then logs a warning and writes a best-effort order,
+which works for tools that sort files themselves (such as Vivado or Quartus
+projects) but may fail with tools that compile one library at a time.
 
 ## Manifest file format
 
@@ -133,7 +144,10 @@ For example, feeding ohsh output to GHDL:
 
 ```bash
 ohsh -t my_project -o build top
-while IFS= read -r f; do ghdl -a --work=work --std=08 "$f"; done < build/work_vhdl.src
+while IFS= read -r lib; do
+  [ -f "build/${lib}_vhdl.src" ] || continue
+  while IFS= read -r f; do ghdl -a --work="$lib" --std=08 "$f"; done < "build/${lib}_vhdl.src"
+done < build/libraries.src
 ghdl -e --std=08 top && ghdl -r --std=08 top
 ```
 

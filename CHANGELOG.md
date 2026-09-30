@@ -15,6 +15,8 @@ First public release.
 - `manifest.json`-driven discovery of HDL modules under a project tree.
 - Recursive dependency resolution producing ordered, per-library
   source lists (`<lib>_verilog.src` / `<lib>_vhdl.src`).
+- `libraries.src`: the order to compile the libraries in, with a warning when
+  libraries depend on each other in a loop.
 - CLI: `-t/--top-dir`, `-w/--work`, `-o/--output`, `-v/--verbose`,
   `--log-file`, `--version`.
 - Verified integration examples for cocotb (Makefile + Python runner), VUnit,

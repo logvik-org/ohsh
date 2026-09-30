@@ -36,6 +36,11 @@ def find_manifest(manifest_data, module):
     return next((m for m in manifest_data if m.get("module") == module), None)
 
 
+def resolve_library_name(declared_library, current_library):
+    # In a manifest, 'work' means the library the module itself is compiled into.
+    return current_library if declared_library == "work" else declared_library
+
+
 def extract_dependencies(manifest_data, top_manifest, work):
     """Return every module ``top_manifest`` depends on, directly or indirectly.
 
@@ -59,9 +64,7 @@ def extract_dependencies(manifest_data, top_manifest, work):
         dependency_chain.append(module_name)
 
         for lib_name, modules in manifest.get("dependencies", {}).items():
-            # Replace 'work' with the library this module is being resolved into.
-            if lib_name == "work":
-                lib_name = library
+            lib_name = resolve_library_name(lib_name, library)
             for module in modules:
                 logger.debug(f"Processing dependency {module} in library {lib_name}")
                 if module in dependency_chain:
@@ -83,6 +86,50 @@ def extract_dependencies(manifest_data, top_manifest, work):
 
     _collect_dependencies_of(top_manifest, work)
     return collected_deps
+
+
+def order_libraries(manifest_data, dependencies):
+    """Return the libraries used in ``dependencies`` in compile order.
+
+    Each library comes after the libraries its modules depend on. When libraries
+    depend on each other in a loop, no such order exists: a warning names the loop
+    and a best-effort order is returned, which tools that sort files themselves
+    can still use.
+    """
+    libraries = list(dict.fromkeys(library for library, _ in dependencies))
+    used_libraries = {library: set() for library in libraries}
+    for library, module in dependencies:
+        manifest = find_manifest(manifest_data, module)
+        for declared_library, modules in manifest.get("dependencies", {}).items():
+            used_library = resolve_library_name(declared_library, library)
+            if modules and used_library != library:
+                used_libraries[library].add(used_library)
+
+    ordered = []
+    while len(ordered) < len(libraries):
+        remaining = [library for library in libraries if library not in ordered]
+        ready = [library for library in remaining if used_libraries[library] <= set(ordered)]
+        if not ready:
+            loop = _find_library_loop(remaining[0], used_libraries, ordered)
+            logger.warning(
+                f"Libraries depend on each other in a loop ({' -> '.join(loop)}), so no "
+                "library order is valid. Writing a best-effort order: tools that compile "
+                "one library at a time may fail."
+            )
+            ready = remaining
+        ordered.append(ready[0])
+    return ordered
+
+
+def _find_library_loop(start, used_libraries, ordered):
+    # Every library still unordered uses at least one other unordered library,
+    # so following those edges from any of them must eventually revisit one.
+    path = [start]
+    while True:
+        next_library = min(used_libraries[path[-1]] - set(ordered))
+        if next_library in path:
+            return path[path.index(next_library) :] + [next_library]
+        path.append(next_library)
 
 
 def validate_top_dir(top_dir):

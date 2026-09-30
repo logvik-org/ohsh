@@ -13,6 +13,7 @@ from ohsh.utils import (
     configure_logging,
     discover_manifests,
     extract_dependencies,
+    order_libraries,
     to_absolute_path,
     validate_top_dir,
 )
@@ -109,6 +110,46 @@ def test_extract_dependencies_missing_manifest_names_requiring_module():
         extract_dependencies(data, data[0], "work")
     assert excinfo.value.module == "ghost"
     assert excinfo.value.required_by == "a"
+
+
+def _library_order(data, work="work"):
+    deps = extract_dependencies(data, data[0], work) + [(work, data[0]["module"])]
+    return order_libraries(data, deps)
+
+
+def test_order_libraries_puts_used_library_first():
+    # libA is reached first (through "a"), but "c" in libA uses libB, so libB
+    # must be compiled before libA.
+    data = [
+        _manifest("top", dependencies={"libA": ["a", "c"]}),
+        _manifest("a"),
+        _manifest("c", dependencies={"libB": ["b"]}),
+        _manifest("b"),
+    ]
+    assert _library_order(data) == ["libB", "libA", "work"]
+
+
+def test_order_libraries_maps_work_to_own_library():
+    data = [
+        _manifest("top", dependencies={"mylib": ["a"]}),
+        _manifest("a", dependencies={"work": ["b"]}),
+        _manifest("b"),
+    ]
+    assert _library_order(data) == ["mylib", "work"]
+
+
+def test_order_libraries_warns_on_library_loop(caplog):
+    data = [
+        _manifest("top", dependencies={"libA": ["a"], "libB": ["c"]}),
+        _manifest("a", dependencies={"libB": ["b"]}),
+        _manifest("b"),
+        _manifest("c", dependencies={"libA": ["d"]}),
+        _manifest("d"),
+    ]
+    order = _library_order(data)
+    assert sorted(order) == ["libA", "libB", "work"]
+    assert order[-1] == "work"
+    assert "libB -> libA -> libB" in caplog.text
 
 
 def test_validate_top_dir(tmp_path):

@@ -18,12 +18,15 @@ from .utils import (
     discover_manifests,
     extract_dependencies,
     find_manifest,
+    order_libraries,
     to_absolute_path,
     validate_top_dir,
 )
 
 valid_verilog_endings = [".v", ".sv", ".svp"]
 valid_vhdl_endings = [".vhd", ".vhdl", ".vo"]
+
+LIBRARY_ORDER_FILE_NAME = "libraries.src"
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +103,9 @@ def run(args, cwd):
 
     logger.info(f"Complete module list: {dependencies}")
 
+    library_order = order_libraries(manifest_data, dependencies)
+    logger.info(f"Library compile order: {library_order}")
+
     # Extract source file list from all modules in the final dependencies list
     source_files_by_lib = {}
     for lib_name, module in dependencies:
@@ -146,7 +152,10 @@ def run(args, cwd):
         logger.error(error_message)
         exit(EXIT_MISSING_FILES)
 
+    source_files_by_lib = {lib_name: source_files_by_lib[lib_name] for lib_name in library_order}
+
     # Print the final source file list for each library in order
+    print(f"Library compile order: {' '.join(library_order)}")
     for lib_name, source_files in source_files_by_lib.items():
         print(f"Verilog sources for library {lib_name}:")
         for source_file in source_files["verilog"]:
@@ -179,3 +188,9 @@ def run(args, cwd):
             logger.info(f"Wrote VHDL source files for library {lib_name} to {vhdl_output_file}")
         else:
             logger.info(f"No VHDL source files for library {lib_name}, skipping file creation.")
+
+    library_order_file = output_dir / LIBRARY_ORDER_FILE_NAME
+    with open(library_order_file, "w", encoding="utf-8") as f:
+        for lib_name in library_order:
+            f.write(f"{lib_name}\n")
+    logger.info(f"Wrote library compile order to {library_order_file}")

@@ -47,6 +47,15 @@ def test_run_writes_ordered_src_files(tmp_path, make_module):
     assert not (out / "math_lib_verilog.src").exists()
 
 
+def test_run_writes_library_order(tmp_path, make_module):
+    make_module("adder", ["adder.vhd"], dependencies={})
+    make_module("top", ["top.vhd"], dependencies={"math_lib": ["adder"]})
+    out = tmp_path / "out"
+    out.mkdir()
+    assert _run(tmp_path, "top", out) == 0
+    assert (out / "libraries.src").read_text().splitlines() == ["math_lib", "work"]
+
+
 def test_run_classifies_extensions(tmp_path, make_module):
     make_module(
         "top",
