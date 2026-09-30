@@ -8,6 +8,7 @@
 # Verified in CI against the demo project (see .github/workflows/integration.yml).
 #
 # Set UVVM_ROOT to an existing UVVM checkout to skip the clone.
+# UVVM_VERSION selects the UVVM release tag to clone.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -22,9 +23,10 @@ mkdir -p "$BUILD"
 
 # 0. Obtain UVVM.
 UVVM_ROOT="${UVVM_ROOT:-$BUILD/UVVM}"
+UVVM_VERSION="${UVVM_VERSION:-2026.03.20}"
 if [ ! -d "$UVVM_ROOT/uvvm_util" ]; then
-  echo ">> Cloning UVVM into $UVVM_ROOT"
-  git clone --depth 1 https://github.com/UVVM/UVVM.git "$UVVM_ROOT"
+  echo ">> Cloning UVVM $UVVM_VERSION into $UVVM_ROOT"
+  git clone --depth 1 --branch "$UVVM_VERSION" https://github.com/UVVM/UVVM.git "$UVVM_ROOT"
 fi
 
 # 1. Compile uvvm_util in the order given by its own compile_order.txt.

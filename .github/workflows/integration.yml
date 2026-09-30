@@ -13,9 +13,10 @@ concurrency:
   group: integration-${{ github.ref }}
   cancel-in-progress: true
 
+# Tool versions are pinned so CI only changes when we bump them on purpose.
 jobs:
   examples:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -24,7 +25,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install ohsh + Python sim frameworks
-        run: pip install . cocotb vunit-hdl
+        run: pip install . cocotb==2.1.0 vunit-hdl==4.7.1
 
       - name: Install Icarus Verilog
         run: sudo apt-get update && sudo apt-get install -y iverilog
@@ -32,12 +33,12 @@ jobs:
       - name: Install GHDL
         uses: ghdl/setup-ghdl@v1
         with:
-          version: nightly
+          version: 6.0.0
 
       - name: Install NVC
         uses: nickg/setup-nvc@v1
         with:
-          version: latest
+          version: 1.23.0
 
       - name: cocotb (Makefile flow)
         working-directory: examples/integrations/cocotb_makefile
