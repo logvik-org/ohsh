@@ -46,7 +46,7 @@ jobs:
           allow-prereleases: true
       - run: pip install -e ".[dev]"
       - name: Run tests
-        run: pytest --cov=ohsh --cov-report=term-missing --cov-report=xml
+        run: pytest --cov=ohsh --cov-report=term-missing
 
   build:
     runs-on: ubuntu-latest
