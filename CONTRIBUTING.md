@@ -42,20 +42,34 @@ end-to-end integration examples. PRs need a green pipeline to merge.
 
 ## Coding style
 
-- Code is formatted and linted with [ruff](https://docs.astral.sh/ruff/); the
-  config lives in `pyproject.toml`. `pre-commit` applies it automatically.
+- Code is formatted and linted with [ruff](https://docs.astral.sh/ruff/). The
+  config lives in `pyproject.toml`, and `pre-commit` applies it automatically.
 - Keep ohsh dependency-free at runtime (standard library only).
 - Add a `# SPDX-License-Identifier: Apache-2.0` header to new modules in `ohsh/`.
 
 ## Releasing (maintainers)
 
-Releases are automated via `.github/workflows/release.yml`:
+1. Bump `__version__` in `ohsh/__init__.py` and update `CHANGELOG.md` on `main`.
+2. Publish a **GitHub Release** with a new tag `v<version>` (for example
+   `v1.2.3`) on that commit.
 
-1. Bump `__version__` in `ohsh/__init__.py` and update `CHANGELOG.md`.
-2. Tag the commit: `git tag v1.2.3 && git push --tags`.
-   → publishes to **TestPyPI**.
-3. Verify the TestPyPI release, then publish a **GitHub Release** for the tag.
-   → publishes to **PyPI**.
+Publishing the release starts `.github/workflows/release.yml`, which runs these
+jobs in order and stops at the first failure:
+
+1. The CI and integration workflows.
+2. Build, after checking that the tag equals `v` + `__version__`.
+3. Upload to **TestPyPI**.
+4. Install the package from TestPyPI and run `scripts/smoke-test.sh`.
+5. Upload the same files to **PyPI**.
+
+If a job fails for a reason outside the code (for example TestPyPI was slow),
+re-run the failed jobs from the Actions tab. TestPyPI skips files it already has,
+so a re-run gets past step 3. If the code needs a fix, delete the release and its
+tag, fix the code, and publish the release again. A version that reached PyPI
+can never be uploaded again, so bump the version in that case.
+
+To approve each PyPI upload by hand, add yourself as a required reviewer on the
+`pypi` environment in the repository settings.
 
 Publishing uses PyPI [Trusted Publishing](https://docs.pypi.org/trusted-publishers/)
 (OIDC) - no API tokens are stored. The `testpypi` and `pypi` environments and the

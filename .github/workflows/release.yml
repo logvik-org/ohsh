@@ -1,8 +1,9 @@
 name: Release
 
+# Publishing a GitHub Release runs one chain, each job waiting for the previous:
+# tests -> build -> TestPyPI -> install from TestPyPI and smoke-test -> PyPI.
+# PyPI receives the exact files that were verified on TestPyPI.
 on:
-  push:
-    tags: ["v*"]
   release:
     types: [published]
 
@@ -10,13 +11,27 @@ permissions:
   contents: read
 
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  integrations:
+    uses: ./.github/workflows/integration.yml
+
   build:
+    needs: [ci, integrations]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Check that the tag matches the package version
+        run: |
+          version="$(python -c 'import ohsh; print(ohsh.__version__)')"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match ohsh.__version__ ($version)"
+            exit 1
+          fi
       - run: pip install build twine
       - run: python -m build
       - run: twine check dist/*
@@ -25,9 +40,7 @@ jobs:
           name: dist
           path: dist/*
 
-  # On a tag push: publish to TestPyPI for validation.
   testpypi:
-    if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest
     environment: testpypi
@@ -41,11 +54,35 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+          # Lets a failed release be re-run after TestPyPI already has the files.
+          skip-existing: true
 
-  # On a published GitHub Release: publish to the real PyPI.
+  verify-testpypi:
+    needs: testpypi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install from TestPyPI
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          # A new upload can take a few minutes to show up in the index.
+          for attempt in $(seq 10); do
+            if pip install --no-cache-dir --index-url https://test.pypi.org/simple/ "ohsh==$version"; then
+              exit 0
+            fi
+            echo "Attempt $attempt: ohsh $version not installable yet, retrying in 30 s"
+            sleep 30
+          done
+          echo "::error::ohsh $version never became installable from TestPyPI"
+          exit 1
+      - name: Smoke-test the TestPyPI package
+        run: scripts/smoke-test.sh "${GITHUB_REF_NAME#v}"
+
   pypi:
-    if: github.event_name == 'release'
-    needs: build
+    needs: verify-testpypi
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
