@@ -63,8 +63,8 @@ ohsh will:
 | Option              | Description                                                            | Default      |
 |---------------------|------------------------------------------------------------------------|--------------|
 | `-t`, `--top-dir`   | Project top-level directory, the base for manifest discovery.          | cwd          |
-| `-w`, `--work`      | Name of the work library.                                              | `work`       |
-| `-o`, `--output`    | Output directory for the `.src` lists.                                 | cwd          |
+| `-w`, `--work`      | Library for the top module, which `work` in its manifest refers to.    | `work`       |
+| `-o`, `--output`    | Directory for the `.src` lists and `libraries.src`, created if missing. | cwd          |
 | `-v`, `--verbose`   | Show progress (`-v`) or debug details (`-vv`).                         | quiet        |
 | `--log-file PATH`   | Also write logs to a file (no log file is written by default).         | none         |
 | `--version`         | Print version and exit.                                                |              |
