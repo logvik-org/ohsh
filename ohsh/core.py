@@ -1,29 +1,51 @@
+# SPDX-License-Identifier: Apache-2.0
 # pylint: disable=logging-fstring-interpolation missing-function-docstring line-too-long
-import pathlib
-import logging
 import json
+import logging
+import pathlib
 
-from .utils import configure_logging, ensure_abs_path, validate_top_dir, extract_dependencies, discover_manifests, EXIT_FILE_ERROR, EXIT_JSON_ERROR, EXIT_MODULE_NOT_FOUND, EXIT_INVALID_TOP_DIR, EXIT_MANIFEST_NOT_FOUND, EXIT_MISSING_FILES, EXIT_UNEXPECTED_ERROR
+from .utils import (
+    EXIT_CIRCULAR_DEPENDENCY,
+    EXIT_FILE_ERROR,
+    EXIT_INVALID_TOP_DIR,
+    EXIT_JSON_ERROR,
+    EXIT_MANIFEST_NOT_FOUND,
+    EXIT_MISSING_FILES,
+    EXIT_MODULE_NOT_FOUND,
+    EXIT_UNEXPECTED_ERROR,
+    CircularDependencyError,
+    configure_logging,
+    discover_manifests,
+    ensure_abs_path,
+    extract_dependencies,
+    validate_top_dir,
+)
 
 valid_verilog_endings = [".v", ".sv", ".svp"]
 valid_vhdl_endings = [".vhd", ".vhdl", ".vo"]
 
 logger = logging.getLogger(__name__)
 
+
 def run(args, cwd):
     module = args.module
     top_dir = args.top_dir
     work = args.work
 
-    # Create a logger object
-    configure_logging()
+    # Configure logging (console by default; file only when --log-file is given)
+    configure_logging(
+        verbose=getattr(args, "verbose", False),
+        log_file=getattr(args, "log_file", None),
+    )
 
-    # if top-level is relative path, make it absolute?
-    ensure_abs_path(cwd, top_dir)
+    # If the top-level directory is a relative path, make it absolute.
+    top_dir = ensure_abs_path(cwd, top_dir)
 
     # Check if top-level is a directory and exists
     if not validate_top_dir(top_dir):
-        error_message = f"The specified top-level directory {top_dir} does not exist or is not a directory."
+        error_message = (
+            f"The specified top-level directory {top_dir} does not exist or is not a directory."
+        )
         logger.error(error_message)
         exit(EXIT_INVALID_TOP_DIR)
 
@@ -34,7 +56,7 @@ def run(args, cwd):
     manifest_data = []
     for manifest_file in all_manifest_files:
         try:
-            with open(manifest_file, "r", encoding="utf-8") as file:
+            with open(manifest_file, encoding="utf-8") as file:
                 data = json.load(file)
                 data["manifest_path"] = str(manifest_file.resolve())
                 manifest_data.append(data)
@@ -42,7 +64,7 @@ def run(args, cwd):
         except json.JSONDecodeError as e:
             logger.error(f"Error parsing JSON from {manifest_file}: {e}")
             exit(EXIT_JSON_ERROR)
-        except (OSError, IOError) as e:
+        except OSError as e:
             logger.error(f"File error reading {manifest_file}: {e}")
             exit(EXIT_FILE_ERROR)
         except Exception as e:
@@ -65,7 +87,11 @@ def run(args, cwd):
         logger.info(f"Found module {module} in manifest.")
 
     # Extract dependencies recursively
-    dependencies = extract_dependencies(manifest_data, top_manifest, work)
+    try:
+        dependencies = extract_dependencies(manifest_data, top_manifest, work)
+    except CircularDependencyError as e:
+        logger.error(f"Circular dependency detected: {e}")
+        exit(EXIT_CIRCULAR_DEPENDENCY)
 
     # Remove duplicate entries
     dependencies = list(dict.fromkeys(dependencies))
@@ -87,11 +113,8 @@ def run(args, cwd):
         manifest = next((m for m in manifest_data if m.get("module") == module), None)
         if manifest:
             manifest_path = pathlib.Path(manifest["manifest_path"]).parent
-            sources = [
-                str(manifest_path / source) for source in manifest.get("sources", [])
-            ]
+            sources = [str(manifest_path / source) for source in manifest.get("sources", [])]
             for source in sources:
-
                 if any(source.endswith(ext) for ext in valid_verilog_endings):
                     verilog_sources.append(source)
                 elif any(source.endswith(ext) for ext in valid_vhdl_endings):
@@ -120,7 +143,7 @@ def run(args, cwd):
 
     # Check that all source files exist
     missing_files = []
-    for lib_name, source_files in source_files_by_lib.items():
+    for source_files in source_files_by_lib.values():
         for source_file in source_files["verilog"] + source_files["vhdl"]:
             if not pathlib.Path(source_file).exists():
                 missing_files.append(source_file)
@@ -154,18 +177,12 @@ def run(args, cwd):
                 f"Wrote Verilog source files for library {lib_name} to {verilog_output_file}"
             )
         else:
-            logger.info(
-                f"No Verilog source files for library {lib_name}, skipping file creation."
-            )
+            logger.info(f"No Verilog source files for library {lib_name}, skipping file creation.")
 
         if source_files["vhdl"]:
             with open(vhdl_output_file, "w", encoding="utf-8") as f:
                 for source_file in source_files["vhdl"]:
                     f.write(f"{source_file}\n")
-            logger.info(
-                f"Wrote VHDL source files for library {lib_name} to {vhdl_output_file}"
-            )
+            logger.info(f"Wrote VHDL source files for library {lib_name} to {vhdl_output_file}")
         else:
-            logger.info(
-                f"No VHDL source files for library {lib_name}, skipping file creation."
-            )
+            logger.info(f"No VHDL source files for library {lib_name}, skipping file creation.")
