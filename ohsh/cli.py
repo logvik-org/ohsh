@@ -1,5 +1,4 @@
 # SPDX-License-Identifier: Apache-2.0
-# pylint: disable=logging-fstring-interpolation missing-function-docstring line-too-long
 
 import argparse
 import pathlib
