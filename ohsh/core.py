@@ -167,6 +167,11 @@ def run(args, cwd):
 
     # Write the source files to output files, one file per library
     output_dir = pathlib.Path(args.output)
+    try:
+        output_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        logger.error(f"Cannot create output directory {output_dir}: {e}")
+        exit(EXIT_FILE_ERROR)
     for lib_name, source_files in source_files_by_lib.items():
         verilog_output_file = output_dir / f"{lib_name}_verilog.src"
         vhdl_output_file = output_dir / f"{lib_name}_vhdl.src"

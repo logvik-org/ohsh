@@ -8,6 +8,7 @@ from ohsh.cli import build_parser
 from ohsh.core import run
 from ohsh.utils import (
     EXIT_CIRCULAR_DEPENDENCY,
+    EXIT_FILE_ERROR,
     EXIT_INVALID_TOP_DIR,
     EXIT_JSON_ERROR,
     EXIT_MANIFEST_NOT_FOUND,
@@ -54,6 +55,20 @@ def test_run_writes_library_order(tmp_path, make_module):
     out.mkdir()
     assert _run(tmp_path, "top", out) == 0
     assert (out / "libraries.src").read_text().splitlines() == ["math_lib", "work"]
+
+
+def test_run_creates_missing_output_dir(tmp_path, make_module):
+    make_module("top", ["top.vhd"], dependencies={})
+    out = tmp_path / "build" / "lists"
+    assert _run(tmp_path, "top", out) == 0
+    assert (out / "work_vhdl.src").exists()
+
+
+def test_run_output_path_is_a_file(tmp_path, make_module):
+    make_module("top", ["top.vhd"], dependencies={})
+    out = tmp_path / "not_a_dir"
+    out.write_text("")
+    assert _run(tmp_path, "top", out) == EXIT_FILE_ERROR
 
 
 def test_run_classifies_extensions(tmp_path, make_module):
