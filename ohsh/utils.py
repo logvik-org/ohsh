@@ -66,7 +66,7 @@ def configure_logging():
     logger.setLevel(logging.DEBUG)
 
     # Create a formatter with a nice formatting
-    formatter = logging.Formatter("oshsh - %(levelname)s - %(message)s")
+    formatter = logging.Formatter("ohsh - %(levelname)s - %(message)s")
 
     # Create a file handler to log to a file
     file_handler = logging.FileHandler("debug.log")
