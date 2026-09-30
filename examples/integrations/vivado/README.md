@@ -3,14 +3,15 @@
 Status: **⚠️ documented & validated against vendor docs** - not executed in CI
 (Vivado is licensed proprietary software).
 
-[`read_sources.tcl`](read_sources.tcl) loops over ohsh's `.src` lists and reads
-each file in non-project (Tcl) mode:
+[`read_sources.tcl`](read_sources.tcl) loops over the libraries in ohsh's
+`libraries.src` and reads each library's files in non-project (Tcl) mode:
 
 ```tcl
 proc read_src {srcfile kind lib} { ... read_vhdl -library $lib $line ... }
-read_src build/math_lib_vhdl.src vhdl    math_lib
-read_src build/work_vhdl.src     vhdl    work
-read_src build/work_verilog.src  verilog work
+foreach lib [read_library_order build/libraries.src] {
+    read_src build/${lib}_vhdl.src    vhdl    $lib
+    read_src build/${lib}_verilog.src verilog $lib
+}
 ```
 
 Usage:

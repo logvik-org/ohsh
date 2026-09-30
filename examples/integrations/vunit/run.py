@@ -21,7 +21,7 @@ DUT_LIB = "dut_lib"
 
 
 def read_src(path: Path) -> list[str]:
-    """Read an ohsh .src list into a list of paths (one per line)."""
+    """Read an ohsh .src file into a list of its non-empty lines."""
     if not path.exists():
         return []
     return [line.strip() for line in path.read_text().splitlines() if line.strip()]
@@ -39,11 +39,9 @@ def main() -> None:
     # 2. Hand the lists to VUnit.
     vu = VUnit.from_argv()
 
-    math = vu.add_library("math_lib")
-    math.add_source_files(read_src(BUILD / "math_lib_vhdl.src"))
-
-    dut = vu.add_library(DUT_LIB)
-    dut.add_source_files(read_src(BUILD / f"{DUT_LIB}_vhdl.src"))
+    for library in read_src(BUILD / "libraries.src"):
+        sources = read_src(BUILD / f"{library}_vhdl.src")
+        vu.add_library(library).add_source_files(sources, allow_empty=True)
 
     tb = vu.add_library("tb_lib")
     tb.add_source_files(HERE / "tb_accumulator_vunit.vhd")

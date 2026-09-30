@@ -4,8 +4,8 @@
 # NVC integration example.
 #
 # 1. Generate ordered, per-library source lists with ohsh.
-# 2. Analyze each library with `nvc --work=<lib> -a` (dependency libraries
-#    before the work library); `-L.` lets `work` find `math_lib`.
+# 2. Analyze each library with `nvc --work=<lib> -a`, in the order ohsh
+#    writes to libraries.src. `-L.` lets `work` find `math_lib`.
 # 3. Elaborate and run the self-checking testbench.
 #
 # Verified in CI against the demo project (see .github/workflows/integration.yml).
@@ -37,9 +37,10 @@ analyze_list() {  # <library> <src-file>
   done < "$list"
 }
 
-# 2. Compile dependency libraries first, then work.
-analyze_list math_lib "$BUILD/math_lib_vhdl.src"
-analyze_list work     "$BUILD/work_vhdl.src"
+# 2. Compile the libraries in the order ohsh wrote to libraries.src.
+while IFS= read -r lib; do
+  analyze_list "$lib" "$BUILD/${lib}_vhdl.src"
+done < "$BUILD/libraries.src"
 
 # Compile the testbench into work.
 nvc --std="$STD" -L. --work=work -a "$TB"

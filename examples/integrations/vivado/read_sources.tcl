@@ -26,10 +26,19 @@ proc read_src {srcfile kind lib} {
     close $fp
 }
 
-# VHDL into named libraries (dependency libraries first); Verilog is global.
-read_src build/math_lib_vhdl.src vhdl    math_lib
-read_src build/work_vhdl.src     vhdl    work
-read_src build/work_verilog.src  verilog work
+# Library names in the order ohsh wrote them to libraries.src.
+proc read_library_order {path} {
+    set fp [open $path r]
+    set libraries [split [string trim [read $fp]] "\n"]
+    close $fp
+    return $libraries
+}
+
+# VHDL goes into named libraries, in library order. Verilog is global.
+foreach lib [read_library_order build/libraries.src] {
+    read_src build/${lib}_vhdl.src    vhdl    $lib
+    read_src build/${lib}_verilog.src verilog $lib
+}
 
 # Example continuation:
 # synth_design -top accumulator

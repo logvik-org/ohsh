@@ -37,7 +37,7 @@ while IFS= read -r line; do
   ( cd "$UTIL_SCRIPT" && ghdl -a "${GFLAGS[@]}" --work=uvvm_util "$line" )
 done < "$UTIL_SCRIPT/compile_order.txt"
 
-# 2. Resolve and compile the design (dependency libraries before work).
+# 2. Resolve and compile the design, in the order ohsh wrote to libraries.src.
 ohsh -t "$DEMO" -o "$BUILD" accumulator
 
 compile_list() {  # <library> <src-file>
@@ -48,8 +48,9 @@ compile_list() {  # <library> <src-file>
     ghdl -a "${GFLAGS[@]}" --work="$lib" "$f"
   done < "$list"
 }
-compile_list math_lib "$BUILD/math_lib_vhdl.src"
-compile_list work     "$BUILD/work_vhdl.src"
+while IFS= read -r lib; do
+  compile_list "$lib" "$BUILD/${lib}_vhdl.src"
+done < "$BUILD/libraries.src"
 
 # 3. Compile and run the UVVM testbench.
 ghdl -a "${GFLAGS[@]}" --work=work "$HERE/tb_accumulator_uvvm.vhd"

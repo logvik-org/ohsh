@@ -8,7 +8,7 @@ Status: **✅ verified in CI** (`.github/workflows/integration.yml`, GHDL backen
    and compiles `uvvm_util` into its own library, following UVVM's own
    `uvvm_util/script/compile_order.txt`.
 2. Runs `ohsh` on the [demo project](../../demo_project) and compiles the design
-   libraries (`math_lib` then `work`).
+   libraries in the order listed in `libraries.src` (`math_lib`, then `work`).
 3. Compiles and runs the UVVM testbench
    ([`tb_accumulator_uvvm.vhd`](tb_accumulator_uvvm.vhd)), which uses
    `uvvm_util` `log()` / `check_value()` and ends with an alert summary.

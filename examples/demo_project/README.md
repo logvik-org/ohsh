@@ -21,8 +21,9 @@ Resolve the VHDL design (top = `accumulator`):
 
 ```bash
 ohsh -t . -o build accumulator
+# build/libraries.src     -> math_lib, work    (library compile order)
 # build/math_lib_vhdl.src  -> adder.vhd
-# build/work_vhdl.src      -> accumulator.vhd   (compiled after math_lib)
+# build/work_vhdl.src      -> accumulator.vhd
 ```
 
 Resolve the Verilog design (top = `counter`):

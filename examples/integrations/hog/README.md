@@ -21,7 +21,7 @@ Generate per-library lists with ohsh:
 
 ```bash
 ohsh -t ../../demo_project -o build accumulator
-# -> build/math_lib_vhdl.src, build/work_vhdl.src
+# -> build/libraries.src, build/math_lib_vhdl.src, build/work_vhdl.src
 ```
 
 A hog project keeps its lists in `Top/<project>/list/`. hog uses the list
@@ -30,8 +30,10 @@ list files (paths can be made relative to the hog repo root as hog expects):
 
 ```bash
 mkdir -p Top/demo/list
-cp build/math_lib_vhdl.src Top/demo/list/math_lib.src
-cp build/work_vhdl.src     Top/demo/list/work.src
+while IFS= read -r lib; do
+  [ -f "build/${lib}_vhdl.src" ] || continue
+  cp "build/${lib}_vhdl.src" "Top/demo/list/${lib}.src"
+done < build/libraries.src
 ```
 
 hog then reads `Top/demo/list/*.src` when creating the project. This keeps the

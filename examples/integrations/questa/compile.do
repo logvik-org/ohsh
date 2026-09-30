@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Questa / ModelSim do-file: compile ohsh-generated source lists into libraries,
-# dependency libraries first, then run the testbench.
+# in the order ohsh writes to libraries.src, then run the testbench.
 #
 # Generate the lists first (from a shell):
 #   ohsh -t ../../demo_project -o build accumulator
@@ -27,16 +27,26 @@ proc compile_src {srcfile lib lang} {
     close $fp
 }
 
+# Library names in the order ohsh wrote them to libraries.src.
+proc read_library_order {path} {
+    set fp [open $path r]
+    set libraries [split [string trim [read $fp]] "\n"]
+    close $fp
+    return $libraries
+}
+
+set libraries [read_library_order build/libraries.src]
+
 # Create / map libraries.
-foreach lib {math_lib work} {
+foreach lib $libraries {
     vlib $lib
     vmap $lib $lib
 }
 
-# Compile dependency libraries before work.
-compile_src build/math_lib_vhdl.src    math_lib vhdl
-compile_src build/work_vhdl.src        work     vhdl
-compile_src build/work_verilog.src     work     verilog
+foreach lib $libraries {
+    compile_src build/${lib}_vhdl.src    $lib vhdl
+    compile_src build/${lib}_verilog.src $lib verilog
+}
 
 # Compile a testbench and simulate (adjust the top to taste).
 # vcom -2008 -work work ../ghdl/tb_accumulator.vhd

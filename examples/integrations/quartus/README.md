@@ -3,16 +3,18 @@
 Status: **⚠️ documented & validated against vendor docs** - not executed in CI
 (Quartus is licensed proprietary software).
 
-[`add_sources.tcl`](add_sources.tcl) reads ohsh's `.src` lists and adds each file
-to the project with `set_global_assignment`:
+[`add_sources.tcl`](add_sources.tcl) loops over the libraries in ohsh's
+`libraries.src` and adds each library's files to the project with
+`set_global_assignment`:
 
 ```tcl
 proc add_src {srcfile kind lib} {
     ... set_global_assignment -name VHDL_FILE $line -library $lib ...
 }
-add_src build/math_lib_vhdl.src vhdl    math_lib
-add_src build/work_vhdl.src     vhdl    work
-add_src build/work_verilog.src  verilog work
+foreach lib [read_library_order build/libraries.src] {
+    add_src build/${lib}_vhdl.src    vhdl    $lib
+    add_src build/${lib}_verilog.src verilog $lib
+}
 ```
 
 Usage:

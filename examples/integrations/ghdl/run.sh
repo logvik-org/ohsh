@@ -4,8 +4,8 @@
 # GHDL integration example.
 #
 # 1. Generate ordered, per-library source lists with ohsh.
-# 2. Analyze each library with `ghdl -a --work=<lib>` (dependency libraries
-#    before the work library).
+# 2. Analyze each library with `ghdl -a --work=<lib>`, in the order ohsh
+#    writes to libraries.src.
 # 3. Elaborate and run the self-checking testbench.
 #
 # Verified in CI against the demo project (see .github/workflows/integration.yml).
@@ -36,9 +36,10 @@ analyze_list() {  # <library> <src-file>
   done < "$list"
 }
 
-# 2. Compile dependency libraries first, then work.
-analyze_list math_lib "$BUILD/math_lib_vhdl.src"
-analyze_list work     "$BUILD/work_vhdl.src"
+# 2. Compile the libraries in the order ohsh wrote to libraries.src.
+while IFS= read -r lib; do
+  analyze_list "$lib" "$BUILD/${lib}_vhdl.src"
+done < "$BUILD/libraries.src"
 
 # Compile the testbench (not part of the design manifest) into work.
 ghdl -a "${GHDL_FLAGS[@]}" --work=work "$HERE/tb_accumulator.vhd"

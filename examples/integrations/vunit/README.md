@@ -9,8 +9,9 @@ libraries:
 subprocess.run(["ohsh", "-t", DEMO, "-o", BUILD, "-w", "dut_lib", "accumulator"], check=True)
 
 vu = VUnit.from_argv()
-vu.add_library("math_lib").add_source_files(read_src(BUILD / "math_lib_vhdl.src"))
-vu.add_library("dut_lib").add_source_files(read_src(BUILD / "dut_lib_vhdl.src"))
+for library in read_src(BUILD / "libraries.src"):
+    sources = read_src(BUILD / f"{library}_vhdl.src")
+    vu.add_library(library).add_source_files(sources, allow_empty=True)
 vu.add_library("tb_lib").add_source_files(HERE / "tb_accumulator_vunit.vhd")
 vu.main()
 ```

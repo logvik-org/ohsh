@@ -28,12 +28,21 @@ proc add_src {srcfile kind lib} {
     close $fp
 }
 
+# Library names in the order ohsh wrote them to libraries.src.
+proc read_library_order {path} {
+    set fp [open $path r]
+    set libraries [split [string trim [read $fp]] "\n"]
+    close $fp
+    return $libraries
+}
+
 project_new -overwrite demo
 set_global_assignment -name TOP_LEVEL_ENTITY accumulator
 
-add_src build/math_lib_vhdl.src vhdl    math_lib
-add_src build/work_vhdl.src     vhdl    work
-add_src build/work_verilog.src  verilog work
+foreach lib [read_library_order build/libraries.src] {
+    add_src build/${lib}_vhdl.src    vhdl    $lib
+    add_src build/${lib}_verilog.src verilog $lib
+}
 
 export_assignments
 project_close
