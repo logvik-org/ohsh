@@ -26,8 +26,11 @@ First public release.
   Vivado, and Quartus.
 - pytest test suite, ruff lint/format, pre-commit hooks, and dev setup scripts.
 - CI (lint + Python 3.9-3.14 matrix, with an experimental 3.15 pre-release leg,
-  + build), integration CI, and an automated
-  TestPyPI → PyPI release workflow using Trusted Publishing.
+  + build and a smoke test of the built wheel) and integration CI with pinned
+  tool versions.
+- Release workflow using Trusted Publishing: publishing a GitHub Release runs
+  the tests, checks the tag against the package version, uploads to TestPyPI,
+  installs and smoke-tests that package, and only then uploads to PyPI.
 - Apache 2.0 license.
 
 ### Changed
