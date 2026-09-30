@@ -7,13 +7,12 @@ import pathlib
 from ohsh.cli import build_parser
 from ohsh.core import run
 from ohsh.utils import (
+    EXIT_CANNOT_CREATE_OUTPUT,
     EXIT_CIRCULAR_DEPENDENCY,
-    EXIT_FILE_ERROR,
-    EXIT_INVALID_TOP_DIR,
-    EXIT_JSON_ERROR,
+    EXIT_DATA_ERROR,
     EXIT_MANIFEST_NOT_FOUND,
-    EXIT_MISSING_FILES,
     EXIT_MODULE_NOT_FOUND,
+    EXIT_NO_INPUT,
 )
 
 
@@ -68,7 +67,7 @@ def test_run_output_path_is_a_file(tmp_path, make_module):
     make_module("top", ["top.vhd"], dependencies={})
     out = tmp_path / "not_a_dir"
     out.write_text("")
-    assert _run(tmp_path, "top", out) == EXIT_FILE_ERROR
+    assert _run(tmp_path, "top", out) == EXIT_CANNOT_CREATE_OUTPUT
 
 
 def test_run_classifies_extensions(tmp_path, make_module):
@@ -101,7 +100,7 @@ def test_run_no_debug_log_side_effect(tmp_path, make_module, monkeypatch):
 def test_run_invalid_top_dir(tmp_path):
     out = tmp_path / "out"
     out.mkdir()
-    assert _run(tmp_path / "does_not_exist", "top", out) == EXIT_INVALID_TOP_DIR
+    assert _run(tmp_path / "does_not_exist", "top", out) == EXIT_NO_INPUT
 
 
 def test_run_module_not_found(tmp_path, make_module):
@@ -132,7 +131,7 @@ def test_run_bad_json(tmp_path):
     (tmp_path / "manifest.json").write_text("{ not valid json ")
     out = tmp_path / "out"
     out.mkdir()
-    assert _run(tmp_path, "top", out) == EXIT_JSON_ERROR
+    assert _run(tmp_path, "top", out) == EXIT_DATA_ERROR
 
 
 def test_run_missing_source_file(tmp_path):
@@ -144,4 +143,4 @@ def test_run_missing_source_file(tmp_path):
     )
     out = tmp_path / "out"
     out.mkdir()
-    assert _run(tmp_path, "top", out) == EXIT_MISSING_FILES
+    assert _run(tmp_path, "top", out) == EXIT_NO_INPUT

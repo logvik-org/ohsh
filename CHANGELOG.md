@@ -20,6 +20,8 @@ First public release.
 - CLI: `-t/--top-dir`, `-w/--work`, `-o/--output`, `-v/--verbose` (repeat as
   `-vv` for debug output), `--log-file`, `--version`. By default only warnings
   and errors are printed.
+- Exit codes that follow Unix conventions (`1`, `2`, `sysexits.h`), with
+  ohsh-specific errors from 100. Listed in `--help` and the README.
 - Verified integration examples for cocotb (Makefile + Python runner), VUnit,
   GHDL, NVC, and UVVM, plus documented examples for hog, Questa/ModelSim,
   Vivado, and Quartus.
@@ -43,7 +45,7 @@ First public release.
   (previously the resolved path was discarded).
 - Running the tool no longer writes a stray `debug.log` into the working
   directory.
-- Circular dependencies now exit with an error (exit code 8) naming the cycle,
+- Circular dependencies now exit with an error (exit code 102) naming the cycle,
   instead of recursing infinitely.
 
 [Unreleased]: https://github.com/logvik-org/oshsh/compare/v0.1.0...HEAD

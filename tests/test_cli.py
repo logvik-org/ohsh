@@ -9,7 +9,7 @@ import pytest
 from ohsh import __version__
 from ohsh.cli import build_parser
 from ohsh.core import run
-from ohsh.utils import CONSOLE_HANDLER_NAME
+from ohsh.utils import CONSOLE_HANDLER_NAME, EXIT_CODE_DESCRIPTIONS, EXIT_USAGE
 
 
 def test_parser_defaults():
@@ -36,8 +36,9 @@ def test_parser_all_options():
 
 def test_module_is_required():
     parser = build_parser(pathlib.Path("/base"))
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as exc:
         parser.parse_args([])
+    assert exc.value.code == EXIT_USAGE
 
 
 def test_version_flag(capsys):
@@ -93,3 +94,11 @@ def test_log_file_in_missing_directory_is_a_usage_error(tmp_path, capsys):
 def test_verbose_flag_counts():
     args = build_parser(pathlib.Path("/base")).parse_args(["-vv", "top"])
     assert args.verbose == 2
+
+
+def test_help_lists_every_exit_code(capsys):
+    with pytest.raises(SystemExit):
+        build_parser(pathlib.Path("/base")).parse_args(["--help"])
+    help_text = capsys.readouterr().out
+    for code, description in EXIT_CODE_DESCRIPTIONS.items():
+        assert f"{code:>3}  {description}" in help_text

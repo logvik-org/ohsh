@@ -9,15 +9,31 @@ logger = logging.getLogger(__name__)
 CONSOLE_HANDLER_NAME = "ohsh-console"
 CONSOLE_LEVEL_BY_VERBOSITY = {0: logging.WARNING, 1: logging.INFO}
 
+# Exit codes follow the Unix conventions where one exists: 1 for a general
+# error, 2 for usage errors (raised by argparse), and BSD sysexits.h (64-78) for
+# bad input and output. Errors specific to ohsh start at 100, clear of those
+# ranges and of the 126+ codes that shells reserve.
 EXIT_SUCCESS = 0
 EXIT_UNEXPECTED_ERROR = 1
-EXIT_FILE_ERROR = 2
-EXIT_JSON_ERROR = 3
-EXIT_MODULE_NOT_FOUND = 4
-EXIT_INVALID_TOP_DIR = 5
-EXIT_MANIFEST_NOT_FOUND = 6
-EXIT_MISSING_FILES = 7
-EXIT_CIRCULAR_DEPENDENCY = 8
+EXIT_USAGE = 2
+EXIT_DATA_ERROR = 65
+EXIT_NO_INPUT = 66
+EXIT_CANNOT_CREATE_OUTPUT = 73
+EXIT_MODULE_NOT_FOUND = 100
+EXIT_MANIFEST_NOT_FOUND = 101
+EXIT_CIRCULAR_DEPENDENCY = 102
+
+EXIT_CODE_DESCRIPTIONS = {
+    EXIT_SUCCESS: "success",
+    EXIT_UNEXPECTED_ERROR: "unexpected error",
+    EXIT_USAGE: "invalid command-line arguments",
+    EXIT_DATA_ERROR: "a manifest is not valid JSON",
+    EXIT_NO_INPUT: "top directory, manifest or source file missing or unreadable",
+    EXIT_CANNOT_CREATE_OUTPUT: "output directory cannot be created",
+    EXIT_MODULE_NOT_FOUND: "top module not found in any manifest",
+    EXIT_MANIFEST_NOT_FOUND: "a dependency has no manifest",
+    EXIT_CIRCULAR_DEPENDENCY: "modules depend on each other in a loop",
+}
 
 
 class CircularDependencyError(Exception):

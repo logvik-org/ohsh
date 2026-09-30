@@ -5,13 +5,12 @@ import logging
 import pathlib
 
 from .utils import (
+    EXIT_CANNOT_CREATE_OUTPUT,
     EXIT_CIRCULAR_DEPENDENCY,
-    EXIT_FILE_ERROR,
-    EXIT_INVALID_TOP_DIR,
-    EXIT_JSON_ERROR,
+    EXIT_DATA_ERROR,
     EXIT_MANIFEST_NOT_FOUND,
-    EXIT_MISSING_FILES,
     EXIT_MODULE_NOT_FOUND,
+    EXIT_NO_INPUT,
     EXIT_UNEXPECTED_ERROR,
     CircularDependencyError,
     MissingManifestError,
@@ -45,7 +44,7 @@ def run(args, cwd):
             f"The specified top-level directory {top_dir} does not exist or is not a directory."
         )
         logger.error(error_message)
-        exit(EXIT_INVALID_TOP_DIR)
+        exit(EXIT_NO_INPUT)
 
     # Find all files named "manifest.json" in the current working directory
     all_manifest_files = discover_manifests(top_dir)
@@ -61,10 +60,10 @@ def run(args, cwd):
                 logger.debug(f"Parsed manifest file: {manifest_file}")
         except json.JSONDecodeError as e:
             logger.error(f"Error parsing JSON from {manifest_file}: {e}")
-            exit(EXIT_JSON_ERROR)
+            exit(EXIT_DATA_ERROR)
         except OSError as e:
             logger.error(f"File error reading {manifest_file}: {e}")
-            exit(EXIT_FILE_ERROR)
+            exit(EXIT_NO_INPUT)
         except Exception as e:
             logger.error(f"Unexpected error reading {manifest_file}: {e}")
             exit(EXIT_UNEXPECTED_ERROR)
@@ -150,7 +149,7 @@ def run(args, cwd):
     if missing_files:
         error_message = f"The following source files do not exist: {missing_files}"
         logger.error(error_message)
-        exit(EXIT_MISSING_FILES)
+        exit(EXIT_NO_INPUT)
 
     source_files_by_lib = {lib_name: source_files_by_lib[lib_name] for lib_name in library_order}
 
@@ -160,7 +159,7 @@ def run(args, cwd):
         output_dir.mkdir(parents=True, exist_ok=True)
     except OSError as e:
         logger.error(f"Cannot create output directory {output_dir}: {e}")
-        exit(EXIT_FILE_ERROR)
+        exit(EXIT_CANNOT_CREATE_OUTPUT)
     for lib_name, source_files in source_files_by_lib.items():
         verilog_output_file = output_dir / f"{lib_name}_verilog.src"
         vhdl_output_file = output_dir / f"{lib_name}_vhdl.src"
