@@ -1,0 +1,7 @@
+{
+  "module": "accumulator",
+  "sources": ["accumulator.vhd"],
+  "dependencies": {
+    "math_lib": ["adder"]
+  }
+}

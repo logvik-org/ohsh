@@ -1,0 +1,5 @@
+{
+  "module": "counter",
+  "sources": ["counter.v"],
+  "dependencies": {}
+}
