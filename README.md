@@ -1,84 +1,80 @@
-WIP.... COming soon
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+# ohsh - Ola's HDL Source Handler
 
-<!-- # OSHSH — Ola's Simple HDL Source Handler
+[![CI](https://github.com/logvik-org/oshsh/actions/workflows/ci.yml/badge.svg)](https://github.com/logvik-org/oshsh/actions/workflows/ci.yml)
+[![Integrations](https://github.com/logvik-org/oshsh/actions/workflows/integration.yml/badge.svg)](https://github.com/logvik-org/oshsh/actions/workflows/integration.yml)
+[![PyPI](https://img.shields.io/pypi/v/ohsh.svg)](https://pypi.org/project/ohsh/)
+[![Python](https://img.shields.io/pypi/pyversions/ohsh.svg)](https://pypi.org/project/ohsh/)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-**OSHSH** is a lightweight command-line tool to manage and organize HDL (Verilog/VHDL) source files based on module manifests.
+**ohsh** is a small, deliberately humble command-line tool that figures out, in
+the right order, which HDL (Verilog / SystemVerilog / VHDL) source files your
+design needs - by reading simple per-module `manifest.json` files and resolving
+their dependencies.
 
-It scans your project directory for `manifest.json` files, resolves dependencies, and outputs ordered lists of source files for easy compilation.
+It is a *companion* to the big build flows (like [hog](https://hog.readthedocs.io),
+Vivado, Quartus, Questa, cocotb, VUnit, …), not a replacement for them. ohsh
+just answers one question well - *"what files, in what order, for which
+libraries?"* - and hands you plain `.src` lists you can feed anywhere.
+
+> So simple it's an *oh sh… that was easy* moment. 🙂
 
 ---
 
-## 🚀 Features
-- 🔍 Auto-discovers HDL module manifests.
-- 📂 Resolves module dependencies recursively.
-- 📝 Generates ordered source file lists for Verilog and VHDL.
-- ⚡ Simple command-line interface.
-- 🐍 Pure Python, no external dependencies.
+## Features
 
----
+- 🔍 Auto-discovers HDL module manifests anywhere under a project tree.
+- 📂 Resolves module dependencies recursively, across libraries.
+- 🔁 Detects circular dependencies and exits with an error naming the cycle.
+- 📝 Emits ordered, per-library source lists for Verilog and VHDL.
+- ✅ Validates that every referenced source file actually exists.
+- 🐍 Pure Python, zero runtime dependencies.
 
-## 📦 Installation
-
-Install via `pip`:
+## Installation
 
 ```bash
-pip install oshsh
+pip install ohsh
 ```
 
-Or clone and install locally:
+Or from a clone:
 
 ```bash
-git clone https://github.com/olagrottvik/oshsh.git
+git clone https://github.com/logvik-org/oshsh.git
 cd oshsh
 pip install .
 ```
 
----
-
-## ⚡ Usage
-
-### Basic Command
+## Usage
 
 ```bash
-oshsh [OPTIONS] module_name
+ohsh [OPTIONS] MODULE
 ```
 
-OSHSH will:
-1. Search for all `manifest.json` files starting from the specified top directory.
-2. Resolve dependencies for the given `module_name`.
-3. Generate ordered lists of Verilog and VHDL source files for each library.
-4. Save the lists as `<lib_name>_verilog.src` and `<lib_name>_vhdl.src` in the output directory.
+ohsh will:
+1. Search for all `manifest*.json` files starting from `--top-dir`.
+2. Resolve dependencies for `MODULE` (the top-level).
+3. Generate ordered Verilog and VHDL source lists per library.
+4. Write them as `<lib>_verilog.src` / `<lib>_vhdl.src` in the output directory.
 
----
+### Options
 
-### 📖 Options
+| Option              | Description                                                            | Default      |
+|---------------------|------------------------------------------------------------------------|--------------|
+| `-t`, `--top-dir`   | Project top-level directory; base for manifest discovery.              | cwd          |
+| `-w`, `--work`      | Name of the work library.                                              | `work`       |
+| `-o`, `--output`    | Output directory for the `.src` lists.                                 | cwd          |
+| `-v`, `--verbose`   | Verbose (DEBUG) console logging.                                       | off          |
+| `--log-file PATH`   | Also write logs to a file (no log file is written by default).         | none         |
+| `--version`         | Print version and exit.                                                |              |
+| `-h`, `--help`      | Show help and exit.                                                    |              |
 
-| Option                  | Description                                                                                   | Default                     |
-|-------------------------|-----------------------------------------------------------------------------------------------|-----------------------------|
-| `-t`, `--top-dir`       | Path to the project top-level directory. Searches for manifests starting here.                 | Current working directory   |
-| `-w`, `--work`          | Name of the work library.                                                                     | `work`                      |
-| `-o`, `--output`        | Output directory where source list files will be written.                                      | Current working directory   |
-| `-h`, `--help`          | Show help message and exit.                                                                   |                             |
-
----
-
-### 🎯 Example
+### Example
 
 ```bash
-oshsh -t /home/user/hdl_project -w mylib -o ./src_lists top_module
+ohsh -t /path/to/hdl_project -w mylib -o ./src_lists top_module
 ```
 
-This will:
-- Search `/home/user/hdl_project` for `manifest.json` files.
-- Treat `top_module` as the top-level module.
-- Use `mylib` as the work library name.
-- Output ordered source lists in the `./src_lists` directory.
-
----
-
-### 📂 Output Example
-
-After running, you might get:
+Produces:
 
 ```
 src_lists/
@@ -86,13 +82,12 @@ src_lists/
 └── mylib_vhdl.src
 ```
 
-Each `.src` file contains the absolute paths to your source files in the correct compilation order.
+Each `.src` file contains absolute paths to the source files, one per line, in
+compilation order.
 
----
+## Manifest file format
 
-## 📄 Manifest File Format
-
-Each module requires a `manifest.json`. Example:
+Each module gets a `manifest.json` next to its sources:
 
 ```json
 {
@@ -108,42 +103,59 @@ Each module requires a `manifest.json`. Example:
 }
 ```
 
-- `"module"`: Name of the module.
-- `"sources"`: List of HDL source files relative to the manifest.
-- `"dependencies"`: Other modules this one depends on, grouped by library.
+- `module` - the module's name.
+- `sources` - HDL source files, relative to the manifest.
+- `dependencies` - modules this one needs, grouped by library. The special
+  library `work` is remapped to whatever `--work` (or the resolving library) is.
 
----
+## Integrations
 
-## 🛠️ Development
+ohsh's `.src` lists are just text - one absolute path per line - so they drop
+into almost any flow. Runnable, self-checking examples live in
+[`examples/`](examples/). The ones marked ✅ are **executed in CI** against a
+demo project; the vendor-tool ones (⚠️) are validated against official docs but
+can't run on a public CI runner.
+
+| Tool | Example | Verified |
+|------|---------|----------|
+| [cocotb (Makefile)](examples/integrations/cocotb_makefile/) | `Makefile` | ✅ CI |
+| [cocotb (Python runner)](examples/integrations/cocotb_runner/) | `runner.py` | ✅ CI |
+| [VUnit](examples/integrations/vunit/) | `run.py` | ✅ CI |
+| [GHDL](examples/integrations/ghdl/) | `run.sh` | ✅ CI |
+| [NVC](examples/integrations/nvc/) | `run.sh` | ✅ CI |
+| [UVVM](examples/integrations/uvvm/) | `run.sh` | ✅ CI |
+| [hog](examples/integrations/hog/) | `README.md` | doc |
+| [Questa / ModelSim](examples/integrations/questa/) | `compile.do` | ⚠️ doc |
+| [Vivado](examples/integrations/vivado/) | `read_sources.tcl` | ⚠️ doc |
+| [Quartus](examples/integrations/quartus/) | `add_sources.tcl` | ⚠️ doc |
+
+For example, feeding ohsh output to GHDL:
 
 ```bash
-git clone https://github.com/olagrottvik/oshsh.git
+ohsh -t my_project -o build top
+while IFS= read -r f; do ghdl -a --work=work --std=08 "$f"; done < build/work_vhdl.src
+ghdl -e --std=08 top && ghdl -r --std=08 top
+```
+
+## Development
+
+```bash
+git clone https://github.com/logvik-org/oshsh.git
 cd oshsh
-pip install -e .
+./scripts/setup-dev.sh   # or: make dev
+make test                # run tests with coverage
+make lint                # ruff lint + format check
 ```
 
-Run locally:
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-```bash
-oshsh --help
-```
+## License
 
----
+Licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) and
+[NOTICE](NOTICE).
 
-## 📃 License
+## Author
 
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+**Ola Groettvik** - [GitHub](https://github.com/olagrottvik)
 
----
-
-## 🙌 Contributions
-
-Feel free to open issues or submit pull requests!
-Bug fixes, improvements, and suggestions are always welcome.
-
----
-
-## 👤 Author
-
-**Ola Grottvik**
-[GitHub](https://github.com/olagrottvik) -->
+Contributions, issues, and suggestions are welcome!
