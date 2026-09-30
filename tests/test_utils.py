@@ -11,8 +11,8 @@ from ohsh.utils import (
     CircularDependencyError,
     configure_logging,
     discover_manifests,
-    ensure_abs_path,
     extract_dependencies,
+    to_absolute_path,
     validate_top_dir,
 )
 
@@ -104,16 +104,16 @@ def test_validate_top_dir(tmp_path):
     assert validate_top_dir(tmp_path / "nope") is False
 
 
-def test_ensure_abs_path_resolves_relative(tmp_path):
-    # The bug fix: ensure_abs_path must RETURN an absolute path.
-    result = ensure_abs_path(tmp_path, "sub/dir")
+def test_to_absolute_path_resolves_relative(tmp_path):
+    # Regression: this used to build the absolute path and then discard it.
+    result = to_absolute_path(tmp_path, "sub/dir")
     assert isinstance(result, pathlib.Path)
     assert result.is_absolute()
     assert result == (tmp_path / "sub/dir").resolve()
 
 
-def test_ensure_abs_path_keeps_absolute(tmp_path):
-    result = ensure_abs_path(tmp_path, str(tmp_path))
+def test_to_absolute_path_keeps_absolute(tmp_path):
+    result = to_absolute_path(tmp_path, str(tmp_path))
     assert pathlib.Path(result).is_absolute()
 
 

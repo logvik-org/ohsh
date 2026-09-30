@@ -33,8 +33,8 @@ First public release.
   captured; console output by default, file logging only via `--log-file`.
 
 ### Fixed
-- `ensure_abs_path()` now actually returns the resolved absolute path
-  (previously a no-op).
+- A relative `-t/--top-dir` is now resolved against the working directory
+  (previously the resolved path was discarded).
 - Running the tool no longer writes a stray `debug.log` into the working
   directory.
 - Circular dependencies now exit with an error (exit code 8) naming the cycle,

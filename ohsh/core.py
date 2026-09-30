@@ -15,8 +15,8 @@ from .utils import (
     EXIT_UNEXPECTED_ERROR,
     CircularDependencyError,
     discover_manifests,
-    ensure_abs_path,
     extract_dependencies,
+    to_absolute_path,
     validate_top_dir,
 )
 
@@ -32,7 +32,7 @@ def run(args, cwd):
     work = args.work
 
     # If the top-level directory is a relative path, make it absolute.
-    top_dir = ensure_abs_path(cwd, top_dir)
+    top_dir = to_absolute_path(cwd, top_dir)
 
     # Check if top-level is a directory and exists
     if not validate_top_dir(top_dir):

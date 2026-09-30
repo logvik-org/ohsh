@@ -26,11 +26,12 @@ class CircularDependencyError(Exception):
 
 
 def extract_dependencies(manifest_data, top_manifest, work):
-    """Resolve dependencies recursively into a post-ordered list of (lib, module).
+    """Return every module ``top_manifest`` depends on, directly or indirectly.
 
-    Dependencies appear before the modules that depend on them and duplicates
-    are dropped. A circular dependency has no valid compile order, so it raises
-    ``CircularDependencyError`` naming the modules in the cycle.
+    The result is a list of (library, module) pairs in compile order: each module
+    comes after all the modules it depends on, and each pair appears once. The
+    top module itself is not included. A circular dependency has no valid compile
+    order, so it raises ``CircularDependencyError`` naming the modules in the cycle.
     """
     collected_deps = []
     dependency_chain = []
@@ -78,9 +79,9 @@ def validate_top_dir(top_dir):
     return pathlib.Path(top_dir).is_dir()
 
 
-def ensure_abs_path(cwd, top_dir):
-    """Return an absolute version of ``top_dir``, resolved against ``cwd``."""
-    path = pathlib.Path(top_dir)
+def to_absolute_path(cwd, path):
+    """Return ``path`` as an absolute path, resolving a relative one against ``cwd``."""
+    path = pathlib.Path(path)
     if not path.is_absolute():
         return (pathlib.Path(cwd) / path).resolve()
     return path
