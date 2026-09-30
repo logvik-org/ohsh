@@ -14,7 +14,6 @@ from .utils import (
     EXIT_MODULE_NOT_FOUND,
     EXIT_UNEXPECTED_ERROR,
     CircularDependencyError,
-    configure_logging,
     discover_manifests,
     ensure_abs_path,
     extract_dependencies,
@@ -31,12 +30,6 @@ def run(args, cwd):
     module = args.module
     top_dir = args.top_dir
     work = args.work
-
-    # Configure logging (console by default; file only when --log-file is given)
-    configure_logging(
-        verbose=getattr(args, "verbose", False),
-        log_file=getattr(args, "log_file", None),
-    )
 
     # If the top-level directory is a relative path, make it absolute.
     top_dir = ensure_abs_path(cwd, top_dir)

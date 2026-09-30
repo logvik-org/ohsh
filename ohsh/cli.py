@@ -6,6 +6,7 @@ import pathlib
 
 from . import __version__
 from .core import run
+from .utils import configure_logging
 
 
 def build_parser(cwd):
@@ -56,4 +57,7 @@ def main():
     cwd = pathlib.Path.cwd()
     parser = build_parser(cwd)
     args = parser.parse_args()
+    # Only the command line configures logging, so programs that call run()
+    # directly keep control of where ohsh log messages go.
+    configure_logging(verbose=args.verbose, log_file=args.log_file)
     run(args, cwd)

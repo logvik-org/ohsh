@@ -1,12 +1,15 @@
 # SPDX-License-Identifier: Apache-2.0
 """Tests for the ohsh command-line interface."""
 
+import logging
 import pathlib
 
 import pytest
 
 from ohsh import __version__
 from ohsh.cli import build_parser
+from ohsh.core import run
+from ohsh.utils import CONSOLE_HANDLER_NAME
 
 
 def test_parser_defaults():
@@ -55,3 +58,25 @@ def test_main_entry_point(tmp_path, make_module, monkeypatch):
     monkeypatch.setattr("sys.argv", ["ohsh", "-t", str(tmp_path), "-o", str(out), "top"])
     cli.main()
     assert (out / "work_verilog.src").read_text().strip().endswith("top.v")
+
+
+def test_main_writes_log_file_when_requested(tmp_path, make_module, monkeypatch):
+    from ohsh import cli
+
+    make_module("top", ["top.v"], dependencies={})
+    out = tmp_path / "out"
+    out.mkdir()
+    log_path = tmp_path / "run.log"
+    argv = ["ohsh", "-t", str(tmp_path), "-o", str(out), "--log-file", str(log_path), "top"]
+    monkeypatch.setattr("sys.argv", argv)
+    cli.main()
+    assert "Found module top" in log_path.read_text()
+
+
+def test_run_leaves_logging_unconfigured(tmp_path, make_module):
+    make_module("top", ["top.v"], dependencies={})
+    args = build_parser(tmp_path).parse_args(["-o", str(tmp_path), "top"])
+    run(args, tmp_path)
+    pkg_logger = logging.getLogger("ohsh")
+    assert pkg_logger.propagate is True
+    assert CONSOLE_HANDLER_NAME not in [h.get_name() for h in pkg_logger.handlers]

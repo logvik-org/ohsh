@@ -9,17 +9,20 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def reset_ohsh_logger():
-    """Detach handlers from the ``ohsh`` logger before/after each test.
+    """Reset handlers and propagation on the ``ohsh`` logger around each test.
 
     ``configure_logging`` is idempotent (it returns early once handlers exist),
     so tests must start from a clean slate to exercise it deterministically.
     """
     logger = logging.getLogger("ohsh")
-    saved = logger.handlers[:]
+    saved_handlers = logger.handlers[:]
+    saved_propagate = logger.propagate
     logger.handlers.clear()
+    logger.propagate = True
     yield
     logger.handlers.clear()
-    logger.handlers.extend(saved)
+    logger.handlers.extend(saved_handlers)
+    logger.propagate = saved_propagate
 
 
 @pytest.fixture
