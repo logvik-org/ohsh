@@ -30,7 +30,10 @@ First public release.
 - Renamed the project from `oshsh` to **`ohsh`** (package, import path, and CLI
   command). The `oshsh` name on PyPI is an unrelated placeholder.
 - Logging now attaches to the package logger so messages from all modules are
-  captured; console output by default, file logging only via `--log-file`.
+  captured. Output goes to the console by default, and to a file only with
+  `--log-file`. Only the `ohsh` command configures logging, so calling `run()`
+  from Python leaves the application's logging alone.
+- A missing dependency now names the module that requires it.
 
 ### Fixed
 - A relative `-t/--top-dir` is now resolved against the working directory
