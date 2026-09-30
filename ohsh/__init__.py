@@ -1,22 +1,26 @@
-"""Ola's Simple HDL Source Handler  (OSHSH)
+# SPDX-License-Identifier: Apache-2.0
+"""ohsh - Ola's HDL Source Handler.
 
-Extract list of source files in correct order based on module manifests.
-Search project directory for all module manifests and extract list of source files in correct order based on module manifests.
-Can return list of source files in order for compilation, based on definition of top-level module name.
+A small, humble companion tool for HDL projects. It scans a project directory
+for module manifests (``manifest.json``), recursively resolves dependencies
+between modules, and emits per-library lists of source files in correct
+compilation order. Feed those lists into your simulator or build flow (cocotb,
+VUnit, ghdl, nvc, Questa, Vivado, Quartus, hog, ...).
 
-Example manifest file (manifest.json):
+Example manifest file (``manifest.json``)::
 
-{
-"module": "module_name",
-"sources": [
-    "source1.v",
-    "source2.v",
-    "source3.v"
-],
-
-"dependencies": {
-    "work": ["module1", "module2"],
-    "lib_name": ["module3"]
-}
-}
+    {
+        "module": "module_name",
+        "sources": [
+            "source1.v",
+            "source2.v",
+            "source3.v"
+        ],
+        "dependencies": {
+            "work": ["module1", "module2"],
+            "lib_name": ["module3"]
+        }
+    }
 """
+
+__version__ = "0.1.0"
