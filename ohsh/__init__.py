@@ -1,11 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
-"""ohsh - Ola's HDL Source Handler.
+"""ohsh (Ola's HDL Source Handler).
 
-A small, humble companion tool for HDL projects. It scans a project directory
-for module manifests (``manifest.json``), recursively resolves dependencies
-between modules, and emits per-library lists of source files in correct
-compilation order. Feed those lists into your simulator or build flow (cocotb,
-VUnit, ghdl, nvc, Questa, Vivado, Quartus, hog, ...).
+Finds the ``manifest.json`` files under a project directory, resolves the
+dependencies of a top-level module, and writes each library's source files in
+compile order, plus the order to compile the libraries in.
 
 Example manifest file (``manifest.json``)::
 
