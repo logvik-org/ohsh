@@ -1,0 +1,63 @@
+# SPDX-License-Identifier: Apache-2.0
+name: Integrations
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ohsh + Python sim frameworks
+        run: pip install . cocotb vunit-hdl
+
+      - name: Install Icarus Verilog
+        run: sudo apt-get update && sudo apt-get install -y iverilog
+
+      - name: Install GHDL
+        uses: ghdl/setup-ghdl@v1
+        with:
+          version: nightly
+
+      - name: Install NVC
+        uses: nickg/setup-nvc@v1
+        with:
+          version: latest
+
+      - name: cocotb (Makefile flow)
+        working-directory: examples/integrations/cocotb_makefile
+        run: make
+
+      - name: cocotb (Python runner)
+        working-directory: examples/integrations/cocotb_runner
+        run: python runner.py
+
+      - name: VUnit
+        working-directory: examples/integrations/vunit
+        env:
+          VUNIT_SIMULATOR: ghdl
+        run: python run.py
+
+      - name: GHDL
+        run: bash examples/integrations/ghdl/run.sh
+
+      - name: NVC
+        run: bash examples/integrations/nvc/run.sh
+
+      - name: UVVM (GHDL)
+        run: bash examples/integrations/uvvm/run.sh
