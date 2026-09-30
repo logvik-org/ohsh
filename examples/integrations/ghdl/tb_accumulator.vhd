@@ -1,4 +1,3 @@
--- SPDX-License-Identifier: Apache-2.0
 -- Self-checking testbench for the demo `accumulator`, for use with GHDL/NVC.
 -- The design sources (adder, accumulator) come from ohsh-generated .src lists;
 -- this testbench is compiled on top of them into the `work` library.

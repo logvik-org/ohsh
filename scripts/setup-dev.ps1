@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 # Bootstrap a local development environment for ohsh (Windows / PowerShell).
 $ErrorActionPreference = "Stop"
 

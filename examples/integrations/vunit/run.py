@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
 """VUnit integration example.
 
 Generates per-library source lists with ohsh and adds them to VUnit libraries,

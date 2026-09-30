@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
 """cocotb (Python runner) integration example.
 
 Generates source lists with ohsh, reads them, and drives cocotb's

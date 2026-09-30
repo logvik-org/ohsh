@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """cocotb test for the demo `counter`, shared by both cocotb examples."""
 
 import cocotb

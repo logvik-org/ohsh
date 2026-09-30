@@ -1,4 +1,3 @@
--- SPDX-License-Identifier: Apache-2.0
 -- Registered accumulator that uses math_lib.adder. Compiled into `work`.
 library ieee;
 use ieee.std_logic_1164.all;

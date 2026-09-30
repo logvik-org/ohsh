@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: Apache-2.0
-#
 # UVVM integration example.
 #
 # 1. Compile the UVVM utility library (uvvm_util) with GHDL.

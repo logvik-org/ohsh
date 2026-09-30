@@ -1,4 +1,3 @@
--- SPDX-License-Identifier: Apache-2.0
 -- UVVM testbench for the demo accumulator. The design (adder, accumulator) is
 -- supplied via ohsh-generated .src lists; UVVM's uvvm_util library is compiled
 -- first by run.sh.

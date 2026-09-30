@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 """End-to-end tests for ohsh.core.run via the CLI parser."""
 
 import json

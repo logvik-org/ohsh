@@ -1,4 +1,3 @@
-<!-- SPDX-License-Identifier: Apache-2.0 -->
 # ohsh - Ola's HDL Source Handler
 
 [![CI](https://github.com/logvik-org/oshsh/actions/workflows/ci.yml/badge.svg)](https://github.com/logvik-org/oshsh/actions/workflows/ci.yml)

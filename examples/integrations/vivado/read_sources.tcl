@@ -1,5 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
-#
 # AMD/Xilinx Vivado: read ohsh-generated source lists in non-project (Tcl) mode.
 #
 # Generate the lists first:

@@ -1,4 +1,3 @@
-<!-- SPDX-License-Identifier: Apache-2.0 -->
 # Contributing to ohsh
 
 Thanks for your interest in improving **ohsh**! This is a small project, so the
@@ -46,7 +45,7 @@ end-to-end integration examples. PRs need a green pipeline to merge.
 - Code is formatted and linted with [ruff](https://docs.astral.sh/ruff/); the
   config lives in `pyproject.toml`. `pre-commit` applies it automatically.
 - Keep ohsh dependency-free at runtime (standard library only).
-- Add a `# SPDX-License-Identifier: Apache-2.0` header to new source files.
+- Add a `# SPDX-License-Identifier: Apache-2.0` header to new modules in `ohsh/`.
 
 ## Releasing (maintainers)
 

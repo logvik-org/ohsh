@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: Apache-2.0
-#
 # GHDL integration example.
 #
 # 1. Generate ordered, per-library source lists with ohsh.

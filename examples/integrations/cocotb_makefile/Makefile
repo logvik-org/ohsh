@@ -1,5 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
-#
 # cocotb (Makefile flow) integration example.
 #
 # ohsh generates the source list at parse time; the Makefile reads it straight

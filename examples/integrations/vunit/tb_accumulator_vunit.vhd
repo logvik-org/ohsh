@@ -1,4 +1,3 @@
--- SPDX-License-Identifier: Apache-2.0
 -- VUnit testbench for the demo accumulator. The design (adder, accumulator)
 -- is supplied via ohsh-generated .src lists; this testbench is added by run.py.
 library ieee;

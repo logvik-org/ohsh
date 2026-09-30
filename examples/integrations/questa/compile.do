@@ -1,5 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
-#
 # Questa / ModelSim do-file: compile ohsh-generated source lists into libraries,
 # in the order ohsh writes to libraries.src, then run the testbench.
 #

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
 // Simple up-counter, used by the cocotb (Verilog) examples.
 module counter #(
     parameter WIDTH = 8

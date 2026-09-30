@@ -1,4 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
 .PHONY: help install dev test lint format build clean
 
 help: ## Show this help

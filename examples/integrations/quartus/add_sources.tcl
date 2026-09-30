@@ -1,5 +1,3 @@
-# SPDX-License-Identifier: Apache-2.0
-#
 # Intel/Altera Quartus: add ohsh-generated source lists to a project.
 #
 # Generate the lists first:
