@@ -190,7 +190,7 @@ def test_configure_logging_no_logfile_by_default(tmp_path, monkeypatch):
 
 def test_configure_logging_writes_logfile_when_requested(tmp_path):
     log_path = tmp_path / "run.log"
-    logger = configure_logging(verbose=True, log_file=str(log_path))
+    logger = configure_logging(verbosity=2, log_file=str(log_path))
     logger.info("hello from ohsh")
     for handler in logger.handlers:
         handler.flush()
@@ -215,3 +215,13 @@ def test_configure_logging_is_idempotent():
     configure_logging()
     handler_names = [h.get_name() for h in logging.getLogger("ohsh").handlers]
     assert handler_names.count(CONSOLE_HANDLER_NAME) == 1
+
+
+@pytest.mark.parametrize(
+    ("verbosity", "level"),
+    [(0, logging.WARNING), (1, logging.INFO), (2, logging.DEBUG), (3, logging.DEBUG)],
+)
+def test_configure_logging_console_level_follows_verbosity(verbosity, level):
+    logger = configure_logging(verbosity=verbosity)
+    console = next(h for h in logger.handlers if h.get_name() == CONSOLE_HANDLER_NAME)
+    assert console.level == level

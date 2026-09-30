@@ -82,7 +82,7 @@ def run(args, cwd):
         logger.error(error_message)
         exit(EXIT_MODULE_NOT_FOUND)
     else:
-        logger.info(f"Found module {module} in manifest.")
+        logger.debug(f"Found module {module} in manifest.")
 
     # Extract dependencies recursively
     try:
@@ -101,10 +101,10 @@ def run(args, cwd):
     # Append the top manifest module with the work library to the dependencies list
     dependencies.append((work, module))
 
-    logger.info(f"Complete module list: {dependencies}")
+    logger.debug(f"Complete module list: {dependencies}")
 
     library_order = order_libraries(manifest_data, dependencies)
-    logger.info(f"Library compile order: {library_order}")
+    logger.info(f"Library compile order: {', '.join(library_order)}")
 
     # Extract source file list from all modules in the final dependencies list
     source_files_by_lib = {}
@@ -154,17 +154,6 @@ def run(args, cwd):
 
     source_files_by_lib = {lib_name: source_files_by_lib[lib_name] for lib_name in library_order}
 
-    # Print the final source file list for each library in order
-    print(f"Library compile order: {' '.join(library_order)}")
-    for lib_name, source_files in source_files_by_lib.items():
-        print(f"Verilog sources for library {lib_name}:")
-        for source_file in source_files["verilog"]:
-            print(f"  {source_file}")
-
-        print(f"VHDL sources for library {lib_name}:")
-        for source_file in source_files["vhdl"]:
-            print(f"  {source_file}")
-
     # Write the source files to output files, one file per library
     output_dir = pathlib.Path(args.output)
     try:
@@ -181,18 +170,22 @@ def run(args, cwd):
                 for source_file in source_files["verilog"]:
                     f.write(f"{source_file}\n")
             logger.info(
-                f"Wrote Verilog source files for library {lib_name} to {verilog_output_file}"
+                f"Wrote {len(source_files['verilog'])} Verilog files for library {lib_name} "
+                f"to {verilog_output_file}"
             )
         else:
-            logger.info(f"No Verilog source files for library {lib_name}, skipping file creation.")
+            logger.debug(f"No Verilog source files for library {lib_name}, skipping file creation.")
 
         if source_files["vhdl"]:
             with open(vhdl_output_file, "w", encoding="utf-8") as f:
                 for source_file in source_files["vhdl"]:
                     f.write(f"{source_file}\n")
-            logger.info(f"Wrote VHDL source files for library {lib_name} to {vhdl_output_file}")
+            logger.info(
+                f"Wrote {len(source_files['vhdl'])} VHDL files for library {lib_name} "
+                f"to {vhdl_output_file}"
+            )
         else:
-            logger.info(f"No VHDL source files for library {lib_name}, skipping file creation.")
+            logger.debug(f"No VHDL source files for library {lib_name}, skipping file creation.")
 
     library_order_file = output_dir / LIBRARY_ORDER_FILE_NAME
     with open(library_order_file, "w", encoding="utf-8") as f:

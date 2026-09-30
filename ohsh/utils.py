@@ -7,6 +7,7 @@ import pathlib
 logger = logging.getLogger(__name__)
 
 CONSOLE_HANDLER_NAME = "ohsh-console"
+CONSOLE_LEVEL_BY_VERBOSITY = {0: logging.WARNING, 1: logging.INFO}
 
 EXIT_SUCCESS = 0
 EXIT_UNEXPECTED_ERROR = 1
@@ -144,13 +145,14 @@ def to_absolute_path(cwd, path):
     return path
 
 
-def configure_logging(verbose=False, log_file=None):
+def configure_logging(verbosity=0, log_file=None):
     """Configure logging for the ``ohsh`` package.
 
     Handlers are attached to the package logger (``ohsh``) so that messages from
-    every submodule are captured. Console output goes to stderr at INFO level
-    (DEBUG when ``verbose``). A file handler is only added when ``log_file`` is
-    given, so running ``ohsh`` never writes a stray ``debug.log`` into the cwd.
+    every submodule are captured. Console output goes to stderr and shows
+    warnings and errors only, INFO messages with ``verbosity`` 1, and DEBUG
+    messages with 2 or more. A file handler, which always records DEBUG, is only
+    added when ``log_file`` is given.
     """
     pkg_logger = logging.getLogger("ohsh")
     pkg_logger.setLevel(logging.DEBUG)
@@ -167,7 +169,7 @@ def configure_logging(verbose=False, log_file=None):
 
     console_handler = logging.StreamHandler()
     console_handler.set_name(CONSOLE_HANDLER_NAME)
-    console_handler.setLevel(logging.DEBUG if verbose else logging.INFO)
+    console_handler.setLevel(CONSOLE_LEVEL_BY_VERBOSITY.get(verbosity, logging.DEBUG))
     console_handler.setFormatter(formatter)
     pkg_logger.addHandler(console_handler)
 
@@ -181,8 +183,9 @@ def configure_logging(verbose=False, log_file=None):
 
 
 def discover_manifests(top_dir):
-    logger.info(f"Discovering manifest files in {top_dir}")
+    logger.debug(f"Discovering manifest files in {top_dir}")
     manifest_files = list(pathlib.Path(top_dir).rglob("manifest*.json"))
     for manifest in manifest_files:
-        logger.info(f"Found manifest file: {manifest}")
+        logger.debug(f"Found manifest file: {manifest}")
+    logger.info(f"Found {len(manifest_files)} manifest files in {top_dir}")
     return manifest_files

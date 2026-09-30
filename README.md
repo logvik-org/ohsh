@@ -65,7 +65,7 @@ ohsh will:
 | `-t`, `--top-dir`   | Project top-level directory, the base for manifest discovery.          | cwd          |
 | `-w`, `--work`      | Name of the work library.                                              | `work`       |
 | `-o`, `--output`    | Output directory for the `.src` lists.                                 | cwd          |
-| `-v`, `--verbose`   | Verbose (DEBUG) console logging.                                       | off          |
+| `-v`, `--verbose`   | Show progress (`-v`) or debug details (`-vv`).                         | quiet        |
 | `--log-file PATH`   | Also write logs to a file (no log file is written by default).         | none         |
 | `--version`         | Print version and exit.                                                |              |
 | `-h`, `--help`      | Show help and exit.                                                    |              |

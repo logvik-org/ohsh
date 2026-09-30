@@ -17,8 +17,9 @@ First public release.
   source lists (`<lib>_verilog.src` / `<lib>_vhdl.src`).
 - `libraries.src`: the order to compile the libraries in, with a warning when
   libraries depend on each other in a loop.
-- CLI: `-t/--top-dir`, `-w/--work`, `-o/--output`, `-v/--verbose`,
-  `--log-file`, `--version`.
+- CLI: `-t/--top-dir`, `-w/--work`, `-o/--output`, `-v/--verbose` (repeat as
+  `-vv` for debug output), `--log-file`, `--version`. By default only warnings
+  and errors are printed.
 - Verified integration examples for cocotb (Makefile + Python runner), VUnit,
   GHDL, NVC, and UVVM, plus documented examples for hog, Questa/ModelSim,
   Vivado, and Quartus.

@@ -17,7 +17,7 @@ def test_parser_defaults():
     args = parser.parse_args(["mytop"])
     assert args.module == "mytop"
     assert args.work == "work"
-    assert args.verbose is False
+    assert args.verbose == 0
     assert args.log_file is None
     assert pathlib.Path(args.top_dir) == pathlib.Path("/base")
 
@@ -30,7 +30,7 @@ def test_parser_all_options():
     assert args.top_dir == "/proj"
     assert args.work == "mylib"
     assert args.output == "/out"
-    assert args.verbose is True
+    assert args.verbose == 1
     assert args.log_file == pathlib.Path("x.log")
 
 
@@ -88,3 +88,8 @@ def test_log_file_in_missing_directory_is_a_usage_error(tmp_path, capsys):
         parser.parse_args(["--log-file", str(tmp_path / "nope" / "run.log"), "top"])
     assert exc.value.code == 2
     assert "directory does not exist" in capsys.readouterr().err
+
+
+def test_verbose_flag_counts():
+    args = build_parser(pathlib.Path("/base")).parse_args(["-vv", "top"])
+    assert args.verbose == 2

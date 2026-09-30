@@ -43,8 +43,9 @@ def build_parser(cwd):
     parser.add_argument(
         "-v",
         "--verbose",
-        action="store_true",
-        help="Enable verbose (DEBUG-level) console logging.",
+        action="count",
+        default=0,
+        help="Show progress (-v) or debug details (-vv). By default only warnings and errors are shown.",
     )
     parser.add_argument(
         "--log-file",
@@ -67,5 +68,5 @@ def main():
     args = parser.parse_args()
     # Only the command line configures logging, so programs that call run()
     # directly keep control of where ohsh log messages go.
-    configure_logging(verbose=args.verbose, log_file=args.log_file)
+    configure_logging(verbosity=args.verbose, log_file=args.log_file)
     run(args, cwd)
