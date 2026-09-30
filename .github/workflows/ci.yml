@@ -61,6 +61,12 @@ jobs:
         run: python -m build
       - name: Check artifacts
         run: twine check dist/*
+      - name: Smoke-test the built wheel
+        run: |
+          python -m venv "$RUNNER_TEMP/wheel-venv"
+          "$RUNNER_TEMP/wheel-venv/bin/pip" install dist/*.whl
+          PATH="$RUNNER_TEMP/wheel-venv/bin:$PATH" \
+            scripts/smoke-test.sh "$(python -c 'import ohsh; print(ohsh.__version__)')"
       - uses: actions/upload-artifact@v4
         with:
           name: dist
