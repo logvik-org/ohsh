@@ -9,6 +9,7 @@ import pytest
 from ohsh.utils import (
     CONSOLE_HANDLER_NAME,
     CircularDependencyError,
+    MissingManifestError,
     configure_logging,
     discover_manifests,
     extract_dependencies,
@@ -97,6 +98,17 @@ def test_extract_dependencies_self_dependency_raises():
     data = [_manifest("a", dependencies={"work": ["a"]})]
     with pytest.raises(CircularDependencyError):
         extract_dependencies(data, data[0], "work")
+
+
+def test_extract_dependencies_missing_manifest_names_requiring_module():
+    data = [
+        _manifest("top", dependencies={"work": ["a"]}),
+        _manifest("a", dependencies={"work": ["ghost"]}),
+    ]
+    with pytest.raises(MissingManifestError) as excinfo:
+        extract_dependencies(data, data[0], "work")
+    assert excinfo.value.module == "ghost"
+    assert excinfo.value.required_by == "a"
 
 
 def test_validate_top_dir(tmp_path):

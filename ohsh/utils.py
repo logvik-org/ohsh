@@ -25,6 +25,17 @@ class CircularDependencyError(Exception):
         super().__init__(" -> ".join(cycle))
 
 
+class MissingManifestError(Exception):
+    def __init__(self, module, required_by):
+        self.module = module
+        self.required_by = required_by
+        super().__init__(f"no manifest found for module {module} (required by {required_by})")
+
+
+def find_manifest(manifest_data, module):
+    return next((m for m in manifest_data if m.get("module") == module), None)
+
+
 def extract_dependencies(manifest_data, top_manifest, work):
     """Return every module ``top_manifest`` depends on, directly or indirectly.
 
@@ -32,6 +43,7 @@ def extract_dependencies(manifest_data, top_manifest, work):
     comes after all the modules it depends on, and each pair appears once. The
     top module itself is not included. A circular dependency has no valid compile
     order, so it raises ``CircularDependencyError`` naming the modules in the cycle.
+    A dependency without a manifest raises ``MissingManifestError``.
     """
     collected_deps = []
     dependency_chain = []
@@ -57,12 +69,10 @@ def extract_dependencies(manifest_data, top_manifest, work):
                     raise CircularDependencyError(dependency_chain[cycle_start:] + [module])
 
                 # Recurse first so deeper dependencies are collected before this one.
-                dep_manifest = next(
-                    (m for m in manifest_data if m.get("module") == module),
-                    None,
-                )
-                if dep_manifest is not None:
-                    _collect_dependencies_of(dep_manifest, lib_name)
+                dep_manifest = find_manifest(manifest_data, module)
+                if dep_manifest is None:
+                    raise MissingManifestError(module, required_by=module_name)
+                _collect_dependencies_of(dep_manifest, lib_name)
 
                 dep_tuple = (lib_name, module)
                 if dep_tuple not in collected_deps:

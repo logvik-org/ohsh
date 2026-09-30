@@ -10,6 +10,7 @@ from ohsh.utils import (
     EXIT_CIRCULAR_DEPENDENCY,
     EXIT_INVALID_TOP_DIR,
     EXIT_JSON_ERROR,
+    EXIT_MANIFEST_NOT_FOUND,
     EXIT_MISSING_FILES,
     EXIT_MODULE_NOT_FOUND,
 )
@@ -93,6 +94,14 @@ def test_run_circular_dependency(tmp_path, make_module):
     out.mkdir()
     assert _run(tmp_path, "a", out) == EXIT_CIRCULAR_DEPENDENCY
     assert not list(out.iterdir())
+
+
+def test_run_missing_dependency_manifest(tmp_path, make_module, caplog):
+    make_module("top", ["top.v"], dependencies={"work": ["ghost"]})
+    out = tmp_path / "out"
+    out.mkdir()
+    assert _run(tmp_path, "top", out) == EXIT_MANIFEST_NOT_FOUND
+    assert "ghost (required by top)" in caplog.text
 
 
 def test_run_bad_json(tmp_path):

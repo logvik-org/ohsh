@@ -14,8 +14,10 @@ from .utils import (
     EXIT_MODULE_NOT_FOUND,
     EXIT_UNEXPECTED_ERROR,
     CircularDependencyError,
+    MissingManifestError,
     discover_manifests,
     extract_dependencies,
+    find_manifest,
     to_absolute_path,
     validate_top_dir,
 )
@@ -85,6 +87,9 @@ def run(args, cwd):
     except CircularDependencyError as e:
         logger.error(f"Circular dependency detected: {e}")
         exit(EXIT_CIRCULAR_DEPENDENCY)
+    except MissingManifestError as e:
+        logger.error(f"Missing dependency: {e}")
+        exit(EXIT_MANIFEST_NOT_FOUND)
 
     # Remove duplicate entries
     dependencies = list(dict.fromkeys(dependencies))
@@ -102,29 +107,24 @@ def run(args, cwd):
         verilog_sources = []
         vhdl_sources = []
 
-        # Find the manifest for the module
-        manifest = next((m for m in manifest_data if m.get("module") == module), None)
-        if manifest:
-            manifest_path = pathlib.Path(manifest["manifest_path"]).parent
-            sources = [str(manifest_path / source) for source in manifest.get("sources", [])]
-            for source in sources:
-                if any(source.endswith(ext) for ext in valid_verilog_endings):
-                    verilog_sources.append(source)
-                elif any(source.endswith(ext) for ext in valid_vhdl_endings):
-                    vhdl_sources.append(source)
+        manifest = find_manifest(manifest_data, module)
+        manifest_path = pathlib.Path(manifest["manifest_path"]).parent
+        sources = [str(manifest_path / source) for source in manifest.get("sources", [])]
+        for source in sources:
+            if any(source.endswith(ext) for ext in valid_verilog_endings):
+                verilog_sources.append(source)
+            elif any(source.endswith(ext) for ext in valid_vhdl_endings):
+                vhdl_sources.append(source)
 
-            # If the library already exists in the source_files_by_lib dictionary, append the source files
-            if lib_name in source_files_by_lib:
-                source_files_by_lib[lib_name]["verilog"].extend(verilog_sources)
-                source_files_by_lib[lib_name]["vhdl"].extend(vhdl_sources)
-            else:  # Otherwise, create a new entry in the dictionary and add the source files
-                source_files_by_lib[lib_name] = {
-                    "verilog": verilog_sources,
-                    "vhdl": vhdl_sources,
-                }
-        else:
-            logger.error(f"Manifest for module {module} not found.")
-            exit(EXIT_MANIFEST_NOT_FOUND)
+        # If the library already exists in the source_files_by_lib dictionary, append the source files
+        if lib_name in source_files_by_lib:
+            source_files_by_lib[lib_name]["verilog"].extend(verilog_sources)
+            source_files_by_lib[lib_name]["vhdl"].extend(vhdl_sources)
+        else:  # Otherwise, create a new entry in the dictionary and add the source files
+            source_files_by_lib[lib_name] = {
+                "verilog": verilog_sources,
+                "vhdl": vhdl_sources,
+            }
 
     # Remove duplicate source files while preserving order within each library
     for lib_name, sources in source_files_by_lib.items():
