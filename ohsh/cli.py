@@ -9,6 +9,13 @@ from .core import run
 from .utils import configure_logging
 
 
+def log_file_path(value):
+    path = pathlib.Path(value)
+    if not path.parent.is_dir():
+        raise argparse.ArgumentTypeError(f"directory does not exist: {path.parent}")
+    return path
+
+
 def build_parser(cwd):
     parser = argparse.ArgumentParser(
         prog="ohsh",
@@ -41,6 +48,7 @@ def build_parser(cwd):
     )
     parser.add_argument(
         "--log-file",
+        type=log_file_path,
         default=None,
         metavar="PATH",
         help="Also write logs to the given file. By default no log file is written.",

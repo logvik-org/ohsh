@@ -31,7 +31,7 @@ def test_parser_all_options():
     assert args.work == "mylib"
     assert args.output == "/out"
     assert args.verbose is True
-    assert args.log_file == "x.log"
+    assert args.log_file == pathlib.Path("x.log")
 
 
 def test_module_is_required():
@@ -80,3 +80,11 @@ def test_run_leaves_logging_unconfigured(tmp_path, make_module):
     pkg_logger = logging.getLogger("ohsh")
     assert pkg_logger.propagate is True
     assert CONSOLE_HANDLER_NAME not in [h.get_name() for h in pkg_logger.handlers]
+
+
+def test_log_file_in_missing_directory_is_a_usage_error(tmp_path, capsys):
+    parser = build_parser(tmp_path)
+    with pytest.raises(SystemExit) as exc:
+        parser.parse_args(["--log-file", str(tmp_path / "nope" / "run.log"), "top"])
+    assert exc.value.code == 2
+    assert "directory does not exist" in capsys.readouterr().err
