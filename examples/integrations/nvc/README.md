@@ -1,22 +1,34 @@
-# NVC integration
+# NVC
 
-Status: **✅ verified in CI** (`.github/workflows/integration.yml`).
+Status: **✅ both examples run in CI** (`.github/workflows/integration.yml`).
 
-[`run.sh`](run.sh) mirrors the GHDL example but uses [NVC](https://www.nickg.me.uk/nvc/):
+The same flow as the [GHDL examples](../ghdl), with [NVC](https://www.nickg.me.uk/nvc/).
+Run them with `./run.sh` in the example's directory. NVC keeps its libraries in
+the current directory, so the scripts work inside `build/`.
 
-1. `ohsh` generates `libraries.src`, `math_lib_vhdl.src` and `work_vhdl.src`
-   from the [demo project](../../demo_project).
-2. Each library is analyzed with `nvc --work=<lib> -a`, in the order listed in
-   `libraries.src`. `-L.` adds the build dir to the library search path so
-   `work` finds `math_lib`.
-3. The shared self-checking testbench
-   ([`../ghdl/tb_accumulator.vhd`](../ghdl/tb_accumulator.vhd)) is analyzed,
-   elaborated (`-e`), and run (`-r`).
+## Simple: [`simple/run.sh`](simple/run.sh)
 
 ```bash
-./run.sh
+ohsh -t ../../../projects/simple -o build accumulator
+while IFS= read -r f; do nvc --std=2008 -a "$f"; done < build/work_vhdl.src
 ```
 
-NVC is not in the default Ubuntu repositories; CI installs it with the
-[`nickg/setup-nvc`](https://github.com/marketplace/actions/setup-nvc) action.
+## Advanced: [`advanced/run.sh`](advanced/run.sh)
+
+Each library is analyzed with `--work=<library>` in the order of
+`libraries.src`, and `-L.` lets later libraries find the earlier ones:
+
+```bash
+ohsh -t ../../../projects/advanced -w dsp_lib -o build accumulator
+while IFS= read -r lib; do
+  while IFS= read -r f; do
+    nvc --std=2008 -L. --work="$lib" -a "$f"
+  done < "build/${lib}_vhdl.src"
+done < build/libraries.src
+```
+
+## Requirements
+
+NVC (not in the default Ubuntu repositories, CI installs it with the
+[`nickg/setup-nvc`](https://github.com/marketplace/actions/setup-nvc) action).
 Docs: <https://www.nickg.me.uk/nvc/manual.html>.

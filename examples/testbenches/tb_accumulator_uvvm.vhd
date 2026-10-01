@@ -1,6 +1,5 @@
--- UVVM testbench for the demo accumulator. The design (adder, accumulator) is
--- supplied via ohsh-generated .src lists; UVVM's uvvm_util library is compiled
--- first by run.sh.
+-- UVVM testbench for the `accumulator` of both example projects. Compile it into
+-- the same library as the accumulator, after UVVM's uvvm_util library.
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;

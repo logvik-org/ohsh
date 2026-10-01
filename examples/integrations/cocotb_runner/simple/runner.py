@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""cocotb (Python runner) integration example.
+"""cocotb Python runner, simple project: one Verilog module on Icarus Verilog.
 
-Generates source lists with ohsh, reads them, and drives cocotb's
-``cocotb_tools.runner`` API (cocotb >= 2.0). Verified in CI against the demo
-project.
+Runs ohsh, reads the source list for the `work` library and hands it to cocotb's
+``cocotb_tools.runner`` API (cocotb >= 2.0).
 """
 
 import subprocess
@@ -21,8 +20,13 @@ except ImportError as error:
     )
 
 HERE = Path(__file__).resolve().parent
-DEMO = HERE.parent.parent / "demo_project"
+EXAMPLES = HERE.parents[2]
+PROJECT = EXAMPLES / "projects" / "simple"
+TESTBENCHES = EXAMPLES / "testbenches"
 BUILD = HERE / "build"
+# The runner hands sys.path to the simulator, so this makes the shared cocotb
+# tests importable while the simulation itself runs in the build directory.
+sys.path.insert(0, str(TESTBENCHES))
 
 
 def read_src(path: Path) -> list[str]:
@@ -36,7 +40,7 @@ def main() -> None:
     # 1. Generate the ordered source list with ohsh. Running it through this
     # Python avoids depending on the `ohsh` command being on PATH.
     subprocess.run(
-        [sys.executable, "-m", "ohsh", "-t", str(DEMO), "-o", str(BUILD), "counter"],
+        [sys.executable, "-m", "ohsh", "-t", str(PROJECT), "-o", str(BUILD), "counter"],
         check=True,
     )
     sources = read_src(BUILD / "work_verilog.src")
@@ -54,11 +58,10 @@ def main() -> None:
     results_xml = runner.test(
         hdl_toplevel="counter",
         test_module="test_counter",
-        test_dir=str(HERE),
     )
 
     num_tests, num_failed = get_results(results_xml)
-    print(f"cocotb runner example: {num_tests} test(s), {num_failed} failure(s)")
+    print(f"cocotb runner, simple: {num_tests} test(s), {num_failed} failure(s)")
     if num_failed:
         sys.exit(1)
 

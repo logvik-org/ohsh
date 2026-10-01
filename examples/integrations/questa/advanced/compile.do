@@ -1,13 +1,13 @@
-# Questa / ModelSim do-file: compile ohsh-generated source lists into libraries,
-# in the order ohsh writes to libraries.src, then run the testbench.
+# Questa / ModelSim, advanced project: compile each library in the order ohsh
+# writes to libraries.src, then run the testbench in the top library.
 #
-# Generate the lists first (from a shell):
-#   ohsh -t ../../demo_project -o build accumulator
+# Generate the lists first (from a shell, in this directory):
+#   ohsh -t ../../../projects/advanced -w dsp_lib -o build accumulator
 # Then run:
 #   vsim -c -do compile.do
 #
-# Status: validated against the Questa/ModelSim command reference; not executed
-# in CI (Questa is licensed proprietary software).
+# Not run in CI (Questa / ModelSim is licensed software). Checked against
+# the Questa / ModelSim command reference.
 
 # Helper: compile every file listed in an ohsh .src file into <lib>.
 proc compile_src {srcfile lib lang} {
@@ -46,6 +46,6 @@ foreach lib $libraries {
     compile_src build/${lib}_verilog.src $lib verilog
 }
 
-# Compile a testbench and simulate (adjust the top to taste).
-# vcom -2008 -work work ../ghdl/tb_accumulator.vhd
-# vsim -c work.tb_accumulator -do "run -all; quit -f"
+# The testbench goes into the top library, where `work.accumulator` resolves.
+vcom -2008 -work dsp_lib ../../../testbenches/tb_accumulator.vhd
+vsim -c dsp_lib.tb_accumulator -do "run -all; quit -f"

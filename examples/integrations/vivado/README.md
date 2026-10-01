@@ -1,29 +1,25 @@
-# Vivado integration
+# Vivado
 
-Status: **⚠️ documented & validated against vendor docs** - not executed in CI
-(Vivado is licensed proprietary software).
+Status: **⚠️ not run in CI** (Vivado, licensed software). Checked against the
+vendor's command reference.
 
-[`read_sources.tcl`](read_sources.tcl) loops over the libraries in ohsh's
-`libraries.src` and reads each library's files in non-project (Tcl) mode:
+Generate the source lists from a shell in the example's directory, then run the
+script with `vivado -mode batch -source read_sources.tcl`.
 
-```tcl
-proc read_src {srcfile kind lib} { ... read_vhdl -library $lib $line ... }
-foreach lib [read_library_order build/libraries.src] {
-    read_src build/${lib}_vhdl.src    vhdl    $lib
-    read_src build/${lib}_verilog.src verilog $lib
-}
-```
-
-Usage:
+## Simple: [`simple/read_sources.tcl`](simple/read_sources.tcl)
 
 ```bash
-ohsh -t ../../demo_project -o build accumulator
-vivado -mode batch -source read_sources.tcl
+ohsh -t ../../../projects/simple -o build accumulator
 ```
 
-Notes:
-- `read_vhdl -library <lib> <file>` places VHDL into a named library (UG835).
-- Use `read_verilog -sv` for SystemVerilog. Verilog has no library namespace in
-  Vivado synthesis, so it is read globally.
+The script reads every file of `work_vhdl.src` with `read_vhdl` in non-project mode.
 
-Docs: AMD Vivado Design Suite Tcl Command Reference (UG835).
+## Advanced: [`advanced/read_sources.tcl`](advanced/read_sources.tcl)
+
+```bash
+ohsh -t ../../../projects/advanced -w dsp_lib -o build accumulator
+```
+
+The script reads each library's files with `read_vhdl -library <library>` in
+the order of `libraries.src`. Verilog has no libraries in Vivado synthesis, so
+any Verilog files are read globally.

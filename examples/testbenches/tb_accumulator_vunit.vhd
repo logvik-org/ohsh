@@ -1,13 +1,11 @@
--- VUnit testbench for the demo accumulator. The design (adder, accumulator)
--- is supplied via ohsh-generated .src lists; this testbench is added by run.py.
+-- VUnit testbench for the `accumulator` of both example projects. run.py adds
+-- it to the same library as the accumulator, so `work.accumulator` finds it.
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 library vunit_lib;
 context vunit_lib.vunit_context;
-
-library dut_lib;
 
 entity tb_accumulator_vunit is
   generic (runner_cfg : string);
@@ -20,7 +18,7 @@ architecture sim of tb_accumulator_vunit is
   signal inc   : unsigned(width - 1 downto 0) := (others => '0');
   signal total : unsigned(width - 1 downto 0);
 begin
-  dut : entity dut_lib.accumulator
+  dut : entity work.accumulator
     generic map (width => width)
     port map (clk => clk, rst => rst, inc => inc, total => total);
 

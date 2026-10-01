@@ -2,22 +2,23 @@
 
 ohsh's `.src` lists are just text - one absolute path per line - so they drop
 into almost any flow. Runnable, self-checking examples live in
-[`examples/`](https://github.com/logvik-org/oshsh/tree/main/examples). The ones marked ✅ are **executed in CI** against a
-demo project. The vendor-tool ones (⚠️) are validated against official docs but
-can't run on a public CI runner.
+[`examples/`](https://github.com/logvik-org/oshsh/tree/main/examples). Each tool has a simple example (one library) and an
+advanced one (three libraries compiled in the order of `libraries.src`). The
+ones marked ✅ run in CI. The vendor-tool ones (⚠️) are checked against the
+vendor's documentation but can't run on a public CI runner.
 
-| Tool | Example | Verified |
-|------|---------|----------|
-| [cocotb (Makefile)](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/cocotb_makefile) | `Makefile` | ✅ CI |
-| [cocotb (Python runner)](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/cocotb_runner) | `runner.py` | ✅ CI |
-| [VUnit](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/vunit) | `run.py` | ✅ CI |
-| [GHDL](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/ghdl) | `run.sh` | ✅ CI |
-| [NVC](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/nvc) | `run.sh` | ✅ CI |
-| [UVVM](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/uvvm) | `run.sh` | ✅ CI |
-| [hog](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/hog) | `README.md` | doc |
-| [Questa / ModelSim](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/questa) | `compile.do` | ⚠️ doc |
-| [Vivado](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/vivado) | `read_sources.tcl` | ⚠️ doc |
-| [Quartus](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/quartus) | `add_sources.tcl` | ⚠️ doc |
+| Tool | Simple | Advanced | Verified |
+|------|--------|----------|----------|
+| [cocotb (Makefile)](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/cocotb_makefile) | [simple](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/cocotb_makefile/simple) | [advanced](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/cocotb_makefile/advanced) | ✅ CI |
+| [cocotb (Python runner)](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/cocotb_runner) | [simple](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/cocotb_runner/simple) | [advanced](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/cocotb_runner/advanced) | ✅ CI |
+| [VUnit](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/vunit) | [simple](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/vunit/simple) | [advanced](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/vunit/advanced) | ✅ CI |
+| [GHDL](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/ghdl) | [simple](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/ghdl/simple) | [advanced](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/ghdl/advanced) | ✅ CI |
+| [NVC](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/nvc) | [simple](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/nvc/simple) | [advanced](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/nvc/advanced) | ✅ CI |
+| [UVVM](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/uvvm) | [simple](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/uvvm/simple) | [advanced](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/uvvm/advanced) | ✅ CI |
+| [hog](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/hog) | [simple](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/hog/simple) | [advanced](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/hog/advanced) | ✅ CI (list files) |
+| [Questa / ModelSim](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/questa) | [simple](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/questa/simple) | [advanced](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/questa/advanced) | ⚠️ doc |
+| [Vivado](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/vivado) | [simple](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/vivado/simple) | [advanced](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/vivado/advanced) | ⚠️ doc |
+| [Quartus](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/quartus) | [simple](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/quartus/simple) | [advanced](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/quartus/advanced) | ⚠️ doc |
 
 For example, feeding ohsh output to GHDL:
 

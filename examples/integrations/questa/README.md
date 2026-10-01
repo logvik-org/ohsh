@@ -1,28 +1,26 @@
-# Questa / ModelSim integration
+# Questa / ModelSim
 
-Status: **⚠️ documented & validated against vendor docs** - not executed in CI
-(Questa/ModelSim is licensed proprietary software).
+Status: **⚠️ not run in CI** (Questa / ModelSim, licensed software). Checked against the
+vendor's command reference.
 
-[`compile.do`](compile.do) reads ohsh's `.src` lists and compiles each file into
-the right library with `vcom`/`vlog`, in the order listed in `libraries.src`:
+Generate the source lists from a shell in the example's directory, then run the
+script with `vsim -c -do compile.do`.
 
-```tcl
-proc compile_src {srcfile lib lang} { ... vcom -2008 -work $lib $line ... }
-foreach lib [read_library_order build/libraries.src] {
-    vlib $lib
-    vmap $lib $lib
-    compile_src build/${lib}_vhdl.src    $lib vhdl
-    compile_src build/${lib}_verilog.src $lib verilog
-}
-```
-
-Usage:
+## Simple: [`simple/compile.do`](simple/compile.do)
 
 ```bash
-ohsh -t ../../demo_project -o build accumulator
-vsim -c -do compile.do
+ohsh -t ../../../projects/simple -o build accumulator
 ```
 
-Key commands: `vlib`/`vmap` create and map libraries, `vcom -work <lib>`
-compiles VHDL, `vlog [-sv] -work <lib>` compiles Verilog/SystemVerilog. Docs:
-Questa SIM / ModelSim Command Reference.
+The script compiles every file of `work_vhdl.src` into `work` with `vcom`, then
+runs the testbench.
+
+## Advanced: [`advanced/compile.do`](advanced/compile.do)
+
+```bash
+ohsh -t ../../../projects/advanced -w dsp_lib -o build accumulator
+```
+
+The script creates and maps each library with `vlib`/`vmap`, compiles it with
+`vcom -work <library>` in the order of `libraries.src`, and runs the testbench
+from `dsp_lib`.

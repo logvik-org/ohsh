@@ -1,45 +1,36 @@
-# hog integration
+# hog
 
-Status: **documented** - shows how ohsh complements
-[hog (HDL on git)](https://hog.readthedocs.io).
+Status: **✅ both examples run in CI** (`.github/workflows/integration.yml`). They check the list files with hog's own reader
+(`ReadListFile` in `hog.tcl`), which runs in plain `tclsh`. Creating a full hog
+project needs Vivado or Quartus, which CI can't run.
 
-ohsh and hog solve different problems and pair nicely:
-
-- **ohsh** answers *"given my module manifests, what source files (per library)
-  are needed for this top, and in what order?"*
-- **hog** drives the full FPGA build/CI flow (Vivado/Quartus projects,
-  versioning, bitstream generation) and reads its file lists from `*.src` files
-  under a project's `list/` directory.
-
-hog's list files contain one source path per line (optionally with a
-`lib_name.src` filename to assign a VHDL library) - the same shape ohsh emits.
-So ohsh output can seed or regenerate hog list files.
-
-## Example
-
-Generate per-library lists with ohsh:
+[hog (HDL on git)](https://hog.readthedocs.io) drives the FPGA build flow and
+reads its sources from list files in `Top/<project>/list/`. hog takes the
+library from the list file's name (`math_lib.src` holds the files of
+`math_lib`) and reads each entry **relative to the repository root**. ohsh
+writes absolute paths, so they have to be converted:
 
 ```bash
-ohsh -t ../../demo_project -o build accumulator
-# -> build/libraries.src, build/math_lib_vhdl.src, build/work_vhdl.src
+while IFS= read -r f; do
+  realpath --relative-to="$REPO_ROOT" "$f"
+done < build/math_lib_vhdl.src > Top/demo/list/math_lib.src
 ```
 
-A hog project keeps its lists in `Top/<project>/list/`. hog uses the list
-*filename* to choose the library, e.g. `math_lib.src`. Map ohsh output to hog
-list files (paths can be made relative to the hog repo root as hog expects):
+Run the examples with `./run.sh` in the example's directory. hog is cloned once
+into `hog/build/Hog` (set `HOG_ROOT` to use an existing checkout, or
+`HOG_VERSION` to pick another release).
 
-```bash
-mkdir -p Top/demo/list
-while IFS= read -r lib; do
-  [ -f "build/${lib}_vhdl.src" ] || continue
-  cp "build/${lib}_vhdl.src" "Top/demo/list/${lib}.src"
-done < build/libraries.src
-```
+## Simple: [`simple/run.sh`](simple/run.sh)
 
-hog then reads `Top/demo/list/*.src` when creating the project. This keeps the
-authoritative dependency information in your `manifest.json` files (resolved by
-ohsh) while letting hog own the project/build/CI machinery.
+ohsh runs with `-w demo_lib`, and `demo_lib_vhdl.src` becomes
+`list/demo_lib.src`.
 
-> Note: hog list-file conventions evolve across hog versions - check the
-> [hog documentation](https://hog.readthedocs.io) for the exact `list/` format
-> your version expects. This example illustrates the data flow, not a pinned API.
+## Advanced: [`advanced/run.sh`](advanced/run.sh)
+
+One hog list file per line of `libraries.src`. hog itself takes care of the
+compile order inside the Vivado or Quartus project.
+
+## Requirements
+
+`tclsh` with tcllib (`apt-get install tcllib`) and git for the check. Docs:
+<https://hog.readthedocs.io>.

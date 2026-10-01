@@ -1,31 +1,25 @@
-# Quartus integration
+# Quartus
 
-Status: **⚠️ documented & validated against vendor docs** - not executed in CI
-(Quartus is licensed proprietary software).
+Status: **⚠️ not run in CI** (Quartus, licensed software). Checked against the
+vendor's command reference.
 
-[`add_sources.tcl`](add_sources.tcl) loops over the libraries in ohsh's
-`libraries.src` and adds each library's files to the project with
-`set_global_assignment`:
+Generate the source lists from a shell in the example's directory, then run the
+script with `quartus_sh -t add_sources.tcl`.
 
-```tcl
-proc add_src {srcfile kind lib} {
-    ... set_global_assignment -name VHDL_FILE $line -library $lib ...
-}
-foreach lib [read_library_order build/libraries.src] {
-    add_src build/${lib}_vhdl.src    vhdl    $lib
-    add_src build/${lib}_verilog.src verilog $lib
-}
-```
-
-Usage:
+## Simple: [`simple/add_sources.tcl`](simple/add_sources.tcl)
 
 ```bash
-ohsh -t ../../demo_project -o build accumulator
-quartus_sh -t add_sources.tcl
+ohsh -t ../../../projects/simple -o build accumulator
 ```
 
-Notes:
-- File assignments: `VHDL_FILE`, `VERILOG_FILE`, `SYSTEMVERILOG_FILE`.
-- `-library <lib>` on a `VHDL_FILE` assignment places it in that VHDL library.
+The script adds every file of `work_vhdl.src` to a new project with
+`set_global_assignment -name VHDL_FILE`.
 
-Docs: Intel Quartus Prime Scripting / Settings reference.
+## Advanced: [`advanced/add_sources.tcl`](advanced/add_sources.tcl)
+
+```bash
+ohsh -t ../../../projects/advanced -w dsp_lib -o build accumulator
+```
+
+The script adds each library's files with `-library <library>` on the
+`VHDL_FILE` assignment, in the order of `libraries.src`.

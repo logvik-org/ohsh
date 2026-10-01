@@ -1,6 +1,6 @@
--- Self-checking testbench for the demo `accumulator`, for use with GHDL/NVC.
--- The design sources (adder, accumulator) come from ohsh-generated .src lists;
--- this testbench is compiled on top of them into the `work` library.
+-- Self-checking testbench for the `accumulator` of both example projects, used
+-- by the GHDL and NVC examples. Compile it into the same library as the
+-- accumulator, so `work.accumulator` finds it.
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;

@@ -1,5 +1,6 @@
 {
   "module": "adder",
-  "sources": ["adder.vhd"],
-  "dependencies": {}
+  "sources": [
+    "adder.vhd"
+  ]
 }

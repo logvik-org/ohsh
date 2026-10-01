@@ -22,9 +22,10 @@ env/
 htmlcov/
 coverage.xml
 
-# cocotb example output
+# cocotb and VUnit example output
 results.xml
 sim_build/
+vunit_out/
 
 # ohsh runtime output
 debug.log

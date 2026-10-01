@@ -27,8 +27,8 @@ jobs:
       - name: Install ohsh + Python sim frameworks
         run: pip install ".[examples]"
 
-      - name: Install Icarus Verilog
-        run: sudo apt-get update && sudo apt-get install -y iverilog
+      - name: Install Icarus Verilog and tcllib
+        run: sudo apt-get update && sudo apt-get install -y iverilog tcllib
 
       - name: Install GHDL
         uses: ghdl/setup-ghdl@75eff367dadc0cd06454a118db0b458d44fdc3c3  # v1.5.1
@@ -40,25 +40,66 @@ jobs:
         with:
           version: 1.23.0
 
-      - name: cocotb (Makefile flow)
-        working-directory: examples/integrations/cocotb_makefile
-        run: make
+      - name: cocotb Makefile (simple)
+        working-directory: examples/integrations/cocotb_makefile/simple
+        run: |
+          make 2>&1 | tee "$RUNNER_TEMP/output.log"
+          ! grep -i deprecat "$RUNNER_TEMP/output.log"
 
-      - name: cocotb (Python runner)
-        working-directory: examples/integrations/cocotb_runner
-        run: python runner.py
+      - name: cocotb Makefile (advanced)
+        working-directory: examples/integrations/cocotb_makefile/advanced
+        run: |
+          make 2>&1 | tee "$RUNNER_TEMP/output.log"
+          ! grep -i deprecat "$RUNNER_TEMP/output.log"
 
-      - name: VUnit
-        working-directory: examples/integrations/vunit
+      - name: cocotb runner (simple)
+        working-directory: examples/integrations/cocotb_runner/simple
+        run: |
+          python runner.py 2>&1 | tee "$RUNNER_TEMP/output.log"
+          ! grep -i deprecat "$RUNNER_TEMP/output.log"
+
+      - name: cocotb runner (advanced)
+        working-directory: examples/integrations/cocotb_runner/advanced
+        run: |
+          python runner.py 2>&1 | tee "$RUNNER_TEMP/output.log"
+          ! grep -i deprecat "$RUNNER_TEMP/output.log"
+
+      - name: VUnit (simple)
+        working-directory: examples/integrations/vunit/simple
         env:
           VUNIT_SIMULATOR: ghdl
-        run: python run.py
+        run: |
+          python run.py 2>&1 | tee "$RUNNER_TEMP/output.log"
+          ! grep -i deprecat "$RUNNER_TEMP/output.log"
 
-      - name: GHDL
-        run: bash examples/integrations/ghdl/run.sh
+      - name: VUnit (advanced)
+        working-directory: examples/integrations/vunit/advanced
+        env:
+          VUNIT_SIMULATOR: ghdl
+        run: |
+          python run.py 2>&1 | tee "$RUNNER_TEMP/output.log"
+          ! grep -i deprecat "$RUNNER_TEMP/output.log"
 
-      - name: NVC
-        run: bash examples/integrations/nvc/run.sh
+      - name: GHDL (simple)
+        run: bash examples/integrations/ghdl/simple/run.sh
 
-      - name: UVVM (GHDL)
-        run: bash examples/integrations/uvvm/run.sh
+      - name: GHDL (advanced)
+        run: bash examples/integrations/ghdl/advanced/run.sh
+
+      - name: NVC (simple)
+        run: bash examples/integrations/nvc/simple/run.sh
+
+      - name: NVC (advanced)
+        run: bash examples/integrations/nvc/advanced/run.sh
+
+      - name: UVVM (simple)
+        run: bash examples/integrations/uvvm/simple/run.sh
+
+      - name: UVVM (advanced)
+        run: bash examples/integrations/uvvm/advanced/run.sh
+
+      - name: hog (simple)
+        run: bash examples/integrations/hog/simple/run.sh
+
+      - name: hog (advanced)
+        run: bash examples/integrations/hog/advanced/run.sh

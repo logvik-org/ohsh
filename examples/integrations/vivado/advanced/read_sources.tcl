@@ -1,12 +1,13 @@
-# AMD/Xilinx Vivado: read ohsh-generated source lists in non-project (Tcl) mode.
+# AMD Vivado, advanced project: read each library's files in non-project mode,
+# in the order ohsh writes to libraries.src.
 #
-# Generate the lists first:
-#   ohsh -t ../../demo_project -o build accumulator
+# Generate the lists first (from a shell, in this directory):
+#   ohsh -t ../../../projects/advanced -w dsp_lib -o build accumulator
 # Then run:
 #   vivado -mode batch -source read_sources.tcl
 #
-# Status: validated against the Vivado Tcl command reference (UG835); not
-# executed in CI (Vivado is licensed proprietary software).
+# Not run in CI (Vivado is licensed software). Checked against the Vivado
+# Tcl command reference (UG835).
 
 # Read every file from an ohsh .src list with the given command/library.
 proc read_src {srcfile kind lib} {
@@ -38,5 +39,5 @@ foreach lib [read_library_order build/libraries.src] {
     read_src build/${lib}_verilog.src verilog $lib
 }
 
-# Example continuation:
-# synth_design -top accumulator
+# Continue with synthesis, for example:
+#   synth_design -top accumulator -part <your part>

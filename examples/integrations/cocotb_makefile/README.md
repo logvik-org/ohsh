@@ -1,28 +1,43 @@
-# cocotb - Makefile flow
+# cocotb, Makefile flow
 
-Status: **✅ verified in CI** (`.github/workflows/integration.yml`).
+Status: **✅ both examples run in CI** (`.github/workflows/integration.yml`).
 
-The [`Makefile`](Makefile) runs `ohsh` at parse time and reads the resulting
-list straight into cocotb's `VERILOG_SOURCES`:
+In both examples, ohsh runs while make reads the Makefile, and the cocotb
+variables are filled straight from its output. Run them with `make` in the
+example's directory.
 
-```makefile
-_ := $(shell mkdir -p $(BUILD) && ohsh -t $(DEMO) -o $(BUILD) counter >/dev/null 2>&1)
+## Simple: [`simple/Makefile`](simple/Makefile)
+
+The Verilog `counter` from the simple project on Icarus Verilog. Its sources are
+in the `work` library, so `VERILOG_SOURCES` is just `work_verilog.src`:
+
+```make
+_ := $(shell ohsh -t $(EXAMPLES)/projects/simple -o $(BUILD) counter)
 VERILOG_SOURCES := $(shell cat $(BUILD)/work_verilog.src)
-COCOTB_TOPLEVEL := counter
-COCOTB_TEST_MODULES := test_counter
-include $(shell cocotb-config --makefiles)/Makefile.sim
 ```
 
-Run it:
+## Advanced: [`advanced/Makefile`](advanced/Makefile)
 
-```bash
-make            # SIM defaults to icarus
-make SIM=questa # or any other supported simulator
+The VHDL `accumulator` from the advanced project, spread over `util_lib`,
+`math_lib` and the top library `dsp_lib`, on NVC. `libraries.src` maps directly
+onto cocotb's library variables: the libraries before the top one go to
+`VHDL_LIB_ORDER` with their files in `VHDL_SOURCES_<library>`, and the top
+library's files go to `VHDL_SOURCES`:
+
+```make
+VHDL_LIB_ORDER := $(filter-out $(TOP_LIBRARY),$(shell cat $(BUILD)/libraries.src))
+$(foreach lib,$(VHDL_LIB_ORDER),$(eval VHDL_SOURCES_$(lib) := $(shell cat $(BUILD)/$(lib)_vhdl.src)))
+VHDL_SOURCES := $(shell cat $(BUILD)/$(TOP_LIBRARY)_vhdl.src)
+TOPLEVEL_LIBRARY := $(TOP_LIBRARY)
 ```
 
-[`test_counter.py`](test_counter.py) is a small self-checking cocotb test.
+This uses NVC because cocotb's GHDL makefile compiles the
+`VHDL_SOURCES_<library>` variables in no particular order, while its NVC
+makefile follows `VHDL_LIB_ORDER`.
 
-Requires cocotb (`pip install -e ".[examples]"`) and a simulator - CI uses Icarus
-Verilog (`apt-get install iverilog`). Variable names target **cocotb 2.x**
-(`COCOTB_TOPLEVEL`, `COCOTB_TEST_MODULES`). Docs:
+## Requirements
+
+cocotb 2.x (`pip install -e ".[examples]"`), Icarus Verilog for the simple
+example and NVC for the advanced one. The cocotb tests are in
+[`../../testbenches`](../../testbenches). Docs:
 <https://docs.cocotb.org/en/stable/building.html>.

@@ -1,36 +1,36 @@
-# VUnit integration
+# VUnit
 
-Status: **✅ verified in CI** (`.github/workflows/integration.yml`, GHDL backend).
+Status: **✅ both examples run in CI** (`.github/workflows/integration.yml`).
 
-[`run.py`](run.py) generates the source lists with `ohsh` and adds them to VUnit
-libraries:
+VUnit works out the compile order from the files itself, so here ohsh's job is
+to say which files belong to which library. Both examples add the testbench
+[`tb_accumulator_vunit.vhd`](../../testbenches/tb_accumulator_vunit.vhd) to the
+same library as the design. Run them with `python run.py` in the example's
+directory (`VUNIT_SIMULATOR=ghdl` in CI).
+
+VUnit reserves the library name `work`, so ohsh is always run with `-w` to give
+the top library another name.
+
+## Simple: [`simple/run.py`](simple/run.py)
 
 ```python
-subprocess.run(
-    [sys.executable, "-m", "ohsh", "-t", DEMO, "-o", BUILD, "-w", "dut_lib", "accumulator"],
-    check=True,
-)
+dut_lib = vu.add_library("dut_lib")
+dut_lib.add_source_files(read_src(BUILD / "dut_lib_vhdl.src"))
+dut_lib.add_source_files(TESTBENCH)
+```
 
-vu = VUnit.from_argv()
+## Advanced: [`advanced/run.py`](advanced/run.py)
+
+One VUnit library per line of `libraries.src`:
+
+```python
 for library in read_src(BUILD / "libraries.src"):
-    sources = read_src(BUILD / f"{library}_vhdl.src")
-    vu.add_library(library).add_source_files(sources, allow_empty=True)
-vu.add_library("tb_lib").add_source_files(HERE / "tb_accumulator_vunit.vhd")
-vu.main()
+    vu.add_library(library).add_source_files(read_src(BUILD / f"{library}_vhdl.src"))
+vu.library("dsp_lib").add_source_files(TESTBENCH)
 ```
 
-Run it:
+## Requirements
 
-```bash
-VUNIT_SIMULATOR=ghdl python run.py
-```
-
-Notes:
-- `add_source_files()` accepts a list of paths, so an ohsh `.src` list drops
-  right in. VUnit re-derives compile order from the files itself.
-- ohsh is invoked with `-w dut_lib` because VUnit reserves the name `work`.
-- [`tb_accumulator_vunit.vhd`](tb_accumulator_vunit.vhd) is a standard VUnit
-  testbench (`runner_cfg` generic, `check_equal`).
-
-Requires VUnit (`pip install -e ".[examples]"`) and a simulator (GHDL in CI). Docs:
-<https://vunit.github.io/py/ui.html>.
+VUnit (`pip install -e ".[examples]"`) and a simulator (GHDL in CI). Both
+examples use VUnit's current API: `VUnit.from_argv(compile_builtins=False)`
+followed by `add_vhdl_builtins()`. Docs: <https://vunit.github.io/py/ui.html>.

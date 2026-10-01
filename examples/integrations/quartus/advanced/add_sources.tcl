@@ -1,12 +1,13 @@
-# Intel/Altera Quartus: add ohsh-generated source lists to a project.
+# Altera Quartus, advanced project: add each library's files to a project, with
+# the VHDL files assigned to their library.
 #
-# Generate the lists first:
-#   ohsh -t ../../demo_project -o build accumulator
+# Generate the lists first (from a shell, in this directory):
+#   ohsh -t ../../../projects/advanced -w dsp_lib -o build accumulator
 # Then run:
 #   quartus_sh -t add_sources.tcl
 #
-# Status: validated against the Quartus Tcl / settings reference; not executed in
-# CI (Quartus is licensed proprietary software).
+# Not run in CI (Quartus is licensed software). Checked against the Quartus
+# Tcl and settings reference.
 
 load_package flow
 

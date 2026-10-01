@@ -1,4 +1,4 @@
--- Combinational adder, compiled into library `math_lib`.
+-- Combinational adder. Wraps around on overflow.
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
