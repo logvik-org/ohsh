@@ -4,7 +4,7 @@
 [![Integrations](https://github.com/logvik-org/oshsh/actions/workflows/integration.yml/badge.svg)](https://github.com/logvik-org/oshsh/actions/workflows/integration.yml)
 [![PyPI](https://img.shields.io/pypi/v/ohsh.svg)](https://pypi.org/project/ohsh/)
 [![Python](https://img.shields.io/pypi/pyversions/ohsh.svg)](https://pypi.org/project/ohsh/)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/logvik-org/oshsh/blob/main/LICENSE)
 
 **ohsh** is a small, deliberately humble command-line tool that figures out, in
 the right order, which HDL (Verilog / SystemVerilog / VHDL) source files your
@@ -139,22 +139,22 @@ Each module gets a `manifest.json` next to its sources:
 
 ohsh's `.src` lists are just text - one absolute path per line - so they drop
 into almost any flow. Runnable, self-checking examples live in
-[`examples/`](examples/). The ones marked ✅ are **executed in CI** against a
+[`examples/`](https://github.com/logvik-org/oshsh/tree/main/examples). The ones marked ✅ are **executed in CI** against a
 demo project; the vendor-tool ones (⚠️) are validated against official docs but
 can't run on a public CI runner.
 
 | Tool | Example | Verified |
 |------|---------|----------|
-| [cocotb (Makefile)](examples/integrations/cocotb_makefile/) | `Makefile` | ✅ CI |
-| [cocotb (Python runner)](examples/integrations/cocotb_runner/) | `runner.py` | ✅ CI |
-| [VUnit](examples/integrations/vunit/) | `run.py` | ✅ CI |
-| [GHDL](examples/integrations/ghdl/) | `run.sh` | ✅ CI |
-| [NVC](examples/integrations/nvc/) | `run.sh` | ✅ CI |
-| [UVVM](examples/integrations/uvvm/) | `run.sh` | ✅ CI |
-| [hog](examples/integrations/hog/) | `README.md` | doc |
-| [Questa / ModelSim](examples/integrations/questa/) | `compile.do` | ⚠️ doc |
-| [Vivado](examples/integrations/vivado/) | `read_sources.tcl` | ⚠️ doc |
-| [Quartus](examples/integrations/quartus/) | `add_sources.tcl` | ⚠️ doc |
+| [cocotb (Makefile)](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/cocotb_makefile) | `Makefile` | ✅ CI |
+| [cocotb (Python runner)](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/cocotb_runner) | `runner.py` | ✅ CI |
+| [VUnit](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/vunit) | `run.py` | ✅ CI |
+| [GHDL](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/ghdl) | `run.sh` | ✅ CI |
+| [NVC](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/nvc) | `run.sh` | ✅ CI |
+| [UVVM](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/uvvm) | `run.sh` | ✅ CI |
+| [hog](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/hog) | `README.md` | doc |
+| [Questa / ModelSim](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/questa) | `compile.do` | ⚠️ doc |
+| [Vivado](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/vivado) | `read_sources.tcl` | ⚠️ doc |
+| [Quartus](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/quartus) | `add_sources.tcl` | ⚠️ doc |
 
 For example, feeding ohsh output to GHDL:
 
@@ -177,12 +177,12 @@ make test                # run tests with coverage
 make lint                # ruff lint + format check
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+See [CONTRIBUTING.md](https://github.com/logvik-org/oshsh/blob/main/CONTRIBUTING.md) for details.
 
 ## License
 
-Licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) and
-[NOTICE](NOTICE).
+Licensed under the **Apache License 2.0**. See [LICENSE](https://github.com/logvik-org/oshsh/blob/main/LICENSE) and
+[NOTICE](https://github.com/logvik-org/oshsh/blob/main/NOTICE).
 
 ## Author
 
