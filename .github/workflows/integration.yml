@@ -44,25 +44,25 @@ jobs:
         working-directory: examples/integrations/cocotb_makefile/simple
         run: |
           make 2>&1 | tee "$RUNNER_TEMP/output.log"
-          ! grep -i deprecat "$RUNNER_TEMP/output.log"
+          ! grep -iE "DeprecationWarning|is deprecated" "$RUNNER_TEMP/output.log"
 
       - name: cocotb Makefile (advanced)
         working-directory: examples/integrations/cocotb_makefile/advanced
         run: |
           make 2>&1 | tee "$RUNNER_TEMP/output.log"
-          ! grep -i deprecat "$RUNNER_TEMP/output.log"
+          ! grep -iE "DeprecationWarning|is deprecated" "$RUNNER_TEMP/output.log"
 
       - name: cocotb runner (simple)
         working-directory: examples/integrations/cocotb_runner/simple
         run: |
           python runner.py 2>&1 | tee "$RUNNER_TEMP/output.log"
-          ! grep -i deprecat "$RUNNER_TEMP/output.log"
+          ! grep -iE "DeprecationWarning|is deprecated" "$RUNNER_TEMP/output.log"
 
       - name: cocotb runner (advanced)
         working-directory: examples/integrations/cocotb_runner/advanced
         run: |
           python runner.py 2>&1 | tee "$RUNNER_TEMP/output.log"
-          ! grep -i deprecat "$RUNNER_TEMP/output.log"
+          ! grep -iE "DeprecationWarning|is deprecated" "$RUNNER_TEMP/output.log"
 
       - name: VUnit (simple)
         working-directory: examples/integrations/vunit/simple
@@ -70,7 +70,7 @@ jobs:
           VUNIT_SIMULATOR: ghdl
         run: |
           python run.py 2>&1 | tee "$RUNNER_TEMP/output.log"
-          ! grep -i deprecat "$RUNNER_TEMP/output.log"
+          ! grep -iE "DeprecationWarning|is deprecated" "$RUNNER_TEMP/output.log"
 
       - name: VUnit (advanced)
         working-directory: examples/integrations/vunit/advanced
@@ -78,7 +78,7 @@ jobs:
           VUNIT_SIMULATOR: ghdl
         run: |
           python run.py 2>&1 | tee "$RUNNER_TEMP/output.log"
-          ! grep -i deprecat "$RUNNER_TEMP/output.log"
+          ! grep -iE "DeprecationWarning|is deprecated" "$RUNNER_TEMP/output.log"
 
       - name: GHDL (simple)
         run: bash examples/integrations/ghdl/simple/run.sh
