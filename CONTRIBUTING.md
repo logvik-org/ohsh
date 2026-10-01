@@ -49,7 +49,9 @@ end-to-end integration examples. PRs need a green pipeline to merge.
 
 ## Releasing (maintainers)
 
-1. Bump `__version__` in `ohsh/__init__.py` and update `CHANGELOG.md` on `main`.
+1. On `main`, bump `__version__` in `ohsh/__init__.py` and move the
+   `Unreleased` entries in `CHANGELOG.md` under a new `## [<version>] - <date>`
+   heading.
 2. Publish a **GitHub Release** with a new tag `v<version>` (for example
    `v1.2.3`) on that commit.
 

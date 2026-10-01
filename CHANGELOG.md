@@ -6,10 +6,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-06-29
-
-First public release.
-
 ### Added
 - `manifest.json`-driven discovery of HDL modules under a project tree.
 - Recursive dependency resolution producing ordered, per-library
@@ -50,5 +46,4 @@ First public release.
 - Circular dependencies now exit with an error (exit code 102) naming the cycle,
   instead of recursing infinitely.
 
-[Unreleased]: https://github.com/logvik-org/oshsh/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/logvik-org/oshsh/releases/tag/v0.1.0
+[Unreleased]: https://github.com/logvik-org/oshsh/commits/main
