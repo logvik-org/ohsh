@@ -69,23 +69,6 @@ ohsh will:
 | `--version`         | Print version and exit.                                                |              |
 | `-h`, `--help`      | Show help and exit.                                                    |              |
 
-### Exit codes
-
-ohsh follows the Unix conventions where one exists (`1`, `2`, and the BSD
-`sysexits.h` codes 64 to 78). Errors specific to ohsh start at 100.
-
-| Code | Meaning                                                        |
-|------|----------------------------------------------------------------|
-| 0    | Success.                                                       |
-| 1    | Unexpected error.                                              |
-| 2    | Invalid command-line arguments.                                |
-| 65   | A manifest is not valid JSON or has the wrong structure.       |
-| 66   | Top directory, manifest or source file missing or unreadable.  |
-| 73   | Output directory cannot be created.                            |
-| 100  | Top module not found in any manifest.                          |
-| 101  | A dependency has no manifest.                                  |
-| 102  | Modules depend on each other in a loop.                        |
-
 ### Example
 
 ```bash
@@ -112,80 +95,12 @@ such order exists. ohsh then logs a warning and writes a best-effort order,
 which works for tools that sort files themselves (such as Vivado or Quartus
 projects) but may fail with tools that compile one library at a time.
 
-## Manifest file format
+## Documentation
 
-Each module gets a `manifest.json` next to its sources:
-
-```json
-{
-  "module": "alu",
-  "sources": [
-    "alu_core.v",
-    "alu_control.vhd"
-  ],
-  "dependencies": {
-    "work": ["adder", "multiplier"],
-    "math_lib": ["sqrt_module"]
-  }
-}
-```
-
-- `module` (required) - the module's name.
-- `sources` (optional) - list of HDL source files, relative to the manifest.
-  Files ending in `.v`, `.sv`, `.svp`, `.vh` or `.svh` go to the Verilog list,
-  and `.vhd`, `.vhdl` or `.vo` to the VHDL list, regardless of case. Other files
-  are skipped with a warning.
-- `dependencies` (optional) - modules this one needs, as lists grouped by
-  library. The special library `work` is remapped to whatever `--work` (or the
-  resolving library) is.
-
-ohsh reads every `manifest*.json` file under `--top-dir` and stops with exit
-code 65 if one is not valid JSON or does not have this structure. Unknown keys
-are ignored.
-
-## Integrations
-
-ohsh's `.src` lists are just text - one absolute path per line - so they drop
-into almost any flow. Runnable, self-checking examples live in
-[`examples/`](https://github.com/logvik-org/oshsh/tree/main/examples). The ones marked ✅ are **executed in CI** against a
-demo project; the vendor-tool ones (⚠️) are validated against official docs but
-can't run on a public CI runner.
-
-| Tool | Example | Verified |
-|------|---------|----------|
-| [cocotb (Makefile)](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/cocotb_makefile) | `Makefile` | ✅ CI |
-| [cocotb (Python runner)](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/cocotb_runner) | `runner.py` | ✅ CI |
-| [VUnit](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/vunit) | `run.py` | ✅ CI |
-| [GHDL](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/ghdl) | `run.sh` | ✅ CI |
-| [NVC](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/nvc) | `run.sh` | ✅ CI |
-| [UVVM](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/uvvm) | `run.sh` | ✅ CI |
-| [hog](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/hog) | `README.md` | doc |
-| [Questa / ModelSim](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/questa) | `compile.do` | ⚠️ doc |
-| [Vivado](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/vivado) | `read_sources.tcl` | ⚠️ doc |
-| [Quartus](https://github.com/logvik-org/oshsh/tree/main/examples/integrations/quartus) | `add_sources.tcl` | ⚠️ doc |
-
-For example, feeding ohsh output to GHDL:
-
-```bash
-ohsh -t my_project -o build top
-while IFS= read -r lib; do
-  [ -f "build/${lib}_vhdl.src" ] || continue
-  while IFS= read -r f; do ghdl -a --work="$lib" --std=08 "$f"; done < "build/${lib}_vhdl.src"
-done < build/libraries.src
-ghdl -e --std=08 top && ghdl -r --std=08 top
-```
-
-## Development
-
-```bash
-git clone https://github.com/logvik-org/oshsh.git
-cd oshsh
-source scripts/setup-dev.sh   # create .venv, install everything, activate it
-make test                     # run tests with coverage
-make lint                     # ruff lint + format check
-```
-
-See [CONTRIBUTING.md](https://github.com/logvik-org/oshsh/blob/main/CONTRIBUTING.md) for details.
+- [Manifest file format](https://github.com/logvik-org/oshsh/blob/main/docs/manifest-format.md)
+- [Exit codes](https://github.com/logvik-org/oshsh/blob/main/docs/exit-codes.md)
+- [Integrations with simulators and build tools](https://github.com/logvik-org/oshsh/blob/main/docs/integrations.md)
+- [Development](https://github.com/logvik-org/oshsh/blob/main/docs/development.md)
 
 ## License
 
