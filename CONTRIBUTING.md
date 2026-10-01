@@ -8,13 +8,18 @@ process is light.
 ```bash
 git clone https://github.com/logvik-org/oshsh.git
 cd oshsh
-./scripts/setup-dev.sh        # creates .venv, installs ".[dev]", sets up pre-commit
+source scripts/setup-dev.sh
 ```
+
+This creates `.venv`, installs ohsh in editable mode with the `dev` and
+`examples` extras, installs the pre-commit hooks, and leaves the environment
+active. Running it as `./scripts/setup-dev.sh` instead does the same without
+activating the environment.
 
 Or, if you manage your own environment:
 
 ```bash
-pip install -e ".[dev]"
+pip install -e ".[dev,examples]"
 pre-commit install
 ```
 
