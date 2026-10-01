@@ -9,7 +9,6 @@ process is light.
 git clone https://github.com/logvik-org/oshsh.git
 cd oshsh
 ./scripts/setup-dev.sh        # creates .venv, installs ".[dev]", sets up pre-commit
-# Windows: ./scripts/setup-dev.ps1
 ```
 
 Or, if you manage your own environment:

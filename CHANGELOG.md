@@ -20,7 +20,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Verified integration examples for cocotb (Makefile + Python runner), VUnit,
   GHDL, NVC, and UVVM, plus documented examples for hog, Questa/ModelSim,
   Vivado, and Quartus.
-- pytest test suite, ruff lint/format, pre-commit hooks, and dev setup scripts.
+- pytest test suite, ruff lint/format, pre-commit hooks, and a dev setup script.
 - CI (lint + Python 3.9-3.14 matrix, with an experimental 3.15 pre-release leg,
   + build and a smoke test of the built wheel) and integration CI with pinned
   tool versions.
