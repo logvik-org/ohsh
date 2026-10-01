@@ -2,6 +2,7 @@
 
 import logging
 import pathlib
+import runpy
 
 import pytest
 
@@ -95,3 +96,11 @@ def test_help_lists_every_exit_code(capsys):
     help_text = capsys.readouterr().out
     for code, description in EXIT_CODE_DESCRIPTIONS.items():
         assert f"{code:>3}  {description}" in help_text
+
+
+def test_python_dash_m_ohsh_runs_the_cli(monkeypatch, capsys):
+    monkeypatch.setattr("sys.argv", ["ohsh", "--version"])
+    with pytest.raises(SystemExit) as exc:
+        runpy.run_module("ohsh", run_name="__main__")
+    assert exc.value.code == 0
+    assert capsys.readouterr().out.strip() == f"ohsh {__version__}"

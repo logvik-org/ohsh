@@ -13,7 +13,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `libraries.src`: the order to compile the libraries in, with a warning when
   libraries depend on each other in a loop.
 - CLI: `-t/--top-dir`, `-w/--work`, `-o/--output`, `-v/--verbose` (repeat as
-  `-vv` for debug output), `--log-file`, `--version`. By default only warnings
+  `-vv` for debug output), `--log-file`, `--version`. Also runs as `python -m ohsh`. By default only warnings
   and errors are printed.
 - Exit codes that follow Unix conventions (`1`, `2`, `sysexits.h`), with
   ohsh-specific errors from 100. Listed in `--help` and the README.
