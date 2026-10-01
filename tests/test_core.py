@@ -1,6 +1,5 @@
 """End-to-end tests for ohsh.core.run via the CLI parser."""
 
-import json
 import pathlib
 
 from ohsh.cli import build_parser
@@ -30,7 +29,6 @@ def test_run_writes_ordered_src_files(tmp_path, make_module):
     make_module("adder", ["adder.vhd"], dependencies={})
     make_module("top", ["top.v", "top_pkg.vhd"], dependencies={"math_lib": ["adder"]})
     out = tmp_path / "out"
-    out.mkdir()
 
     code = _run(tmp_path, "top", out)
     assert code == 0
@@ -46,11 +44,21 @@ def test_run_writes_ordered_src_files(tmp_path, make_module):
     assert not (out / "math_lib_verilog.src").exists()
 
 
+def test_run_puts_dependency_before_dependent_in_same_library(tmp_path, make_module):
+    make_module("counter", ["counter.vhd"], dependencies={})
+    make_module("top", ["top.vhd"], dependencies={"work": ["counter"]})
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out) == 0
+    assert (out / "work_vhdl.src").read_text().splitlines() == [
+        str(tmp_path / "counter" / "counter.vhd"),
+        str(tmp_path / "top" / "top.vhd"),
+    ]
+
+
 def test_run_writes_library_order(tmp_path, make_module):
     make_module("adder", ["adder.vhd"], dependencies={})
     make_module("top", ["top.vhd"], dependencies={"math_lib": ["adder"]})
     out = tmp_path / "out"
-    out.mkdir()
     assert _run(tmp_path, "top", out) == 0
     assert (out / "libraries.src").read_text().splitlines() == ["math_lib", "work"]
 
@@ -89,25 +97,14 @@ def test_run_warns_and_skips_unknown_extension(tmp_path, make_module, caplog):
     assert "notes.txt in module top: unknown file extension" in caplog.text
 
 
-def test_run_no_debug_log_side_effect(tmp_path, make_module, monkeypatch):
-    make_module("top", ["top.v"], dependencies={})
-    out = tmp_path / "out"
-    out.mkdir()
-    monkeypatch.chdir(tmp_path)
-    assert _run(tmp_path, "top", out) == 0
-    assert not (tmp_path / "debug.log").exists()
-
-
 def test_run_invalid_top_dir(tmp_path):
     out = tmp_path / "out"
-    out.mkdir()
     assert _run(tmp_path / "does_not_exist", "top", out) == EXIT_NO_INPUT
 
 
 def test_run_module_not_found(tmp_path, make_module):
     make_module("top", ["top.v"], dependencies={})
     out = tmp_path / "out"
-    out.mkdir()
     assert _run(tmp_path, "nonexistent", out) == EXIT_MODULE_NOT_FOUND
 
 
@@ -115,15 +112,13 @@ def test_run_circular_dependency(tmp_path, make_module):
     make_module("a", ["a.vhd"], dependencies={"work": ["b"]})
     make_module("b", ["b.vhd"], dependencies={"work": ["a"]})
     out = tmp_path / "out"
-    out.mkdir()
     assert _run(tmp_path, "a", out) == EXIT_CIRCULAR_DEPENDENCY
-    assert not list(out.iterdir())
+    assert not out.exists()
 
 
 def test_run_missing_dependency_manifest(tmp_path, make_module, caplog):
     make_module("top", ["top.v"], dependencies={"work": ["ghost"]})
     out = tmp_path / "out"
-    out.mkdir()
     assert _run(tmp_path, "top", out) == EXIT_MANIFEST_NOT_FOUND
     assert "ghost (required by top)" in caplog.text
 
@@ -131,7 +126,6 @@ def test_run_missing_dependency_manifest(tmp_path, make_module, caplog):
 def test_run_bad_json(tmp_path):
     (tmp_path / "manifest.json").write_text("{ not valid json ")
     out = tmp_path / "out"
-    out.mkdir()
     assert _run(tmp_path, "top", out) == EXIT_DATA_ERROR
 
 
@@ -153,13 +147,7 @@ def test_run_unreadable_manifest(tmp_path):
     assert _run(tmp_path, "top", tmp_path / "out") == EXIT_NO_INPUT
 
 
-def test_run_missing_source_file(tmp_path):
-    # Manifest references a source that does not exist on disk.
-    mod = tmp_path / "top"
-    mod.mkdir()
-    (mod / "manifest.json").write_text(
-        json.dumps({"module": "top", "sources": ["ghost.v"], "dependencies": {}})
-    )
+def test_run_missing_source_file(tmp_path, make_module):
+    make_module("top", ["ghost.v"], dependencies={}, create_sources=False)
     out = tmp_path / "out"
-    out.mkdir()
     assert _run(tmp_path, "top", out) == EXIT_NO_INPUT

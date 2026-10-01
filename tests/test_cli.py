@@ -6,7 +6,7 @@ import pathlib
 import pytest
 
 from ohsh import __version__
-from ohsh.cli import build_parser
+from ohsh.cli import build_parser, main
 from ohsh.core import run
 from ohsh.utils import CONSOLE_HANDLER_NAME, EXIT_CODE_DESCRIPTIONS, EXIT_USAGE
 
@@ -49,27 +49,21 @@ def test_version_flag(capsys):
 
 
 def test_main_entry_point(tmp_path, make_module, monkeypatch):
-    from ohsh import cli
-
     make_module("top", ["top.v"], dependencies={})
     out = tmp_path / "out"
-    out.mkdir()
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr("sys.argv", ["ohsh", "-t", str(tmp_path), "-o", str(out), "top"])
-    cli.main()
+    main()
     assert (out / "work_verilog.src").read_text().strip().endswith("top.v")
 
 
 def test_main_writes_log_file_when_requested(tmp_path, make_module, monkeypatch):
-    from ohsh import cli
-
     make_module("top", ["top.v"], dependencies={})
     out = tmp_path / "out"
-    out.mkdir()
     log_path = tmp_path / "run.log"
     argv = ["ohsh", "-t", str(tmp_path), "-o", str(out), "--log-file", str(log_path), "top"]
     monkeypatch.setattr("sys.argv", argv)
-    cli.main()
+    main()
     assert "Found module top" in log_path.read_text()
 
 
@@ -86,7 +80,7 @@ def test_log_file_in_missing_directory_is_a_usage_error(tmp_path, capsys):
     parser = build_parser(tmp_path)
     with pytest.raises(SystemExit) as exc:
         parser.parse_args(["--log-file", str(tmp_path / "nope" / "run.log"), "top"])
-    assert exc.value.code == 2
+    assert exc.value.code == EXIT_USAGE
     assert "directory does not exist" in capsys.readouterr().err
 
 

@@ -188,17 +188,16 @@ def test_to_absolute_path_resolves_relative(tmp_path):
 
 
 def test_to_absolute_path_keeps_absolute(tmp_path):
-    result = to_absolute_path(tmp_path, str(tmp_path))
-    assert pathlib.Path(result).is_absolute()
+    absolute = tmp_path / "elsewhere"
+    assert to_absolute_path(pathlib.Path("/unused/cwd"), str(absolute)) == absolute
 
 
-def test_discover_manifests_globs_recursively(make_module):
+def test_discover_manifests_globs_recursively(tmp_path, make_module):
     make_module("a", ["a.v"])
     make_module("b", ["b.vhd"], name="manifest_extra.json")
-    top = pathlib.Path(str(make_module("c", ["c.v"]))).parent
-    found = {p.name for p in discover_manifests(top)}
-    assert "manifest.json" in found
-    assert "manifest_extra.json" in found
+    make_module("deep/nested/c", ["c.v"])
+    found = {p.relative_to(tmp_path).as_posix() for p in discover_manifests(tmp_path)}
+    assert found == {"a/manifest.json", "b/manifest_extra.json", "deep/nested/c/manifest.json"}
 
 
 def test_configure_logging_no_logfile_by_default(tmp_path, monkeypatch):
