@@ -7,9 +7,18 @@ backend).
 """
 
 import subprocess
+import sys
 from pathlib import Path
 
-from vunit import VUnit
+try:
+    from vunit import VUnit
+
+    import ohsh  # noqa: F401  (only checked here, run below as `python -m ohsh`)
+except ImportError as error:
+    sys.exit(
+        f"{error.name} is not installed for {sys.executable}. "
+        'From the repo root: pip install -e ".[examples]"'
+    )
 
 HERE = Path(__file__).resolve().parent
 DEMO = HERE.parent.parent / "demo_project"
@@ -29,9 +38,21 @@ def read_src(path: Path) -> list[str]:
 def main() -> None:
     BUILD.mkdir(exist_ok=True)
 
-    # 1. Resolve the design sources with ohsh.
+    # 1. Resolve the design sources with ohsh. Running it through this Python
+    # avoids depending on the `ohsh` command being on PATH.
     subprocess.run(
-        ["ohsh", "-t", str(DEMO), "-o", str(BUILD), "-w", DUT_LIB, "accumulator"],
+        [
+            sys.executable,
+            "-m",
+            "ohsh",
+            "-t",
+            str(DEMO),
+            "-o",
+            str(BUILD),
+            "-w",
+            DUT_LIB,
+            "accumulator",
+        ],
         check=True,
     )
 

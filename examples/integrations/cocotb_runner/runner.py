@@ -10,7 +10,15 @@ import subprocess
 import sys
 from pathlib import Path
 
-from cocotb_tools.runner import get_results, get_runner
+try:
+    from cocotb_tools.runner import get_results, get_runner
+
+    import ohsh  # noqa: F401  (only checked here, run below as `python -m ohsh`)
+except ImportError as error:
+    sys.exit(
+        f"{error.name} is not installed for {sys.executable}. "
+        'From the repo root: pip install -e ".[examples]"'
+    )
 
 HERE = Path(__file__).resolve().parent
 DEMO = HERE.parent.parent / "demo_project"
@@ -25,9 +33,10 @@ def read_src(path: Path) -> list[str]:
 def main() -> None:
     BUILD.mkdir(exist_ok=True)
 
-    # 1. Generate the ordered source list with ohsh.
+    # 1. Generate the ordered source list with ohsh. Running it through this
+    # Python avoids depending on the `ohsh` command being on PATH.
     subprocess.run(
-        ["ohsh", "-t", str(DEMO), "-o", str(BUILD), "counter"],
+        [sys.executable, "-m", "ohsh", "-t", str(DEMO), "-o", str(BUILD), "counter"],
         check=True,
     )
     sources = read_src(BUILD / "work_verilog.src")

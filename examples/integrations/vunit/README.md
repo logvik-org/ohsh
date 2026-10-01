@@ -6,7 +6,10 @@ Status: **✅ verified in CI** (`.github/workflows/integration.yml`, GHDL backen
 libraries:
 
 ```python
-subprocess.run(["ohsh", "-t", DEMO, "-o", BUILD, "-w", "dut_lib", "accumulator"], check=True)
+subprocess.run(
+    [sys.executable, "-m", "ohsh", "-t", DEMO, "-o", BUILD, "-w", "dut_lib", "accumulator"],
+    check=True,
+)
 
 vu = VUnit.from_argv()
 for library in read_src(BUILD / "libraries.src"):
