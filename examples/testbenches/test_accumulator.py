@@ -7,10 +7,12 @@ from cocotb.triggers import RisingEdge, Timer
 
 @cocotb.test()
 async def adds_increment_every_clock(dut):
-    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
-
+    # Drive reset before the clock starts: writes take effect at the end of the
+    # time step, so the first edge would otherwise see reset still undriven.
     dut.rst.value = 1
     dut.inc.value = 0
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
+    await RisingEdge(dut.clk)
     await RisingEdge(dut.clk)
     dut.rst.value = 0
     dut.inc.value = 3
