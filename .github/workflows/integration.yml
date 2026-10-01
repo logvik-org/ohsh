@@ -17,6 +17,11 @@ concurrency:
 jobs:
   examples:
     runs-on: ubuntu-24.04
+    defaults:
+      run:
+        # An explicit bash shell runs with pipefail, so a failing example is not
+        # hidden by the `| tee` used to check its output for deprecations.
+        shell: bash
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
 
