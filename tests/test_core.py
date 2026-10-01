@@ -70,21 +70,23 @@ def test_run_output_path_is_a_file(tmp_path, make_module):
 
 
 def test_run_classifies_extensions(tmp_path, make_module):
-    make_module(
-        "top",
-        ["a.v", "b.sv", "c.svp", "d.vhd", "e.vhdl", "f.vo"],
-        dependencies={},
-    )
+    verilog = ["a.v", "b.sv", "c.svp", "d.vh", "e.svh", "F.V"]
+    vhdl = ["g.vhd", "h.vhdl", "i.vo", "J.VHD"]
+    make_module("top", verilog + vhdl, dependencies={})
     out = tmp_path / "out"
-    out.mkdir()
     assert _run(tmp_path, "top", out) == 0
+    written_verilog = (out / "work_verilog.src").read_text().splitlines()
+    written_vhdl = (out / "work_vhdl.src").read_text().splitlines()
+    assert [pathlib.Path(p).name for p in written_verilog] == verilog
+    assert [pathlib.Path(p).name for p in written_vhdl] == vhdl
 
-    verilog = (out / "work_verilog.src").read_text()
-    vhdl = (out / "work_vhdl.src").read_text()
-    for name in ("a.v", "b.sv", "c.svp"):
-        assert name in verilog
-    for name in ("d.vhd", "e.vhdl", "f.vo"):
-        assert name in vhdl
+
+def test_run_warns_and_skips_unknown_extension(tmp_path, make_module, caplog):
+    make_module("top", ["top.vhd", "notes.txt"], dependencies={})
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out) == 0
+    assert "notes.txt" not in (out / "work_vhdl.src").read_text()
+    assert "notes.txt in module top: unknown file extension" in caplog.text
 
 
 def test_run_no_debug_log_side_effect(tmp_path, make_module, monkeypatch):

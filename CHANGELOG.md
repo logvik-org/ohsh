@@ -40,6 +40,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Manifests are checked when read: a manifest with the wrong structure (for
   example `"sources"` given as a string) stops ohsh with exit code 65 and names
   the file and the problem, instead of producing empty source lists.
+- Source file extensions are matched regardless of case, and `.vh` / `.svh`
+  files are now included in the Verilog lists. Files with other extensions are
+  skipped with a warning instead of silently.
 
 ### Fixed
 - A relative `-t/--top-dir` is now resolved against the working directory

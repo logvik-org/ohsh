@@ -22,8 +22,8 @@ from .utils import (
     validate_top_dir,
 )
 
-valid_verilog_endings = [".v", ".sv", ".svp"]
-valid_vhdl_endings = [".vhd", ".vhdl", ".vo"]
+VERILOG_EXTENSIONS = {".v", ".sv", ".svp", ".vh", ".svh"}
+VHDL_EXTENSIONS = {".vhd", ".vhdl", ".vo"}
 
 LIBRARY_ORDER_FILE_NAME = "libraries.src"
 
@@ -117,10 +117,13 @@ def run(args, cwd):
         manifest_path = pathlib.Path(manifest["manifest_path"]).parent
         sources = [str(manifest_path / source) for source in manifest.get("sources", [])]
         for source in sources:
-            if any(source.endswith(ext) for ext in valid_verilog_endings):
+            extension = pathlib.Path(source).suffix.lower()
+            if extension in VERILOG_EXTENSIONS:
                 verilog_sources.append(source)
-            elif any(source.endswith(ext) for ext in valid_vhdl_endings):
+            elif extension in VHDL_EXTENSIONS:
                 vhdl_sources.append(source)
+            else:
+                logger.warning(f"Skipping {source} in module {module}: unknown file extension")
 
         # If the library already exists in the source_files_by_lib dictionary, append the source files
         if lib_name in source_files_by_lib:

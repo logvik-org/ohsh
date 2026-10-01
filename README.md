@@ -132,6 +132,9 @@ Each module gets a `manifest.json` next to its sources:
 
 - `module` (required) - the module's name.
 - `sources` (optional) - list of HDL source files, relative to the manifest.
+  Files ending in `.v`, `.sv`, `.svp`, `.vh` or `.svh` go to the Verilog list,
+  and `.vhd`, `.vhdl` or `.vo` to the VHDL list, regardless of case. Other files
+  are skipped with a warning.
 - `dependencies` (optional) - modules this one needs, as lists grouped by
   library. The special library `work` is remapped to whatever `--work` (or the
   resolving library) is.
