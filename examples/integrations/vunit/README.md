@@ -29,5 +29,5 @@ Notes:
 - [`tb_accumulator_vunit.vhd`](tb_accumulator_vunit.vhd) is a standard VUnit
   testbench (`runner_cfg` generic, `check_equal`).
 
-Requires `pip install vunit-hdl` and a simulator (GHDL in CI). Docs:
+Requires VUnit (`pip install -e ".[examples]"`) and a simulator (GHDL in CI). Docs:
 <https://vunit.github.io/py/ui.html>.

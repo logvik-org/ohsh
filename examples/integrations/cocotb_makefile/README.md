@@ -22,7 +22,7 @@ make SIM=questa # or any other supported simulator
 
 [`test_counter.py`](test_counter.py) is a small self-checking cocotb test.
 
-Requires `cocotb` (`pip install cocotb`) and a simulator - CI uses Icarus
+Requires cocotb (`pip install -e ".[examples]"`) and a simulator - CI uses Icarus
 Verilog (`apt-get install iverilog`). Variable names target **cocotb 2.x**
 (`COCOTB_TOPLEVEL`, `COCOTB_TEST_MODULES`). Docs:
 <https://docs.cocotb.org/en/stable/building.html>.

@@ -45,6 +45,12 @@ dev = [
     "twine>=5.0",
     "pre-commit>=3.0",
 ]
+# Python frameworks used by the integration examples, pinned to the versions CI
+# runs them with.
+examples = [
+    "cocotb==2.1.0",
+    "vunit-hdl==4.7.1",
+]
 
 [project.scripts]
 ohsh = "ohsh.cli:main"

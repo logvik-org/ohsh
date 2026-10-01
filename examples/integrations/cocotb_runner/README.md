@@ -26,4 +26,7 @@ Notes:
 - A `timescale` is set because Icarus otherwise can't represent a 10 ns clock.
 - `get_results()` is used to fail the script if any test fails.
 
+Requires cocotb (`pip install -e ".[examples]"`) and Icarus Verilog
+(`apt-get install iverilog`).
+
 Docs: <https://docs.cocotb.org/en/stable/runner.html>.

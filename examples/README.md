@@ -21,6 +21,21 @@ then hand those lists to the tool.
 | [vivado](integrations/vivado/) | AMD Vivado | ⚠️ doc (licensed) |
 | [quartus](integrations/quartus/) | Intel Quartus | ⚠️ doc (licensed) |
 
+## Running the examples
+
+The Python frameworks (cocotb, VUnit) come with the `examples` extra, pinned to
+the versions CI uses:
+
+```bash
+source scripts/setup-dev.sh        # from the repo root: installs dev + examples
+# or, in an environment you manage yourself:
+pip install -e ".[examples]"
+```
+
+The simulators are system tools: Icarus Verilog for the cocotb examples, GHDL
+for the GHDL, VUnit and UVVM examples, and NVC for the NVC example. Each
+example's README says which one it needs.
+
 **✅ run in CI** means the example is executed end-to-end on every push by
 [`.github/workflows/integration.yml`](../.github/workflows/integration.yml),
 with a self-checking testbench that fails the build if the source list is wrong.

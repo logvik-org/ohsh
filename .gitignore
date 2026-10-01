@@ -22,6 +22,10 @@ env/
 htmlcov/
 coverage.xml
 
+# cocotb example output
+results.xml
+sim_build/
+
 # ohsh runtime output
 debug.log
 *.src
