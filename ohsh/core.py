@@ -10,14 +10,15 @@ from .utils import (
     EXIT_MANIFEST_NOT_FOUND,
     EXIT_MODULE_NOT_FOUND,
     EXIT_NO_INPUT,
-    EXIT_UNEXPECTED_ERROR,
     CircularDependencyError,
+    InvalidManifestError,
     MissingManifestError,
     discover_manifests,
     extract_dependencies,
     find_manifest,
     order_libraries,
     to_absolute_path,
+    validate_manifest,
     validate_top_dir,
 )
 
@@ -54,18 +55,19 @@ def run(args, cwd):
         try:
             with open(manifest_file, encoding="utf-8") as file:
                 data = json.load(file)
-                data["manifest_path"] = str(manifest_file.resolve())
-                manifest_data.append(data)
-                logger.debug(f"Parsed manifest file: {manifest_file}")
-        except json.JSONDecodeError as e:
+            validate_manifest(data)
+        except (json.JSONDecodeError, UnicodeDecodeError) as e:
             logger.error(f"Error parsing JSON from {manifest_file}: {e}")
+            exit(EXIT_DATA_ERROR)
+        except InvalidManifestError as e:
+            logger.error(f"Invalid manifest {manifest_file}: {e}")
             exit(EXIT_DATA_ERROR)
         except OSError as e:
             logger.error(f"File error reading {manifest_file}: {e}")
             exit(EXIT_NO_INPUT)
-        except Exception as e:
-            logger.error(f"Unexpected error reading {manifest_file}: {e}")
-            exit(EXIT_UNEXPECTED_ERROR)
+        data["manifest_path"] = str(manifest_file.resolve())
+        manifest_data.append(data)
+        logger.debug(f"Parsed manifest file: {manifest_file}")
 
     # Check if the specified module is found within the list of manifests
     module_found = False

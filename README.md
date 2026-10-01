@@ -79,7 +79,7 @@ ohsh follows the Unix conventions where one exists (`1`, `2`, and the BSD
 | 0    | Success.                                                       |
 | 1    | Unexpected error.                                              |
 | 2    | Invalid command-line arguments.                                |
-| 65   | A manifest is not valid JSON.                                  |
+| 65   | A manifest is not valid JSON or has the wrong structure.       |
 | 66   | Top directory, manifest or source file missing or unreadable.  |
 | 73   | Output directory cannot be created.                            |
 | 100  | Top module not found in any manifest.                          |
@@ -130,10 +130,15 @@ Each module gets a `manifest.json` next to its sources:
 }
 ```
 
-- `module` - the module's name.
-- `sources` - HDL source files, relative to the manifest.
-- `dependencies` - modules this one needs, grouped by library. The special
-  library `work` is remapped to whatever `--work` (or the resolving library) is.
+- `module` (required) - the module's name.
+- `sources` (optional) - list of HDL source files, relative to the manifest.
+- `dependencies` (optional) - modules this one needs, as lists grouped by
+  library. The special library `work` is remapped to whatever `--work` (or the
+  resolving library) is.
+
+ohsh reads every `manifest*.json` file under `--top-dir` and stops with exit
+code 65 if one is not valid JSON or does not have this structure. Unknown keys
+are ignored.
 
 ## Integrations
 

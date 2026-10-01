@@ -26,7 +26,7 @@ EXIT_CODE_DESCRIPTIONS = {
     EXIT_SUCCESS: "success",
     EXIT_UNEXPECTED_ERROR: "unexpected error",
     EXIT_USAGE: "invalid command-line arguments",
-    EXIT_DATA_ERROR: "a manifest is not valid JSON",
+    EXIT_DATA_ERROR: "a manifest is not valid JSON or has the wrong structure",
     EXIT_NO_INPUT: "top directory, manifest or source file missing or unreadable",
     EXIT_CANNOT_CREATE_OUTPUT: "output directory cannot be created",
     EXIT_MODULE_NOT_FOUND: "top module not found in any manifest",
@@ -46,6 +46,32 @@ class MissingManifestError(Exception):
         self.module = module
         self.required_by = required_by
         super().__init__(f"no manifest found for module {module} (required by {required_by})")
+
+
+class InvalidManifestError(Exception):
+    pass
+
+
+def _is_list_of_strings(value):
+    return isinstance(value, list) and all(isinstance(item, str) for item in value)
+
+
+def validate_manifest(manifest):
+    """Raise ``InvalidManifestError`` naming the first structural problem in ``manifest``.
+
+    ``sources`` and ``dependencies`` are optional. Unknown keys are ignored.
+    """
+    if not isinstance(manifest, dict):
+        raise InvalidManifestError("the top level must be a JSON object")
+    if not isinstance(manifest.get("module"), str) or not manifest["module"]:
+        raise InvalidManifestError('"module" must be a non-empty string')
+    if not _is_list_of_strings(manifest.get("sources", [])):
+        raise InvalidManifestError('"sources" must be a list of file names')
+    dependencies = manifest.get("dependencies", {})
+    if not isinstance(dependencies, dict) or not all(
+        _is_list_of_strings(modules) for modules in dependencies.values()
+    ):
+        raise InvalidManifestError('"dependencies" must map library names to lists of module names')
 
 
 def find_manifest(manifest_data, module):

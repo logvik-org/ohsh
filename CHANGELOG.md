@@ -37,6 +37,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `--log-file`. Only the `ohsh` command configures logging, so calling `run()`
   from Python leaves the application's logging alone.
 - A missing dependency now names the module that requires it.
+- Manifests are checked when read: a manifest with the wrong structure (for
+  example `"sources"` given as a string) stops ohsh with exit code 65 and names
+  the file and the problem, instead of producing empty source lists.
 
 ### Fixed
 - A relative `-t/--top-dir` is now resolved against the working directory

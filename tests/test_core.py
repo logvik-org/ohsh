@@ -133,6 +133,24 @@ def test_run_bad_json(tmp_path):
     assert _run(tmp_path, "top", out) == EXIT_DATA_ERROR
 
 
+def test_run_invalid_manifest_structure(tmp_path, caplog):
+    (tmp_path / "manifest.json").write_text('{"module": "top", "sources": "top.vhd"}')
+    assert _run(tmp_path, "top", tmp_path / "out") == EXIT_DATA_ERROR
+    assert f"Invalid manifest {tmp_path / 'manifest.json'}" in caplog.text
+    assert '"sources" must be a list' in caplog.text
+
+
+def test_run_manifest_not_utf8(tmp_path):
+    (tmp_path / "manifest.json").write_bytes(b'{"module": "\xff"}')
+    assert _run(tmp_path, "top", tmp_path / "out") == EXIT_DATA_ERROR
+
+
+def test_run_unreadable_manifest(tmp_path):
+    # A directory matching the manifest pattern cannot be opened as a file.
+    (tmp_path / "manifest.json").mkdir()
+    assert _run(tmp_path, "top", tmp_path / "out") == EXIT_NO_INPUT
+
+
 def test_run_missing_source_file(tmp_path):
     # Manifest references a source that does not exist on disk.
     mod = tmp_path / "top"

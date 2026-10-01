@@ -8,12 +8,14 @@ import pytest
 from ohsh.utils import (
     CONSOLE_HANDLER_NAME,
     CircularDependencyError,
+    InvalidManifestError,
     MissingManifestError,
     configure_logging,
     discover_manifests,
     extract_dependencies,
     order_libraries,
     to_absolute_path,
+    validate_manifest,
     validate_top_dir,
 )
 
@@ -149,6 +151,27 @@ def test_order_libraries_warns_on_library_loop(caplog):
     assert sorted(order) == ["libA", "libB", "work"]
     assert order[-1] == "work"
     assert "libB -> libA -> libB" in caplog.text
+
+
+def test_validate_manifest_accepts_minimal_manifest():
+    validate_manifest({"module": "top"})
+
+
+@pytest.mark.parametrize(
+    ("manifest", "problem"),
+    [
+        ([{"module": "top"}], "JSON object"),
+        ({"sources": ["a.v"]}, '"module"'),
+        ({"module": ""}, '"module"'),
+        ({"module": "top", "sources": "a.v"}, '"sources"'),
+        ({"module": "top", "sources": ["a.v", 3]}, '"sources"'),
+        ({"module": "top", "dependencies": ["a"]}, '"dependencies"'),
+        ({"module": "top", "dependencies": {"work": "a"}}, '"dependencies"'),
+    ],
+)
+def test_validate_manifest_rejects_wrong_structure(manifest, problem):
+    with pytest.raises(InvalidManifestError, match=problem):
+        validate_manifest(manifest)
 
 
 def test_validate_top_dir(tmp_path):
