@@ -22,6 +22,10 @@ ohsh my_top_module
 
 ## Why ohsh
 
+**One description for every tool.** The same manifests feed your cocotb
+testbenches, your VUnit runs and your Vivado or Quartus build. A new dependency
+is added once, in one manifest, instead of in every tool's file list.
+
 **Compile only what a testbench needs.** Give each testbench its own manifest
 and ohsh lists just the files under it, not the whole project. In one FPGA
 project with about 1100 HDL files, a unit testbench compiles 35 of them and the
@@ -31,10 +35,6 @@ full design 165.
 submodules don't need to know about ohsh. A manifest next to the submodule lists
 the files you use, in their own library, and every module that needs them
 names that library.
-
-**One description for every tool.** The same manifests feed your cocotb
-testbenches, your VUnit runs and your Vivado or Quartus build. A new dependency
-is added once, in one manifest, instead of in every tool's file list.
 
 ohsh does not run simulators, manage tool projects or parse your HDL. It hands
 those tools the file lists and leaves the rest to them.
@@ -48,6 +48,12 @@ those tools the file lists and leaves the rest to them.
 - [Integrations](integrations.md): runnable examples for simulators and build
   tools.
 - [Exit codes](exit-codes.md): what each exit code means.
+
+```{toctree}
+:hidden:
+
+Home <self>
+```
 
 ```{toctree}
 :hidden:
