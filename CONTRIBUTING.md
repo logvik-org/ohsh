@@ -35,19 +35,21 @@ pre-commit install
 ## Before you open a pull request
 
 1. Add or update tests for your change (`tests/`). New behavior should be
-   covered; bug fixes should come with a regression test.
+   covered, and bug fixes should come with a regression test.
 2. Make sure `make test` and `make lint` pass.
 3. Update `CHANGELOG.md` under the `Unreleased` section.
 4. Keep commits focused and write clear commit messages.
 
-CI runs ruff, the test matrix (Python 3.9-3.14, plus an experimental 3.15
-pre-release leg), a package build, and the
-end-to-end integration examples. PRs need a green pipeline to merge.
+CI runs the pre-commit checks, the test matrix (Python 3.9-3.14, plus an
+experimental 3.15 pre-release leg), a package build, and the end-to-end
+integration examples. PRs need a green pipeline to merge.
 
 ## Coding style
 
-- Code is formatted and linted with [ruff](https://docs.astral.sh/ruff/). The
-  config lives in `pyproject.toml`, and `pre-commit` applies it automatically.
+- All lint checks run through [pre-commit](https://pre-commit.com), which also
+  pins their versions in `.pre-commit-config.yaml`: Python code is formatted and
+  linted with [ruff](https://docs.astral.sh/ruff/) (config in `pyproject.toml`),
+  shell scripts are checked with shellcheck, and workflows with actionlint.
 - Keep ohsh dependency-free at runtime (standard library only).
 - Add a `# SPDX-License-Identifier: Apache-2.0` header to new modules in `ohsh/`.
 

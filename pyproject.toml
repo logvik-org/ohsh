@@ -40,7 +40,6 @@ Changelog = "https://github.com/logvik-org/oshsh/blob/main/CHANGELOG.md"
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
-    "ruff==0.16.9",
     "build>=1.0",
     "twine>=5.0",
     "pre-commit>=3.0",
