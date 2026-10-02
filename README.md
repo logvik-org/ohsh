@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/logvik-org/ohsh/main/docs/images/logo-dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/logvik-org/ohsh/main/docs/images/logo-light.png">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/logo-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="docs/images/logo-light.png">
     <img alt="ohsh: a humble HDL source handler" src="https://raw.githubusercontent.com/logvik-org/ohsh/main/docs/images/logo-light.png" width="600">
   </picture>
 </p>
