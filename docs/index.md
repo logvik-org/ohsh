@@ -1,22 +1,50 @@
 # ohsh
 
-**ohsh** is a small command-line tool that works out which HDL source files your
-design needs, and in which order to compile them. You describe each module in a
-short `manifest.json` next to its sources. ohsh follows the dependencies from
-your top module and writes plain `.src` lists, one per library and language,
-plus the order to compile the libraries in. Those lists drop into any simulator
-or build flow.
+<p align="center">
+  <img class="only-light" alt="ohsh: a humble HDL source handler" src="_static/logo-light.png" width="600">
+  <img class="only-dark" alt="ohsh: a humble HDL source handler" src="_static/logo-dark.png" width="600">
+</p>
+
+**ohsh** is a small, deliberately humble command-line tool that figures out, in
+the right order, which HDL (SystemVerilog and VHDL) source files your
+design needs - by reading simple per-module `manifest.json` files and resolving
+their dependencies.
+
+It is a *companion* to the big build flows (like [hog](https://hog.readthedocs.io),
+Vivado, Quartus, Questa, cocotb, VUnit, …), not a replacement for them. ohsh
+just answers one question well - *"what files, in what order, for which
+libraries?"* - and hands you plain `.src` lists you can feed anywhere.
 
 ```bash
 pip install ohsh
 ohsh my_top_module
 ```
 
-- [Getting started](getting-started.md): install ohsh, write manifests and
-  compile the result.
-- [Why ohsh](why-ohsh.md): the problem ohsh solves and where it fits next to
-  the tools you already use.
-- [Manifest file format](manifest-format.md): every field of a manifest.
+## Why ohsh
+
+**Compile only what a testbench needs.** Give each testbench its own manifest
+and ohsh lists just the files under it, not the whole project. In one FPGA
+project with about 1100 HDL files, a unit testbench compiles 35 of them and the
+full design 165.
+
+**Third-party code stays untouched.** Vendor IP and libraries pulled in as git
+submodules don't need to know about ohsh. A manifest next to the submodule lists
+the files you use, in their own library, and every module that needs them
+names that library.
+
+**One description for every tool.** The same manifests feed your cocotb
+testbenches, your VUnit runs and your Vivado or Quartus build. A new dependency
+is added once, in one manifest, instead of in every tool's file list.
+
+ohsh does not run simulators, manage tool projects or parse your HDL. It hands
+those tools the file lists and leaves the rest to them.
+
+## Documentation
+
+- [Getting started](getting-started.md): install ohsh, write manifests, add
+  third-party libraries and compile the result.
+- [Manifest file format](manifest-format.md): every field of a manifest, and
+  what order things go in.
 - [Integrations](integrations.md): runnable examples for simulators and build
   tools.
 - [Exit codes](exit-codes.md): what each exit code means.
@@ -26,7 +54,6 @@ ohsh my_top_module
 :caption: User guide
 
 getting-started
-why-ohsh
 manifest-format
 integrations
 exit-codes
