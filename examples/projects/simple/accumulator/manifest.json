@@ -1,0 +1,11 @@
+{
+  "module": "accumulator",
+  "sources": [
+    "accumulator.vhd"
+  ],
+  "dependencies": {
+    "work": [
+      "adder"
+    ]
+  }
+}

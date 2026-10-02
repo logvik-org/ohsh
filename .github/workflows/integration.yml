@@ -1,0 +1,44 @@
+name: Integrations
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+# Tool versions are pinned so CI only changes when we bump them on purpose.
+jobs:
+  examples:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: "3.12"
+
+      - name: Install ohsh + Python sim frameworks
+        run: pip install ".[examples]"
+
+      - name: Install Icarus Verilog and tcllib
+        run: sudo apt-get update && sudo apt-get install -y iverilog tcllib
+
+      - name: Install GHDL
+        uses: ghdl/setup-ghdl@75eff367dadc0cd06454a118db0b458d44fdc3c3  # v1.5.1
+        with:
+          version: 6.0.0
+
+      - name: Install NVC
+        uses: nickg/setup-nvc@48f966dfc9b27bf13e873a473fcf1649ef8f5a0f  # v1
+        with:
+          version: 1.23.0
+
+      - name: Run the examples
+        run: scripts/run-examples.sh

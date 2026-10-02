@@ -1,0 +1,11 @@
+{
+  "module": "adder",
+  "sources": [
+    "adder.vhd"
+  ],
+  "dependencies": {
+    "util_lib": [
+      "util_pkg"
+    ]
+  }
+}

@@ -1,0 +1,167 @@
+"""End-to-end tests for ohsh.core.run via the CLI parser."""
+
+import pathlib
+
+from ohsh.cli import build_parser
+from ohsh.core import run
+from ohsh.utils import (
+    EXIT_CANNOT_CREATE_OUTPUT,
+    EXIT_CIRCULAR_DEPENDENCY,
+    EXIT_DATA_ERROR,
+    EXIT_DUPLICATE_MODULE,
+    EXIT_MANIFEST_NOT_FOUND,
+    EXIT_MODULE_NOT_FOUND,
+    EXIT_NO_INPUT,
+)
+
+
+def _run(top_dir, module, output, *, work="work", extra=None):
+    """Invoke run() the way the CLI does and return the SystemExit code (or 0)."""
+    argv = ["-t", str(top_dir), "-o", str(output), "-w", work, *(extra or []), module]
+    args = build_parser(pathlib.Path.cwd()).parse_args(argv)
+    try:
+        run(args, pathlib.Path.cwd())
+    except SystemExit as exc:
+        return exc.code or 0
+    return 0
+
+
+def test_run_writes_ordered_src_files(tmp_path, make_module):
+    make_module("adder", ["adder.vhd"], dependencies={})
+    make_module("top", ["top.v", "top_pkg.vhd"], dependencies={"math_lib": ["adder"]})
+    out = tmp_path / "out"
+
+    code = _run(tmp_path, "top", out)
+    assert code == 0
+
+    work_v = (out / "work_verilog.src").read_text().splitlines()
+    work_vhd = (out / "work_vhdl.src").read_text().splitlines()
+    math_vhd = (out / "math_lib_vhdl.src").read_text().splitlines()
+
+    assert work_v == [str(tmp_path / "top" / "top.v")]
+    assert work_vhd == [str(tmp_path / "top" / "top_pkg.vhd")]
+    assert math_vhd == [str(tmp_path / "adder" / "adder.vhd")]
+    # A dependency-only library with no Verilog gets no Verilog .src file.
+    assert not (out / "math_lib_verilog.src").exists()
+
+
+def test_run_puts_dependency_before_dependent_in_same_library(tmp_path, make_module):
+    make_module("counter", ["counter.vhd"], dependencies={})
+    make_module("top", ["top.vhd"], dependencies={"work": ["counter"]})
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out) == 0
+    assert (out / "work_vhdl.src").read_text().splitlines() == [
+        str(tmp_path / "counter" / "counter.vhd"),
+        str(tmp_path / "top" / "top.vhd"),
+    ]
+
+
+def test_run_writes_library_order(tmp_path, make_module):
+    make_module("adder", ["adder.vhd"], dependencies={})
+    make_module("top", ["top.vhd"], dependencies={"math_lib": ["adder"]})
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out) == 0
+    assert (out / "libraries.src").read_text().splitlines() == ["math_lib", "work"]
+
+
+def test_run_creates_missing_output_dir(tmp_path, make_module):
+    make_module("top", ["top.vhd"], dependencies={})
+    out = tmp_path / "build" / "lists"
+    assert _run(tmp_path, "top", out) == 0
+    assert (out / "work_vhdl.src").exists()
+
+
+def test_run_output_path_is_a_file(tmp_path, make_module):
+    make_module("top", ["top.vhd"], dependencies={})
+    out = tmp_path / "not_a_dir"
+    out.write_text("")
+    assert _run(tmp_path, "top", out) == EXIT_CANNOT_CREATE_OUTPUT
+
+
+def test_run_classifies_extensions(tmp_path, make_module):
+    verilog = ["a.v", "b.sv", "c.svp", "d.vh", "e.svh", "F.V"]
+    vhdl = ["g.vhd", "h.vhdl", "i.vo", "J.VHD"]
+    make_module("top", verilog + vhdl, dependencies={})
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out) == 0
+    written_verilog = (out / "work_verilog.src").read_text().splitlines()
+    written_vhdl = (out / "work_vhdl.src").read_text().splitlines()
+    assert [pathlib.Path(p).name for p in written_verilog] == verilog
+    assert [pathlib.Path(p).name for p in written_vhdl] == vhdl
+
+
+def test_run_warns_and_skips_unknown_extension(tmp_path, make_module, caplog):
+    make_module("top", ["top.vhd", "notes.txt"], dependencies={})
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out) == 0
+    assert "notes.txt" not in (out / "work_vhdl.src").read_text()
+    assert "notes.txt in module top: unknown file extension" in caplog.text
+
+
+def test_run_invalid_top_dir(tmp_path):
+    out = tmp_path / "out"
+    assert _run(tmp_path / "does_not_exist", "top", out) == EXIT_NO_INPUT
+
+
+def test_run_module_not_found(tmp_path, make_module):
+    make_module("top", ["top.v"], dependencies={})
+    out = tmp_path / "out"
+    assert _run(tmp_path, "nonexistent", out) == EXIT_MODULE_NOT_FOUND
+
+
+def test_run_circular_dependency(tmp_path, make_module):
+    make_module("a", ["a.vhd"], dependencies={"work": ["b"]})
+    make_module("b", ["b.vhd"], dependencies={"work": ["a"]})
+    out = tmp_path / "out"
+    assert _run(tmp_path, "a", out) == EXIT_CIRCULAR_DEPENDENCY
+    assert not out.exists()
+
+
+def test_run_missing_dependency_manifest(tmp_path, make_module, caplog):
+    make_module("top", ["top.v"], dependencies={"work": ["ghost"]})
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out) == EXIT_MANIFEST_NOT_FOUND
+    assert "ghost (required by top)" in caplog.text
+
+
+def test_run_duplicate_module_name_lists_both_manifests(tmp_path, make_module, caplog):
+    make_module("top", ["top.vhd"], dependencies={"work": ["adder"]})
+    make_module("adder", ["adder.vhd"])
+    copy = tmp_path / "vendor" / "adder"
+    copy.mkdir(parents=True)
+    (copy / "manifest.json").write_text('{"module": "adder", "sources": []}')
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out) == EXIT_DUPLICATE_MODULE
+    assert str(tmp_path / "adder" / "manifest.json") in caplog.text
+    assert str(copy / "manifest.json") in caplog.text
+    assert not out.exists()
+
+
+def test_run_bad_json(tmp_path):
+    (tmp_path / "manifest.json").write_text("{ not valid json ")
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out) == EXIT_DATA_ERROR
+
+
+def test_run_invalid_manifest_structure(tmp_path, caplog):
+    (tmp_path / "manifest.json").write_text('{"module": "top", "sources": "top.vhd"}')
+    assert _run(tmp_path, "top", tmp_path / "out") == EXIT_DATA_ERROR
+    assert f"Invalid manifest {tmp_path / 'manifest.json'}" in caplog.text
+    assert '"sources" must be a list' in caplog.text
+
+
+def test_run_manifest_not_utf8(tmp_path):
+    (tmp_path / "manifest.json").write_bytes(b'{"module": "\xff"}')
+    assert _run(tmp_path, "top", tmp_path / "out") == EXIT_DATA_ERROR
+
+
+def test_run_unreadable_manifest(tmp_path):
+    # A directory matching the manifest pattern cannot be opened as a file.
+    (tmp_path / "manifest.json").mkdir()
+    assert _run(tmp_path, "top", tmp_path / "out") == EXIT_NO_INPUT
+
+
+def test_run_missing_source_file(tmp_path, make_module):
+    make_module("top", ["ghost.v"], dependencies={}, create_sources=False)
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out) == EXIT_NO_INPUT

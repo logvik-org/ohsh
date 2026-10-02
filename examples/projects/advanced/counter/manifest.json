@@ -1,0 +1,7 @@
+{
+  "module": "counter",
+  "sources": [
+    "counter_defs.vh",
+    "counter.v"
+  ]
+}
