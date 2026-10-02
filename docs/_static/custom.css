@@ -14,3 +14,46 @@ section#ohsh > h1 {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+.mascot {
+  float: right;
+  width: 180px;
+  margin: 0 0 1rem 1.5rem;
+}
+
+.mascot-end {
+  display: block;
+  width: 200px;
+  margin: 2rem auto 0;
+}
+
+.mascot-strip {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 1rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.mascot-strip figure {
+  margin: 0;
+  text-align: center;
+  font-size: var(--font-size--small);
+  color: var(--color-foreground-secondary);
+}
+
+.mascot-strip img {
+  width: 160px;
+}
+
+@media (max-width: 46em) {
+  .mascot {
+    float: none;
+    display: block;
+    margin: 0 auto 1rem;
+  }
+
+  .mascot-strip img {
+    width: 30vw;
+  }
+}
