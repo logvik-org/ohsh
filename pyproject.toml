@@ -31,10 +31,10 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/logvik-org/oshsh"
-Repository = "https://github.com/logvik-org/oshsh"
-Issues = "https://github.com/logvik-org/oshsh/issues"
-Changelog = "https://github.com/logvik-org/oshsh/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/logvik-org/ohsh"
+Repository = "https://github.com/logvik-org/ohsh"
+Issues = "https://github.com/logvik-org/ohsh/issues"
+Changelog = "https://github.com/logvik-org/ohsh/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [

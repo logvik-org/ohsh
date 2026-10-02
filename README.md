@@ -1,10 +1,10 @@
 # ohsh - Ola's HDL Source Handler
 
-[![CI](https://github.com/logvik-org/oshsh/actions/workflows/ci.yml/badge.svg)](https://github.com/logvik-org/oshsh/actions/workflows/ci.yml)
-[![Integrations](https://github.com/logvik-org/oshsh/actions/workflows/integration.yml/badge.svg)](https://github.com/logvik-org/oshsh/actions/workflows/integration.yml)
+[![CI](https://github.com/logvik-org/ohsh/actions/workflows/ci.yml/badge.svg)](https://github.com/logvik-org/ohsh/actions/workflows/ci.yml)
+[![Integrations](https://github.com/logvik-org/ohsh/actions/workflows/integration.yml/badge.svg)](https://github.com/logvik-org/ohsh/actions/workflows/integration.yml)
 [![PyPI](https://img.shields.io/pypi/v/ohsh.svg)](https://pypi.org/project/ohsh/)
 [![Python](https://img.shields.io/pypi/pyversions/ohsh.svg)](https://pypi.org/project/ohsh/)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/logvik-org/oshsh/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/logvik-org/ohsh/blob/main/LICENSE)
 
 **ohsh** is a small, deliberately humble command-line tool that figures out, in
 the right order, which HDL (Verilog / SystemVerilog / VHDL) source files your
@@ -39,8 +39,8 @@ pip install ohsh
 Or from a clone:
 
 ```bash
-git clone https://github.com/logvik-org/oshsh.git
-cd oshsh
+git clone https://github.com/logvik-org/ohsh.git
+cd ohsh
 pip install .
 ```
 
@@ -97,15 +97,15 @@ projects) but may fail with tools that compile one library at a time.
 
 ## Documentation
 
-- [Manifest file format](https://github.com/logvik-org/oshsh/blob/main/docs/manifest-format.md)
-- [Exit codes](https://github.com/logvik-org/oshsh/blob/main/docs/exit-codes.md)
-- [Integrations with simulators and build tools](https://github.com/logvik-org/oshsh/blob/main/docs/integrations.md)
-- [Contributing and development](https://github.com/logvik-org/oshsh/blob/main/CONTRIBUTING.md)
+- [Manifest file format](https://github.com/logvik-org/ohsh/blob/main/docs/manifest-format.md)
+- [Exit codes](https://github.com/logvik-org/ohsh/blob/main/docs/exit-codes.md)
+- [Integrations with simulators and build tools](https://github.com/logvik-org/ohsh/blob/main/docs/integrations.md)
+- [Contributing and development](https://github.com/logvik-org/ohsh/blob/main/CONTRIBUTING.md)
 
 ## License
 
-Licensed under the **Apache License 2.0**. See [LICENSE](https://github.com/logvik-org/oshsh/blob/main/LICENSE) and
-[NOTICE](https://github.com/logvik-org/oshsh/blob/main/NOTICE).
+Licensed under the **Apache License 2.0**. See [LICENSE](https://github.com/logvik-org/ohsh/blob/main/LICENSE) and
+[NOTICE](https://github.com/logvik-org/ohsh/blob/main/NOTICE).
 
 ## Author
 

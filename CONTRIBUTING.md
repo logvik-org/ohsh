@@ -6,8 +6,8 @@ process is light.
 ## Development setup
 
 ```bash
-git clone https://github.com/logvik-org/oshsh.git
-cd oshsh
+git clone https://github.com/logvik-org/ohsh.git
+cd ohsh
 source scripts/setup-dev.sh
 ```
 
