@@ -8,62 +8,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.1.0] - 2026-10-02
 
+First release.
+
 ### Added
-- `manifest.json`-driven discovery of HDL modules under a project tree.
-- Recursive dependency resolution producing ordered, per-library
-  source lists (`<lib>_verilog.src` / `<lib>_vhdl.src`).
-- `libraries.src`: the order to compile the libraries in, with a warning when
-  libraries depend on each other in a loop.
-- CLI: `-t/--top-dir`, `-w/--work`, `-o/--output`, `-v/--verbose` (repeat as
-  `-vv` for debug output), `--log-file`, `--version`. Also runs as `python -m ohsh`. By default only warnings
-  and errors are printed.
-- Exit codes that follow Unix conventions (`1`, `2`, `sysexits.h`), with
-  ohsh-specific errors from 100. Listed in `--help` and `docs/exit-codes.md`.
-- Integration examples for cocotb (Makefile and Python runner), VUnit, GHDL,
-  NVC, UVVM, hog, Questa/ModelSim, Vivado and Quartus. Each tool has a simple
-  example (one library) and an advanced one (three libraries compiled in the
-  order of `libraries.src`). All but the licensed tools run in CI, and the hog
-  examples are checked with hog's own list-file reader.
-- pytest test suite, pre-commit checks (ruff, shellcheck, actionlint), a dev
-  setup script that can be run or sourced, and a Makefile that keeps `.venv` in
-  sync with `pyproject.toml` and runs the integration examples (`make examples`).
-- `examples` extra with the pinned Python frameworks the integration examples use.
-- `docs/` with the manifest format, exit codes and integrations pages, kept
-  out of the README so it stays short.
-- CI (lint + Python 3.9-3.14 matrix, with an experimental 3.15 pre-release leg,
-  + build and a smoke test of the built wheel) and integration CI with pinned
-  tool versions.
-- Release workflow using Trusted Publishing: publishing a GitHub Release runs
-  the tests, checks the tag against the package version, uploads to TestPyPI,
-  installs and smoke-tests that package, and only then uploads to PyPI.
-- Apache 2.0 license.
-
-### Changed
-- Renamed the project from `oshsh` to **`ohsh`** (package, import path, and CLI
-  command). The `oshsh` name on PyPI is an unrelated placeholder.
-- Logging now attaches to the package logger so messages from all modules are
-  captured. Output goes to the console by default, and to a file only with
-  `--log-file`. Only the `ohsh` command configures logging, so calling `run()`
-  from Python leaves the application's logging alone.
-- A missing dependency now names the module that requires it.
-- Manifests are checked when read: a manifest with the wrong structure (for
-  example `"sources"` given as a string) stops ohsh with exit code 65 and names
-  the file and the problem, instead of producing empty source lists.
-- A module name declared in more than one manifest now stops ohsh with exit
-  code 103 and lists the manifests, instead of silently using one of them.
-- Errors exit through `sys.exit`, so they also work when Python runs without
-  the `site` module (`python -S`).
-- Source file extensions are matched regardless of case, and `.vh` / `.svh`
-  files are now included in the Verilog lists. Files with other extensions are
-  skipped with a warning instead of silently.
-
-### Fixed
-- A relative `-t/--top-dir` is now resolved against the working directory
-  (previously the resolved path was discarded).
-- Running the tool no longer writes a stray `debug.log` into the working
-  directory.
-- Circular dependencies now exit with an error (exit code 102) naming the cycle,
-  instead of recursing infinitely.
+- `ohsh` command (also `python -m ohsh`) that reads `manifest.json` files under a
+  project tree, resolves the dependencies of a top module and writes per-library
+  source lists in compile order, plus `libraries.src` with the library order.
+- Clear errors with documented exit codes for missing, malformed, duplicate and
+  circular manifests.
+- Integration examples for cocotb, VUnit, GHDL, NVC, UVVM, hog, Questa, Vivado
+  and Quartus.
 
 [Unreleased]: https://github.com/logvik-org/ohsh/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/logvik-org/ohsh/releases/tag/v0.1.0
