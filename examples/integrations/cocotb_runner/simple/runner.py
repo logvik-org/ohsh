@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cocotb Python runner, simple project: one Verilog module on Icarus Verilog.
+"""cocotb Python runner, simple project: one SystemVerilog module on Icarus Verilog.
 
 Runs ohsh, reads the source list for the `work` library and hands it to cocotb's
 ``cocotb_tools.runner`` API (cocotb >= 2.0).
@@ -43,7 +43,7 @@ def main() -> None:
         [sys.executable, "-m", "ohsh", "-t", str(PROJECT), "-o", str(BUILD), "counter"],
         check=True,
     )
-    sources = read_src(BUILD / "work_verilog.src")
+    sources = read_src(BUILD / "work_systemverilog.src")
 
     # 2. Build and 3. test via the cocotb runner.
     sim = "icarus"

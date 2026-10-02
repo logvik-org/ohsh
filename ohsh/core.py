@@ -25,7 +25,7 @@ from .utils import (
     validate_top_dir,
 )
 
-VERILOG_EXTENSIONS = {".v", ".sv", ".svp", ".vh", ".svh"}
+SYSTEMVERILOG_EXTENSIONS = {".v", ".sv", ".svp", ".vh", ".svh"}
 VHDL_EXTENSIONS = {".vhd", ".vhdl", ".vo"}
 
 LIBRARY_ORDER_FILE_NAME = "libraries.src"
@@ -114,8 +114,8 @@ def run(args, cwd):
     # Extract source file list from all modules in the final dependencies list
     source_files_by_lib = {}
     for lib_name, module in dependencies:
-        # Separate Verilog and VHDL files
-        verilog_sources = []
+        # Separate SystemVerilog and VHDL files
+        systemverilog_sources = []
         vhdl_sources = []
 
         manifest = find_manifest(manifest_data, module)
@@ -123,8 +123,8 @@ def run(args, cwd):
         sources = [str(manifest_path / source) for source in manifest.get("sources", [])]
         for source in sources:
             extension = pathlib.Path(source).suffix.lower()
-            if extension in VERILOG_EXTENSIONS:
-                verilog_sources.append(source)
+            if extension in SYSTEMVERILOG_EXTENSIONS:
+                systemverilog_sources.append(source)
             elif extension in VHDL_EXTENSIONS:
                 vhdl_sources.append(source)
             else:
@@ -132,26 +132,26 @@ def run(args, cwd):
 
         # If the library already exists in the source_files_by_lib dictionary, append the source files
         if lib_name in source_files_by_lib:
-            source_files_by_lib[lib_name]["verilog"].extend(verilog_sources)
+            source_files_by_lib[lib_name]["systemverilog"].extend(systemverilog_sources)
             source_files_by_lib[lib_name]["vhdl"].extend(vhdl_sources)
         else:  # Otherwise, create a new entry in the dictionary and add the source files
             source_files_by_lib[lib_name] = {
-                "verilog": verilog_sources,
+                "systemverilog": systemverilog_sources,
                 "vhdl": vhdl_sources,
             }
 
     # Remove duplicate source files while preserving order within each library
     for lib_name, sources in source_files_by_lib.items():
-        sources["verilog"] = list(dict.fromkeys(sources["verilog"]))
+        sources["systemverilog"] = list(dict.fromkeys(sources["systemverilog"]))
         sources["vhdl"] = list(dict.fromkeys(sources["vhdl"]))
         logger.debug(
-            f"Source files for library {lib_name}: Verilog: {sources['verilog']}, VHDL: {sources['vhdl']}"
+            f"Source files for library {lib_name}: SystemVerilog: {sources['systemverilog']}, VHDL: {sources['vhdl']}"
         )
 
     # Check that all source files exist
     missing_files = []
     for source_files in source_files_by_lib.values():
-        for source_file in source_files["verilog"] + source_files["vhdl"]:
+        for source_file in source_files["systemverilog"] + source_files["vhdl"]:
             if not pathlib.Path(source_file).exists():
                 missing_files.append(source_file)
 
@@ -169,19 +169,21 @@ def run(args, cwd):
             f"Cannot create output directory {output_dir}: {e}", EXIT_CANNOT_CREATE_OUTPUT
         )
     for lib_name, source_files in source_files_by_lib.items():
-        verilog_output_file = output_dir / f"{lib_name}_verilog.src"
+        systemverilog_output_file = output_dir / f"{lib_name}_systemverilog.src"
         vhdl_output_file = output_dir / f"{lib_name}_vhdl.src"
 
-        if source_files["verilog"]:
-            with open(verilog_output_file, "w", encoding="utf-8") as f:
-                for source_file in source_files["verilog"]:
+        if source_files["systemverilog"]:
+            with open(systemverilog_output_file, "w", encoding="utf-8") as f:
+                for source_file in source_files["systemverilog"]:
                     f.write(f"{source_file}\n")
             logger.info(
-                f"Wrote {len(source_files['verilog'])} Verilog files for library {lib_name} "
-                f"to {verilog_output_file}"
+                f"Wrote {len(source_files['systemverilog'])} SystemVerilog files for library {lib_name} "
+                f"to {systemverilog_output_file}"
             )
         else:
-            logger.debug(f"No Verilog source files for library {lib_name}, skipping file creation.")
+            logger.debug(
+                f"No SystemVerilog source files for library {lib_name}, skipping file creation."
+            )
 
         if source_files["vhdl"]:
             with open(vhdl_output_file, "w", encoding="utf-8") as f:

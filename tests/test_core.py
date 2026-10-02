@@ -34,15 +34,15 @@ def test_run_writes_ordered_src_files(tmp_path, make_module):
     code = _run(tmp_path, "top", out)
     assert code == 0
 
-    work_v = (out / "work_verilog.src").read_text().splitlines()
+    work_v = (out / "work_systemverilog.src").read_text().splitlines()
     work_vhd = (out / "work_vhdl.src").read_text().splitlines()
     math_vhd = (out / "math_lib_vhdl.src").read_text().splitlines()
 
     assert work_v == [str(tmp_path / "top" / "top.v")]
     assert work_vhd == [str(tmp_path / "top" / "top_pkg.vhd")]
     assert math_vhd == [str(tmp_path / "adder" / "adder.vhd")]
-    # A dependency-only library with no Verilog gets no Verilog .src file.
-    assert not (out / "math_lib_verilog.src").exists()
+    # A dependency-only library with no SystemVerilog gets no SystemVerilog .src file.
+    assert not (out / "math_lib_systemverilog.src").exists()
 
 
 def test_run_puts_dependency_before_dependent_in_same_library(tmp_path, make_module):
@@ -79,14 +79,14 @@ def test_run_output_path_is_a_file(tmp_path, make_module):
 
 
 def test_run_classifies_extensions(tmp_path, make_module):
-    verilog = ["a.v", "b.sv", "c.svp", "d.vh", "e.svh", "F.V"]
+    systemverilog = ["a.v", "b.sv", "c.svp", "d.vh", "e.svh", "F.V"]
     vhdl = ["g.vhd", "h.vhdl", "i.vo", "J.VHD"]
-    make_module("top", verilog + vhdl, dependencies={})
+    make_module("top", systemverilog + vhdl, dependencies={})
     out = tmp_path / "out"
     assert _run(tmp_path, "top", out) == 0
-    written_verilog = (out / "work_verilog.src").read_text().splitlines()
+    written_systemverilog = (out / "work_systemverilog.src").read_text().splitlines()
     written_vhdl = (out / "work_vhdl.src").read_text().splitlines()
-    assert [pathlib.Path(p).name for p in written_verilog] == verilog
+    assert [pathlib.Path(p).name for p in written_systemverilog] == systemverilog
     assert [pathlib.Path(p).name for p in written_vhdl] == vhdl
 
 

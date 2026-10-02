@@ -4,7 +4,7 @@
 1. The VHDL accumulator, spread over three libraries, on NVC. Each library is
    built with ``runner.build(hdl_library=...)`` in the order ohsh wrote to
    libraries.src.
-2. The Verilog counter, whose settings come from a ``.vh`` header, on Icarus
+2. The SystemVerilog counter, whose settings come from a ``.vh`` header, on Icarus
    Verilog. The header is listed in the manifest, so ohsh puts it in the source
    list before the file that uses it.
 """
@@ -67,13 +67,13 @@ def test_vhdl_accumulator() -> Path:
     )
 
 
-def test_verilog_counter() -> Path:
+def test_systemverilog_counter() -> Path:
     build = BUILD / "counter"
     run_ohsh("counter", build)
 
     runner = get_runner("icarus")
     runner.build(
-        sources=read_src(build / "work_verilog.src"),
+        sources=read_src(build / "work_systemverilog.src"),
         hdl_toplevel="counter",
         build_dir=str(build / "sim_build"),
         timescale=("1ns", "1ps"),
@@ -84,7 +84,7 @@ def test_verilog_counter() -> Path:
 
 def main() -> None:
     total_failed = 0
-    for results_xml in (test_vhdl_accumulator(), test_verilog_counter()):
+    for results_xml in (test_vhdl_accumulator(), test_systemverilog_counter()):
         num_tests, num_failed = get_results(results_xml)
         print(
             f"cocotb runner, advanced: {results_xml.parent.parent.name}: "

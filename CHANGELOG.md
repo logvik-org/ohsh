@@ -6,6 +6,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-02
+
+### Changed
+- Renamed the output file `<lib>_verilog.src` to `<lib>_systemverilog.src`.
+
 ## [0.1.0] - 2026-10-02
 
 First release.
@@ -19,5 +24,6 @@ First release.
 - Integration examples for cocotb, VUnit, GHDL, NVC, UVVM, hog, Questa, Vivado
   and Quartus.
 
-[Unreleased]: https://github.com/logvik-org/ohsh/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/logvik-org/ohsh/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/logvik-org/ohsh/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/logvik-org/ohsh/releases/tag/v0.1.0

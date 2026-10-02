@@ -1,4 +1,4 @@
-"""cocotb test for the Verilog `counter` of both example projects."""
+"""cocotb test for the SystemVerilog `counter` of both example projects."""
 
 import cocotb
 from cocotb.clock import Clock

@@ -8,12 +8,12 @@ example's directory.
 
 ## Simple: [`simple/Makefile`](simple/Makefile)
 
-The Verilog `counter` from the simple project on Icarus Verilog. Its sources are
-in the `work` library, so `VERILOG_SOURCES` is just `work_verilog.src`:
+The SystemVerilog `counter` from the simple project on Icarus Verilog. Its sources are
+in the `work` library, so `VERILOG_SOURCES` is just `work_systemverilog.src`:
 
 ```make
 _ := $(shell ohsh -t $(EXAMPLES)/projects/simple -o $(BUILD) counter)
-VERILOG_SOURCES := $(shell cat $(BUILD)/work_verilog.src)
+VERILOG_SOURCES := $(shell cat $(BUILD)/work_systemverilog.src)
 ```
 
 ## Advanced: [`advanced/Makefile`](advanced/Makefile)

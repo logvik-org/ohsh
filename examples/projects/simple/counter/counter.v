@@ -1,4 +1,4 @@
-// Simple up-counter, used by the cocotb (Verilog) examples.
+// Simple up-counter, used by the cocotb (SystemVerilog) examples.
 module counter #(
     parameter WIDTH = 8
 ) (

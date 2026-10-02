@@ -1,4 +1,4 @@
-# cocotb Makefile flow, simple project: one Verilog module on Icarus Verilog.
+# cocotb Makefile flow, simple project: one SystemVerilog module on Icarus Verilog.
 #
 # ohsh writes the source lists while make reads this file, and VERILOG_SOURCES
 # comes straight from the list for the `work` library.
@@ -14,7 +14,7 @@ ifneq ($(.SHELLSTATUS),0)
 $(error ohsh failed, see the message above)
 endif
 
-VERILOG_SOURCES := $(shell cat $(BUILD)/work_verilog.src)
+VERILOG_SOURCES := $(shell cat $(BUILD)/work_systemverilog.src)
 
 COCOTB_TOPLEVEL := counter
 COCOTB_TEST_MODULES := test_counter

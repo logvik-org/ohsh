@@ -5,7 +5,7 @@ Each integration has two examples:
 - **simple**: the [simple project](projects), where every module is in one
   library. Shows the least you need to feed ohsh output to the tool.
 - **advanced**: the [advanced project](projects), with three libraries, a VHDL
-  package used across them, the top library named with `-w`, and a Verilog
+  package used across them, the top library named with `-w`, and a SystemVerilog
   header. Shows how to compile libraries in the order of `libraries.src`.
 
 The flow is always the same: run ohsh to get the per-library `.src` lists and
@@ -46,7 +46,7 @@ pip install -e ".[examples]"
 To run every example that CI runs, use `make examples` from the repo root, or
 pick some with `scripts/run-examples.sh ghdl/simple vunit/advanced`.
 
-The simulators are system tools: Icarus Verilog for the cocotb Verilog
+The simulators are system tools: Icarus Verilog for the cocotb SystemVerilog
 examples, GHDL for the GHDL, VUnit and UVVM examples, and NVC for the NVC and
 advanced cocotb examples. The hog examples need `tclsh` with tcllib. Each
 example's README says which tools it needs.

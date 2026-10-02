@@ -17,12 +17,23 @@ proc read_src {srcfile kind lib} {
         if {[string trim $line] eq ""} { continue }
         puts "Reading $line ($kind, lib=$lib)"
         switch -- $kind {
-            vhdl    { read_vhdl -library $lib $line }
-            verilog { read_verilog $line }
-            sv      { read_verilog -sv $line }
+            vhdl { read_vhdl -library $lib $line }
+            systemverilog {
+                if {[is_systemverilog_only $line]} {
+                    read_verilog -sv $line
+                } else {
+                    read_verilog $line
+                }
+            }
         }
     }
     close $fp
+}
+
+# The SystemVerilog list also holds plain Verilog (.v, .vh) files, which the
+# tool should keep compiling as Verilog.
+proc is_systemverilog_only {path} {
+    return [expr {[string tolower [file extension $path]] in {.sv .svh .svp}}]
 }
 
 # Library names in the order ohsh wrote them to libraries.src.
@@ -33,10 +44,10 @@ proc read_library_order {path} {
     return $libraries
 }
 
-# VHDL goes into named libraries, in library order. Verilog is global.
+# VHDL goes into named libraries, in library order. SystemVerilog is global.
 foreach lib [read_library_order build/libraries.src] {
-    read_src build/${lib}_vhdl.src    vhdl    $lib
-    read_src build/${lib}_verilog.src verilog $lib
+    read_src build/${lib}_vhdl.src          vhdl          $lib
+    read_src build/${lib}_systemverilog.src systemverilog $lib
 }
 
 # Continue with synthesis, for example:
