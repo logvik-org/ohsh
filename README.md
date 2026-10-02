@@ -8,6 +8,7 @@
 
 [![CI](https://github.com/logvik-org/ohsh/actions/workflows/ci.yml/badge.svg)](https://github.com/logvik-org/ohsh/actions/workflows/ci.yml)
 [![Integrations](https://github.com/logvik-org/ohsh/actions/workflows/integration.yml/badge.svg)](https://github.com/logvik-org/ohsh/actions/workflows/integration.yml)
+[![Docs](https://readthedocs.org/projects/ohsh/badge/?version=latest)](https://ohsh.readthedocs.io)
 [![PyPI](https://img.shields.io/pypi/v/ohsh.svg)](https://pypi.org/project/ohsh/)
 [![Python](https://img.shields.io/pypi/pyversions/ohsh.svg)](https://pypi.org/project/ohsh/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/logvik-org/ohsh/blob/main/LICENSE)
@@ -118,7 +119,7 @@ It writes `work_vhdl.src` with the sources in compile order:
 
 and `libraries.src` with the libraries to compile (here only `work`). Modules
 with SystemVerilog sources go to `<lib>_systemverilog.src` in the same way. See
-[the manifest file format](https://github.com/logvik-org/ohsh/blob/main/docs/manifest-format.md)
+[the manifest file format](https://ohsh.readthedocs.io/en/latest/manifest-format.html)
 for dependencies across libraries.
 
 `libraries.src` lists the library names, one per line, in the order to compile
@@ -131,9 +132,13 @@ projects) but may fail with tools that compile one library at a time.
 
 ## Documentation
 
-- [Manifest file format](https://github.com/logvik-org/ohsh/blob/main/docs/manifest-format.md)
-- [Exit codes](https://github.com/logvik-org/ohsh/blob/main/docs/exit-codes.md)
-- [Integrations with simulators and build tools](https://github.com/logvik-org/ohsh/blob/main/docs/integrations.md)
+The full documentation is at [ohsh.readthedocs.io](https://ohsh.readthedocs.io):
+
+- [Getting started](https://ohsh.readthedocs.io/en/latest/getting-started.html)
+- [Why ohsh](https://ohsh.readthedocs.io/en/latest/why-ohsh.html)
+- [Manifest file format](https://ohsh.readthedocs.io/en/latest/manifest-format.html)
+- [Integrations with simulators and build tools](https://ohsh.readthedocs.io/en/latest/integrations.html)
+- [Exit codes](https://ohsh.readthedocs.io/en/latest/exit-codes.html)
 - [Contributing and development](https://github.com/logvik-org/ohsh/blob/main/CONTRIBUTING.md)
 
 ## License

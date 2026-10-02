@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Set up a local development environment for ohsh: create .venv, install ohsh
-# (editable) with the dev and examples dependencies, and install the pre-commit
+# (editable) with the dev, examples and docs dependencies, and install the pre-commit
 # hooks. Works in bash and zsh.
 #
 #   ./scripts/setup-dev.sh         # set up, then: source .venv/bin/activate
@@ -37,8 +37,8 @@ _ohsh_venv="${VENV_DIR:-$_ohsh_root/.venv}"
     echo ">> Upgrading pip"
     "$_ohsh_venv/bin/python" -m pip install --upgrade pip
 
-    echo ">> Installing ohsh (editable) with dev and examples dependencies"
-    "$_ohsh_venv/bin/python" -m pip install -e ".[dev,examples]"
+    echo ">> Installing ohsh (editable) with dev, examples and docs dependencies"
+    "$_ohsh_venv/bin/python" -m pip install -e ".[dev,examples,docs]"
 
     echo ">> Installing pre-commit hooks"
     "$_ohsh_venv/bin/pre-commit" install || echo "   (not a git checkout, skipping)"

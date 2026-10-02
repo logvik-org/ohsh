@@ -6,6 +6,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- Documentation site on [Read the Docs](https://ohsh.readthedocs.io) with new
+  Getting started and Why ohsh pages.
+- Logo and mascot images, with the logo shown in the README.
+
 ## [0.1.1] - 2026-10-02
 
 ### Changed
