@@ -22,8 +22,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   example (one library) and an advanced one (three libraries compiled in the
   order of `libraries.src`). All but the licensed tools run in CI, and the hog
   examples are checked with hog's own list-file reader.
-- pytest test suite, ruff lint/format, pre-commit hooks, and a dev setup script
-  that can be run or sourced.
+- pytest test suite, pre-commit checks (ruff, shellcheck, actionlint), a dev
+  setup script that can be run or sourced, and a Makefile that keeps `.venv` in
+  sync with `pyproject.toml` and runs the integration examples (`make examples`).
 - `examples` extra with the pinned Python frameworks the integration examples use.
 - `docs/` with the manifest format, exit codes, integrations and development
   pages, kept out of the README so it stays short.

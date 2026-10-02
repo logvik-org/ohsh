@@ -25,18 +25,26 @@ pre-commit install
 
 ## Everyday commands
 
-| Command       | What it does                          |
-|---------------|---------------------------------------|
-| `make test`   | Run the test suite with coverage      |
-| `make lint`   | Ruff lint + format check              |
-| `make format` | Auto-fix lint issues and format       |
-| `make build`  | Build sdist + wheel, validate them    |
+| Command         | What it does                                          |
+|-----------------|-------------------------------------------------------|
+| `make test`     | Run the test suite with coverage                      |
+| `make lint`     | Run every pre-commit check, fixing what it can        |
+| `make examples` | Run the integration examples CI runs                  |
+| `make build`    | Build sdist + wheel and validate them                 |
+| `make dev`      | Set up `.venv` again (e.g. after changing extras)     |
+| `make clean`    | Remove build, test and example outputs                |
+
+The make targets use `.venv` directly, so they work without activating it. When
+`pyproject.toml` changes, they set the environment up again before running.
+`make examples` needs the simulators described in
+[`examples/README.md`](examples/README.md).
 
 ## Before you open a pull request
 
 1. Add or update tests for your change (`tests/`). New behavior should be
    covered, and bug fixes should come with a regression test.
-2. Make sure `make test` and `make lint` pass.
+2. Make sure `make test` and `make lint` pass, and `make examples` if you
+   changed the examples or the output format.
 3. Update `CHANGELOG.md` under the `Unreleased` section.
 4. Keep commits focused and write clear commit messages.
 

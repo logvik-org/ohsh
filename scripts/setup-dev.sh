@@ -42,6 +42,10 @@ _ohsh_venv="${VENV_DIR:-$_ohsh_root/.venv}"
 
     echo ">> Installing pre-commit hooks"
     "$_ohsh_venv/bin/pre-commit" install || echo "   (not a git checkout, skipping)"
+
+    # The Makefile compares this file's age with pyproject.toml to tell when the
+    # venv needs setting up again.
+    touch "$_ohsh_venv/.installed"
 )
 _ohsh_status=$?
 
