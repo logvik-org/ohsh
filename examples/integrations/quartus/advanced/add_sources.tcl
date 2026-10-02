@@ -19,12 +19,23 @@ proc add_src {srcfile kind lib} {
         if {[string trim $line] eq ""} { continue }
         puts "Adding $line ($kind, lib=$lib)"
         switch -- $kind {
-            vhdl    { set_global_assignment -name VHDL_FILE $line -library $lib }
-            verilog { set_global_assignment -name VERILOG_FILE $line }
-            sv      { set_global_assignment -name SYSTEMVERILOG_FILE $line }
+            vhdl { set_global_assignment -name VHDL_FILE $line -library $lib }
+            systemverilog {
+                if {[is_systemverilog_only $line]} {
+                    set_global_assignment -name SYSTEMVERILOG_FILE $line
+                } else {
+                    set_global_assignment -name VERILOG_FILE $line
+                }
+            }
         }
     }
     close $fp
+}
+
+# The SystemVerilog list also holds plain Verilog (.v, .vh) files, which the
+# tool should keep compiling as Verilog.
+proc is_systemverilog_only {path} {
+    return [expr {[string tolower [file extension $path]] in {.sv .svh .svp}}]
 }
 
 # Library names in the order ohsh wrote them to libraries.src.
@@ -39,8 +50,8 @@ project_new -overwrite demo
 set_global_assignment -name TOP_LEVEL_ENTITY accumulator
 
 foreach lib [read_library_order build/libraries.src] {
-    add_src build/${lib}_vhdl.src    vhdl    $lib
-    add_src build/${lib}_verilog.src verilog $lib
+    add_src build/${lib}_vhdl.src          vhdl          $lib
+    add_src build/${lib}_systemverilog.src systemverilog $lib
 }
 
 export_assignments

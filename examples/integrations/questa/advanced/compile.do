@@ -17,12 +17,23 @@ proc compile_src {srcfile lib lang} {
         if {[string trim $line] eq ""} { continue }
         puts "Compiling $line into $lib"
         switch -- $lang {
-            vhdl    { vcom -2008 -work $lib $line }
-            verilog { vlog -work $lib $line }
-            sv      { vlog -sv -work $lib $line }
+            vhdl { vcom -2008 -work $lib $line }
+            systemverilog {
+                if {[is_systemverilog_only $line]} {
+                    vlog -sv -work $lib $line
+                } else {
+                    vlog -work $lib $line
+                }
+            }
         }
     }
     close $fp
+}
+
+# The SystemVerilog list also holds plain Verilog (.v, .vh) files, which the
+# tool should keep compiling as Verilog.
+proc is_systemverilog_only {path} {
+    return [expr {[string tolower [file extension $path]] in {.sv .svh .svp}}]
 }
 
 # Library names in the order ohsh wrote them to libraries.src.
@@ -42,8 +53,8 @@ foreach lib $libraries {
 }
 
 foreach lib $libraries {
-    compile_src build/${lib}_vhdl.src    $lib vhdl
-    compile_src build/${lib}_verilog.src $lib verilog
+    compile_src build/${lib}_vhdl.src          $lib vhdl
+    compile_src build/${lib}_systemverilog.src $lib systemverilog
 }
 
 # The testbench goes into the top library, where `work.accumulator` resolves.

@@ -50,7 +50,7 @@ ohsh will:
 1. Search for all `manifest*.json` files starting from `--top-dir`.
 2. Resolve dependencies for `MODULE` (the top-level).
 3. Generate ordered SystemVerilog and VHDL source lists per library.
-4. Write them as `<lib>_verilog.src` / `<lib>_vhdl.src` in the output directory.
+4. Write them as `<lib>_systemverilog.src` / `<lib>_vhdl.src` in the output directory.
 5. Write the library compile order to `libraries.src`.
 
 ### Options
@@ -111,7 +111,7 @@ It writes `work_vhdl.src` with the sources in compile order:
 ```
 
 and `libraries.src` with the libraries to compile (here only `work`). Modules
-with SystemVerilog sources go to `<lib>_verilog.src` in the same way. See
+with SystemVerilog sources go to `<lib>_systemverilog.src` in the same way. See
 [the manifest file format](https://github.com/logvik-org/ohsh/blob/main/docs/manifest-format.md)
 for dependencies across libraries.
 

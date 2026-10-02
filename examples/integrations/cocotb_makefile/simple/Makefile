@@ -14,7 +14,7 @@ ifneq ($(.SHELLSTATUS),0)
 $(error ohsh failed, see the message above)
 endif
 
-VERILOG_SOURCES := $(shell cat $(BUILD)/work_verilog.src)
+VERILOG_SOURCES := $(shell cat $(BUILD)/work_systemverilog.src)
 
 COCOTB_TOPLEVEL := counter
 COCOTB_TEST_MODULES := test_counter

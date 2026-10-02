@@ -57,7 +57,7 @@ def test_main_entry_point(tmp_path, make_module, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr("sys.argv", ["ohsh", "-t", str(tmp_path), "-o", str(out), "top"])
     main()
-    assert (out / "work_verilog.src").read_text().strip().endswith("top.v")
+    assert (out / "work_systemverilog.src").read_text().strip().endswith("top.v")
 
 
 def test_main_writes_log_file_when_requested(tmp_path, make_module, monkeypatch):

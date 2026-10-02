@@ -11,7 +11,7 @@ Run them with `python runner.py` in the example's directory.
 The SystemVerilog `counter` from the simple project on Icarus Verilog:
 
 ```python
-sources = read_src(BUILD / "work_verilog.src")
+sources = read_src(BUILD / "work_systemverilog.src")
 runner = get_runner("icarus")
 runner.build(sources=sources, hdl_toplevel="counter", timescale=("1ns", "1ps"), always=True)
 runner.test(hdl_toplevel="counter", test_module="test_counter")
@@ -33,7 +33,7 @@ Two runs on the advanced project:
 
 2. The SystemVerilog `counter`, whose settings come from the header `counter_defs.vh`,
    on Icarus Verilog. The header is listed in the manifest before `counter.v`,
-   so it comes first in `work_verilog.src`.
+   so it comes first in `work_systemverilog.src`.
 
 ## Requirements
 
