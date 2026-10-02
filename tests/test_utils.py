@@ -13,6 +13,7 @@ from ohsh.utils import (
     configure_logging,
     discover_manifests,
     extract_dependencies,
+    find_duplicate_modules,
     order_libraries,
     to_absolute_path,
     validate_manifest,
@@ -172,6 +173,20 @@ def test_validate_manifest_accepts_minimal_manifest():
 def test_validate_manifest_rejects_wrong_structure(manifest, problem):
     with pytest.raises(InvalidManifestError, match=problem):
         validate_manifest(manifest)
+
+
+def test_find_duplicate_modules_lists_every_manifest_path():
+    data = [
+        {"module": "adder", "manifest_path": "/a/manifest.json"},
+        {"module": "top", "manifest_path": "/t/manifest.json"},
+        {"module": "adder", "manifest_path": "/b/manifest.json"},
+    ]
+    assert find_duplicate_modules(data) == {"adder": ["/a/manifest.json", "/b/manifest.json"]}
+
+
+def test_find_duplicate_modules_empty_when_names_are_unique():
+    data = [{"module": "a", "manifest_path": "/a"}, {"module": "b", "manifest_path": "/b"}]
+    assert find_duplicate_modules(data) == {}
 
 
 def test_validate_top_dir(tmp_path):

@@ -16,7 +16,9 @@ Each module gets a `manifest.json` next to its sources:
 }
 ```
 
-- `module` (required) - the module's name.
+- `module` (required) - the module's name. It must be unique across all
+  manifests under `--top-dir`, otherwise ohsh stops with exit code 103 and
+  lists the manifests that declare it.
 - `sources` (optional) - list of HDL source files, relative to the manifest.
   Files ending in `.v`, `.sv`, `.svp`, `.vh` or `.svh` go to the Verilog list,
   and `.vhd`, `.vhdl` or `.vo` to the VHDL list, regardless of case. Other files

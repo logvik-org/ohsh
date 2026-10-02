@@ -47,6 +47,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Manifests are checked when read: a manifest with the wrong structure (for
   example `"sources"` given as a string) stops ohsh with exit code 65 and names
   the file and the problem, instead of producing empty source lists.
+- A module name declared in more than one manifest now stops ohsh with exit
+  code 103 and lists the manifests, instead of silently using one of them.
+- Errors exit through `sys.exit`, so they also work when Python runs without
+  the `site` module (`python -S`).
 - Source file extensions are matched regardless of case, and `.vh` / `.svh`
   files are now included in the Verilog lists. Files with other extensions are
   skipped with a warning instead of silently.

@@ -8,6 +8,7 @@ from ohsh.utils import (
     EXIT_CANNOT_CREATE_OUTPUT,
     EXIT_CIRCULAR_DEPENDENCY,
     EXIT_DATA_ERROR,
+    EXIT_DUPLICATE_MODULE,
     EXIT_MANIFEST_NOT_FOUND,
     EXIT_MODULE_NOT_FOUND,
     EXIT_NO_INPUT,
@@ -121,6 +122,19 @@ def test_run_missing_dependency_manifest(tmp_path, make_module, caplog):
     out = tmp_path / "out"
     assert _run(tmp_path, "top", out) == EXIT_MANIFEST_NOT_FOUND
     assert "ghost (required by top)" in caplog.text
+
+
+def test_run_duplicate_module_name_lists_both_manifests(tmp_path, make_module, caplog):
+    make_module("top", ["top.vhd"], dependencies={"work": ["adder"]})
+    make_module("adder", ["adder.vhd"])
+    copy = tmp_path / "vendor" / "adder"
+    copy.mkdir(parents=True)
+    (copy / "manifest.json").write_text('{"module": "adder", "sources": []}')
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out) == EXIT_DUPLICATE_MODULE
+    assert str(tmp_path / "adder" / "manifest.json") in caplog.text
+    assert str(copy / "manifest.json") in caplog.text
+    assert not out.exists()
 
 
 def test_run_bad_json(tmp_path):

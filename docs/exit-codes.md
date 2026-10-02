@@ -14,3 +14,4 @@ ohsh follows the Unix conventions where one exists (`1`, `2`, and the BSD
 | 100  | Top module not found in any manifest.                          |
 | 101  | A dependency has no manifest.                                  |
 | 102  | Modules depend on each other in a loop.                        |
+| 103  | A module name is declared in more than one manifest.           |

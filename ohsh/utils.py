@@ -21,6 +21,7 @@ EXIT_CANNOT_CREATE_OUTPUT = 73
 EXIT_MODULE_NOT_FOUND = 100
 EXIT_MANIFEST_NOT_FOUND = 101
 EXIT_CIRCULAR_DEPENDENCY = 102
+EXIT_DUPLICATE_MODULE = 103
 
 EXIT_CODE_DESCRIPTIONS = {
     EXIT_SUCCESS: "success",
@@ -32,6 +33,7 @@ EXIT_CODE_DESCRIPTIONS = {
     EXIT_MODULE_NOT_FOUND: "top module not found in any manifest",
     EXIT_MANIFEST_NOT_FOUND: "a dependency has no manifest",
     EXIT_CIRCULAR_DEPENDENCY: "modules depend on each other in a loop",
+    EXIT_DUPLICATE_MODULE: "a module name is declared in more than one manifest",
 }
 
 
@@ -72,6 +74,14 @@ def validate_manifest(manifest):
         _is_list_of_strings(modules) for modules in dependencies.values()
     ):
         raise InvalidManifestError('"dependencies" must map library names to lists of module names')
+
+
+def find_duplicate_modules(manifest_data):
+    """Return {module: [manifest paths]} for every module declared more than once."""
+    paths_by_module = {}
+    for manifest in manifest_data:
+        paths_by_module.setdefault(manifest["module"], []).append(manifest["manifest_path"])
+    return {module: paths for module, paths in paths_by_module.items() if len(paths) > 1}
 
 
 def find_manifest(manifest_data, module):

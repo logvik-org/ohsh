@@ -8,6 +8,7 @@ from .utils import (
     EXIT_CANNOT_CREATE_OUTPUT,
     EXIT_CIRCULAR_DEPENDENCY,
     EXIT_DATA_ERROR,
+    EXIT_DUPLICATE_MODULE,
     EXIT_MANIFEST_NOT_FOUND,
     EXIT_MODULE_NOT_FOUND,
     EXIT_NO_INPUT,
@@ -16,6 +17,7 @@ from .utils import (
     MissingManifestError,
     discover_manifests,
     extract_dependencies,
+    find_duplicate_modules,
     find_manifest,
     order_libraries,
     to_absolute_path,
@@ -71,15 +73,19 @@ def run(args, cwd):
         manifest_data.append(data)
         logger.debug(f"Parsed manifest file: {manifest_file}")
 
-    # Check if the specified module is found within the list of manifests
-    module_found = False
-    top_manifest = None
-    for manifest in manifest_data:
-        if manifest.get("module") == module:
-            module_found = True
-            top_manifest = manifest
+    # Every lookup by module name below relies on the names being unique.
+    duplicates = find_duplicate_modules(manifest_data)
+    if duplicates:
+        listing = "\n".join(
+            f"  {name}: {', '.join(sorted(paths))}" for name, paths in sorted(duplicates.items())
+        )
+        _exit_with_error(
+            f"Each module must be declared in exactly one manifest, but these are not:\n{listing}",
+            EXIT_DUPLICATE_MODULE,
+        )
 
-    if not module_found:
+    top_manifest = find_manifest(manifest_data, module)
+    if top_manifest is None:
         _exit_with_error(
             f"The specified module {module} was not found in any manifest.", EXIT_MODULE_NOT_FOUND
         )
