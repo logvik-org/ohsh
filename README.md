@@ -1,4 +1,4 @@
-# ohsh - Ola's HDL Source Handler
+# ohsh
 
 [![CI](https://github.com/logvik-org/ohsh/actions/workflows/ci.yml/badge.svg)](https://github.com/logvik-org/ohsh/actions/workflows/ci.yml)
 [![Integrations](https://github.com/logvik-org/ohsh/actions/workflows/integration.yml/badge.svg)](https://github.com/logvik-org/ohsh/actions/workflows/integration.yml)
@@ -16,19 +16,15 @@ Vivado, Quartus, Questa, cocotb, VUnit, …), not a replacement for them. ohsh
 just answers one question well - *"what files, in what order, for which
 libraries?"* - and hands you plain `.src` lists you can feed anywhere.
 
-> So simple it's an *oh sh… that was easy* moment. 🙂
-
----
-
 ## Features
 
-- 🔍 Auto-discovers HDL module manifests anywhere under a project tree.
-- 📂 Resolves module dependencies recursively, across libraries.
-- 🔁 Detects circular dependencies and exits with an error naming the cycle.
-- 📝 Emits ordered, per-library source lists for Verilog and VHDL.
-- 📚 Writes the order to compile the libraries in.
-- ✅ Validates that every referenced source file actually exists.
-- 🐍 Pure Python, zero runtime dependencies.
+- Auto-discovers HDL module manifests anywhere under a project tree.
+- Resolves module dependencies recursively, across libraries.
+- Detects circular dependencies and exits with an error naming the cycle.
+- Emits ordered, per-library source lists for Verilog and VHDL.
+- Writes the order to compile the libraries in.
+- Validates that every referenced source file actually exists.
+- Pure Python, zero runtime dependencies.
 
 ## Installation
 
@@ -71,21 +67,53 @@ ohsh will:
 
 ### Example
 
+Give each module a `manifest.json` next to its sources:
+
+```
+project/
+├── accumulator/
+│   ├── accumulator.vhd
+│   └── manifest.json
+└── adder/
+    ├── adder.vhd
+    └── manifest.json
+```
+
+```json
+{
+  "module": "accumulator",
+  "sources": ["accumulator.vhd"],
+  "dependencies": {
+    "work": ["adder"]
+  }
+}
+```
+
+```json
+{
+  "module": "adder",
+  "sources": ["adder.vhd"]
+}
+```
+
+Then run ohsh in the project directory with the top module's name:
+
 ```bash
-ohsh -t /path/to/hdl_project -w mylib -o ./src_lists top_module
+cd project
+ohsh accumulator
 ```
 
-Produces:
+It writes `work_vhdl.src` with the sources in compile order:
 
 ```
-src_lists/
-├── libraries.src
-├── mylib_verilog.src
-└── mylib_vhdl.src
+/path/to/project/adder/adder.vhd
+/path/to/project/accumulator/accumulator.vhd
 ```
 
-Each `<lib>_verilog.src` / `<lib>_vhdl.src` file contains absolute paths to the
-source files, one per line, in compilation order.
+and `libraries.src` with the libraries to compile (here only `work`). Modules
+with Verilog sources go to `<lib>_verilog.src` in the same way. See
+[the manifest file format](https://github.com/logvik-org/ohsh/blob/main/docs/manifest-format.md)
+for dependencies across libraries.
 
 `libraries.src` lists the library names, one per line, in the order to compile
 them: each library comes after the libraries it uses. Compile the libraries in

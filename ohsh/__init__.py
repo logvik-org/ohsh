@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""ohsh (Ola's HDL Source Handler).
+"""ohsh.
 
 Finds the ``manifest.json`` files under a project directory, resolves the
 dependencies of a top-level module, and writes each library's source files in
