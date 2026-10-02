@@ -17,11 +17,6 @@ concurrency:
 jobs:
   examples:
     runs-on: ubuntu-24.04
-    defaults:
-      run:
-        # An explicit bash shell runs with pipefail, so a failing example is not
-        # hidden by the `| tee` used to check its output for deprecations.
-        shell: bash
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
 
@@ -45,66 +40,5 @@ jobs:
         with:
           version: 1.23.0
 
-      - name: cocotb Makefile (simple)
-        working-directory: examples/integrations/cocotb_makefile/simple
-        run: |
-          make 2>&1 | tee "$RUNNER_TEMP/output.log"
-          ! grep -iE "DeprecationWarning|is deprecated" "$RUNNER_TEMP/output.log"
-
-      - name: cocotb Makefile (advanced)
-        working-directory: examples/integrations/cocotb_makefile/advanced
-        run: |
-          make 2>&1 | tee "$RUNNER_TEMP/output.log"
-          ! grep -iE "DeprecationWarning|is deprecated" "$RUNNER_TEMP/output.log"
-
-      - name: cocotb runner (simple)
-        working-directory: examples/integrations/cocotb_runner/simple
-        run: |
-          python runner.py 2>&1 | tee "$RUNNER_TEMP/output.log"
-          ! grep -iE "DeprecationWarning|is deprecated" "$RUNNER_TEMP/output.log"
-
-      - name: cocotb runner (advanced)
-        working-directory: examples/integrations/cocotb_runner/advanced
-        run: |
-          python runner.py 2>&1 | tee "$RUNNER_TEMP/output.log"
-          ! grep -iE "DeprecationWarning|is deprecated" "$RUNNER_TEMP/output.log"
-
-      - name: VUnit (simple)
-        working-directory: examples/integrations/vunit/simple
-        env:
-          VUNIT_SIMULATOR: ghdl
-        run: |
-          python run.py 2>&1 | tee "$RUNNER_TEMP/output.log"
-          ! grep -iE "DeprecationWarning|is deprecated" "$RUNNER_TEMP/output.log"
-
-      - name: VUnit (advanced)
-        working-directory: examples/integrations/vunit/advanced
-        env:
-          VUNIT_SIMULATOR: ghdl
-        run: |
-          python run.py 2>&1 | tee "$RUNNER_TEMP/output.log"
-          ! grep -iE "DeprecationWarning|is deprecated" "$RUNNER_TEMP/output.log"
-
-      - name: GHDL (simple)
-        run: bash examples/integrations/ghdl/simple/run.sh
-
-      - name: GHDL (advanced)
-        run: bash examples/integrations/ghdl/advanced/run.sh
-
-      - name: NVC (simple)
-        run: bash examples/integrations/nvc/simple/run.sh
-
-      - name: NVC (advanced)
-        run: bash examples/integrations/nvc/advanced/run.sh
-
-      - name: UVVM (simple)
-        run: bash examples/integrations/uvvm/simple/run.sh
-
-      - name: UVVM (advanced)
-        run: bash examples/integrations/uvvm/advanced/run.sh
-
-      - name: hog (simple)
-        run: bash examples/integrations/hog/simple/run.sh
-
-      - name: hog (advanced)
-        run: bash examples/integrations/hog/advanced/run.sh
+      - name: Run the examples
+        run: scripts/run-examples.sh

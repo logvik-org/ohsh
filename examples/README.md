@@ -43,6 +43,10 @@ source scripts/setup-dev.sh        # from the repo root: installs dev + examples
 pip install -e ".[examples]"
 ```
 
+To run every example that CI runs, use `make examples` from the repo root, or
+pick some with `scripts/run-examples.sh ghdl/simple vunit/advanced`.
+
 The simulators are system tools: Icarus Verilog for the cocotb Verilog
 examples, GHDL for the GHDL, VUnit and UVVM examples, and NVC for the NVC and
-advanced cocotb examples. Each example's README says which ones it needs.
+advanced cocotb examples. The hog examples need `tclsh` with tcllib. Each
+example's README says which tools it needs.
