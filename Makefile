@@ -1,4 +1,4 @@
-.PHONY: help dev test lint build examples clean
+.PHONY: help dev test lint build examples docs clean
 
 VENV ?= .venv
 VENV_BIN := $(VENV)/bin
@@ -31,8 +31,11 @@ build: $(STAMP) ## Build sdist + wheel and validate them
 examples: $(STAMP) ## Run the integration examples that CI runs
 	PATH="$(abspath $(VENV_BIN)):$$PATH" scripts/run-examples.sh
 
+docs: $(STAMP) ## Build the documentation site into docs/_build/html
+	$(VENV_BIN)/sphinx-build -W --keep-going -b html docs docs/_build/html
+
 clean: ## Remove build, test and example outputs (keeps .venv)
-	rm -rf build dist *.egg-info .pytest_cache .ruff_cache .coverage htmlcov
+	rm -rf build dist docs/_build *.egg-info .pytest_cache .ruff_cache .coverage htmlcov
 	find . -path ./$(VENV) -prune -o -type d -name __pycache__ -exec rm -rf {} +
 	find examples -type d \( -name build -o -name sim_build -o -name vunit_out \) -prune -exec rm -rf {} +
 	find examples -name results.xml -delete

@@ -11,15 +11,15 @@ cd ohsh
 source scripts/setup-dev.sh
 ```
 
-This creates `.venv`, installs ohsh in editable mode with the `dev` and
-`examples` extras, installs the pre-commit hooks, and leaves the environment
+This creates `.venv`, installs ohsh in editable mode with the `dev`, `examples`
+and `docs` extras, installs the pre-commit hooks, and leaves the environment
 active. Running it as `./scripts/setup-dev.sh` instead does the same without
 activating the environment.
 
 Or, if you manage your own environment:
 
 ```bash
-pip install -e ".[dev,examples]"
+pip install -e ".[dev,examples,docs]"
 pre-commit install
 ```
 
@@ -31,6 +31,7 @@ pre-commit install
 | `make lint`     | Run every pre-commit check, fixing what it can        |
 | `make examples` | Run the integration examples CI runs                  |
 | `make build`    | Build sdist + wheel and validate them                 |
+| `make docs`     | Build the documentation site into `docs/_build/html`  |
 | `make dev`      | Set up `.venv` again (e.g. after changing extras)     |
 | `make clean`    | Remove build, test and example outputs                |
 
@@ -51,6 +52,15 @@ The make targets use `.venv` directly, so they work without activating it. When
 CI runs the pre-commit checks, the test matrix (Python 3.9-3.14, plus an
 experimental 3.15 pre-release leg), a package build, and the end-to-end
 integration examples. PRs need a green pipeline to merge.
+
+## Documentation
+
+The documentation site is built with [Sphinx](https://www.sphinx-doc.org) from
+the Markdown pages in `docs/` and published on
+[Read the Docs](https://ohsh.readthedocs.io), which rebuilds it on every push to
+`main` and for every release tag. Its configuration is in `.readthedocs.yaml`
+and `docs/conf.py`. Run `make docs` to check a change locally: it fails on any
+warning, like the Read the Docs build and CI.
 
 ## Coding style
 
