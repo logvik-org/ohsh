@@ -216,3 +216,5 @@ is just another module, so the synthesis flow uses the same manifests.
 
 A common setup is a small Makefile next to each testbench that runs ohsh before
 the simulator. See the [cocotb Makefile example](https://github.com/logvik-org/ohsh/tree/main/examples/integrations/cocotb_makefile).
+
+<img class="mascot-end" src="_static/mascot-sorted.png" alt="The ohsh dog resting next to an ordered, checked list">

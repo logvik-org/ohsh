@@ -29,6 +29,8 @@ Each module gets a `manifest.json` next to its sources:
 
 ## Does order matter?
 
+<img class="mascot" src="_static/mascot-sorting.png" alt="The ohsh dog sorting files into a neat stack">
+
 **`sources`: yes.** ohsh writes a module's files in the order the manifest lists
 them, so list them in compile order. A VHDL package goes before the files that
 use it, and a SystemVerilog header or package before the code that includes or

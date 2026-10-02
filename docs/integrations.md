@@ -1,5 +1,7 @@
 # Integrations
 
+<img class="mascot" src="_static/mascot-running.png" alt="The ohsh dog running off with source files">
+
 ohsh's `.src` lists are just text - one absolute path per line - so they drop
 into almost any flow. Runnable, self-checking examples live in
 [`examples/`](https://github.com/logvik-org/ohsh/tree/main/examples). Each tool has a simple example (one library) and an

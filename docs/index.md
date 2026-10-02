@@ -22,6 +22,12 @@ ohsh my_top_module
 
 ## Why ohsh
 
+<div class="mascot-strip">
+  <figure><img src="_static/mascot-unsorted.png" alt="The ohsh dog surrounded by scattered source files"><figcaption>Your files</figcaption></figure>
+  <figure><img src="_static/mascot-sorting.png" alt="The dog sorting files into a neat stack"><figcaption>ohsh</figcaption></figure>
+  <figure><img src="_static/mascot-sorted.png" alt="The dog resting next to an ordered, checked list"><figcaption>In order</figcaption></figure>
+</div>
+
 **One description for every tool.** The same manifests feed your cocotb
 testbenches, your VUnit runs and your Vivado or Quartus build. A new dependency
 is added once, in one manifest, instead of in every tool's file list.
