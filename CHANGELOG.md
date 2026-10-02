@@ -63,4 +63,4 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Circular dependencies now exit with an error (exit code 102) naming the cycle,
   instead of recursing infinitely.
 
-[Unreleased]: https://github.com/logvik-org/oshsh/commits/main
+[Unreleased]: https://github.com/logvik-org/ohsh/commits/main
