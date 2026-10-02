@@ -3,13 +3,15 @@
 import logging
 import pathlib
 import runpy
+import subprocess
+import sys
 
 import pytest
 
 from ohsh import __version__
 from ohsh.cli import build_parser, main
 from ohsh.core import run
-from ohsh.utils import CONSOLE_HANDLER_NAME, EXIT_CODE_DESCRIPTIONS, EXIT_USAGE
+from ohsh.utils import CONSOLE_HANDLER_NAME, EXIT_CODE_DESCRIPTIONS, EXIT_NO_INPUT, EXIT_USAGE
 
 
 def test_parser_defaults():
@@ -104,3 +106,17 @@ def test_python_dash_m_ohsh_runs_the_cli(monkeypatch, capsys):
         runpy.run_module("ohsh", run_name="__main__")
     assert exc.value.code == 0
     assert capsys.readouterr().out.strip() == f"ohsh {__version__}"
+
+
+def test_errors_exit_cleanly_without_site_builtins(tmp_path):
+    # Regression for #7: the builtin exit() only exists when the site module is
+    # loaded, so `python -S` used to crash with a NameError instead of exiting.
+    package_root = pathlib.Path(__file__).resolve().parents[1]
+    script = (
+        f"import sys; sys.path.insert(0, {str(package_root)!r}); "
+        f"sys.argv = ['ohsh', '-t', {str(tmp_path / 'missing')!r}, 'top']; "
+        "from ohsh.cli import main; main()"
+    )
+    completed = subprocess.run([sys.executable, "-S", "-c", script], capture_output=True, text=True)
+    assert completed.returncode == EXIT_NO_INPUT
+    assert "does not exist" in completed.stderr

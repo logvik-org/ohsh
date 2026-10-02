@@ -2,6 +2,7 @@
 import json
 import logging
 import pathlib
+import sys
 
 from .utils import (
     EXIT_CANNOT_CREATE_OUTPUT,
@@ -30,6 +31,11 @@ LIBRARY_ORDER_FILE_NAME = "libraries.src"
 logger = logging.getLogger(__name__)
 
 
+def _exit_with_error(message, code):
+    logger.error(message)
+    sys.exit(code)
+
+
 def run(args, cwd):
     module = args.module
     top_dir = args.top_dir
@@ -40,11 +46,10 @@ def run(args, cwd):
 
     # Check if top-level is a directory and exists
     if not validate_top_dir(top_dir):
-        error_message = (
-            f"The specified top-level directory {top_dir} does not exist or is not a directory."
+        _exit_with_error(
+            f"The specified top-level directory {top_dir} does not exist or is not a directory.",
+            EXIT_NO_INPUT,
         )
-        logger.error(error_message)
-        exit(EXIT_NO_INPUT)
 
     # Find all files named "manifest.json" in the current working directory
     all_manifest_files = discover_manifests(top_dir)
@@ -57,14 +62,11 @@ def run(args, cwd):
                 data = json.load(file)
             validate_manifest(data)
         except (json.JSONDecodeError, UnicodeDecodeError) as e:
-            logger.error(f"Error parsing JSON from {manifest_file}: {e}")
-            exit(EXIT_DATA_ERROR)
+            _exit_with_error(f"Error parsing JSON from {manifest_file}: {e}", EXIT_DATA_ERROR)
         except InvalidManifestError as e:
-            logger.error(f"Invalid manifest {manifest_file}: {e}")
-            exit(EXIT_DATA_ERROR)
+            _exit_with_error(f"Invalid manifest {manifest_file}: {e}", EXIT_DATA_ERROR)
         except OSError as e:
-            logger.error(f"File error reading {manifest_file}: {e}")
-            exit(EXIT_NO_INPUT)
+            _exit_with_error(f"File error reading {manifest_file}: {e}", EXIT_NO_INPUT)
         data["manifest_path"] = str(manifest_file.resolve())
         manifest_data.append(data)
         logger.debug(f"Parsed manifest file: {manifest_file}")
@@ -78,21 +80,18 @@ def run(args, cwd):
             top_manifest = manifest
 
     if not module_found:
-        error_message = f"The specified module {module} was not found in any manifest."
-        logger.error(error_message)
-        exit(EXIT_MODULE_NOT_FOUND)
-    else:
-        logger.debug(f"Found module {module} in manifest.")
+        _exit_with_error(
+            f"The specified module {module} was not found in any manifest.", EXIT_MODULE_NOT_FOUND
+        )
+    logger.debug(f"Found module {module} in manifest.")
 
     # Extract dependencies recursively
     try:
         dependencies = extract_dependencies(manifest_data, top_manifest, work)
     except CircularDependencyError as e:
-        logger.error(f"Circular dependency detected: {e}")
-        exit(EXIT_CIRCULAR_DEPENDENCY)
+        _exit_with_error(f"Circular dependency detected: {e}", EXIT_CIRCULAR_DEPENDENCY)
     except MissingManifestError as e:
-        logger.error(f"Missing dependency: {e}")
-        exit(EXIT_MANIFEST_NOT_FOUND)
+        _exit_with_error(f"Missing dependency: {e}", EXIT_MANIFEST_NOT_FOUND)
 
     # Remove duplicate entries
     dependencies = list(dict.fromkeys(dependencies))
@@ -151,9 +150,7 @@ def run(args, cwd):
                 missing_files.append(source_file)
 
     if missing_files:
-        error_message = f"The following source files do not exist: {missing_files}"
-        logger.error(error_message)
-        exit(EXIT_NO_INPUT)
+        _exit_with_error(f"The following source files do not exist: {missing_files}", EXIT_NO_INPUT)
 
     source_files_by_lib = {lib_name: source_files_by_lib[lib_name] for lib_name in library_order}
 
@@ -162,8 +159,9 @@ def run(args, cwd):
     try:
         output_dir.mkdir(parents=True, exist_ok=True)
     except OSError as e:
-        logger.error(f"Cannot create output directory {output_dir}: {e}")
-        exit(EXIT_CANNOT_CREATE_OUTPUT)
+        _exit_with_error(
+            f"Cannot create output directory {output_dir}: {e}", EXIT_CANNOT_CREATE_OUTPUT
+        )
     for lib_name, source_files in source_files_by_lib.items():
         verilog_output_file = output_dir / f"{lib_name}_verilog.src"
         vhdl_output_file = output_dir / f"{lib_name}_vhdl.src"
