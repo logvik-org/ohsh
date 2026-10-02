@@ -27,6 +27,24 @@ Each module gets a `manifest.json` next to its sources:
   library. The special library `work` is remapped to whatever `--work` (or the
   resolving library) is.
 
+## Does order matter?
+
+**`sources`: yes.** ohsh writes a module's files in the order the manifest lists
+them, so list them in compile order. A VHDL package goes before the files that
+use it, and a SystemVerilog header or package before the code that includes or
+imports it.
+
+**`dependencies`: no.** List the modules and libraries in any order. ohsh
+always puts a module, and everything it depends on, before the modules that use
+it, and puts each library before the libraries that use it. The listed order
+only decides the order between modules that don't depend on each other.
+
+In other words, ohsh orders *modules*, and you order the *files* inside each
+module. When a module's files would need another module compiled in between
+them, split it into two modules.
+
+## Discovery and validation
+
 ohsh reads every `manifest*.json` file under `--top-dir` and stops with exit
 code 65 if one is not valid JSON or does not have this structure. Unknown keys
 are ignored.

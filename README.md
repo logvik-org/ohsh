@@ -135,7 +135,6 @@ projects) but may fail with tools that compile one library at a time.
 The full documentation is at [ohsh.readthedocs.io](https://ohsh.readthedocs.io):
 
 - [Getting started](https://ohsh.readthedocs.io/en/latest/getting-started.html)
-- [Why ohsh](https://ohsh.readthedocs.io/en/latest/why-ohsh.html)
 - [Manifest file format](https://ohsh.readthedocs.io/en/latest/manifest-format.html)
 - [Integrations with simulators and build tools](https://ohsh.readthedocs.io/en/latest/integrations.html)
 - [Exit codes](https://ohsh.readthedocs.io/en/latest/exit-codes.html)
