@@ -1,7 +1,6 @@
 ---
 name: Bug report
 about: Report something that isn't working as expected
-title: "[Bug] "
 labels: bug
 ---
 
@@ -18,7 +17,7 @@ Steps to reproduce, ideally with a minimal manifest tree:
 What you expected to happen.
 
 **Output / logs**
-Paste the console output (run with `-v` for more detail).
+Paste the console output (run with `-vv` for debug details).
 
 **Environment**
 - ohsh version (`ohsh --version`):

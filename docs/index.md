@@ -8,4 +8,5 @@ Markdown, readable on GitHub.
 - [Exit codes](exit-codes.md): what each exit code means.
 - [Integrations](integrations.md): feeding ohsh output to simulators and build
   tools, with runnable examples.
-- [Development](development.md): setting up a development environment.
+- [Contributing](https://github.com/logvik-org/oshsh/blob/main/CONTRIBUTING.md):
+  setting up a development environment and the release process.

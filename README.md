@@ -100,7 +100,7 @@ projects) but may fail with tools that compile one library at a time.
 - [Manifest file format](https://github.com/logvik-org/oshsh/blob/main/docs/manifest-format.md)
 - [Exit codes](https://github.com/logvik-org/oshsh/blob/main/docs/exit-codes.md)
 - [Integrations with simulators and build tools](https://github.com/logvik-org/oshsh/blob/main/docs/integrations.md)
-- [Development](https://github.com/logvik-org/oshsh/blob/main/docs/development.md)
+- [Contributing and development](https://github.com/logvik-org/oshsh/blob/main/CONTRIBUTING.md)
 
 ## License
 

@@ -26,8 +26,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   setup script that can be run or sourced, and a Makefile that keeps `.venv` in
   sync with `pyproject.toml` and runs the integration examples (`make examples`).
 - `examples` extra with the pinned Python frameworks the integration examples use.
-- `docs/` with the manifest format, exit codes, integrations and development
-  pages, kept out of the README so it stays short.
+- `docs/` with the manifest format, exit codes and integrations pages, kept
+  out of the README so it stays short.
 - CI (lint + Python 3.9-3.14 matrix, with an experimental 3.15 pre-release leg,
   + build and a smoke test of the built wheel) and integration CI with pinned
   tool versions.
