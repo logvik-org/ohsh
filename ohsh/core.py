@@ -114,7 +114,7 @@ def run(args, cwd):
     # Extract source file list from all modules in the final dependencies list
     source_files_by_lib = {}
     for lib_name, module in dependencies:
-        # Separate Verilog and VHDL files
+        # Separate SystemVerilog and VHDL files
         verilog_sources = []
         vhdl_sources = []
 
@@ -145,7 +145,7 @@ def run(args, cwd):
         sources["verilog"] = list(dict.fromkeys(sources["verilog"]))
         sources["vhdl"] = list(dict.fromkeys(sources["vhdl"]))
         logger.debug(
-            f"Source files for library {lib_name}: Verilog: {sources['verilog']}, VHDL: {sources['vhdl']}"
+            f"Source files for library {lib_name}: SystemVerilog: {sources['verilog']}, VHDL: {sources['vhdl']}"
         )
 
     # Check that all source files exist
@@ -177,11 +177,13 @@ def run(args, cwd):
                 for source_file in source_files["verilog"]:
                     f.write(f"{source_file}\n")
             logger.info(
-                f"Wrote {len(source_files['verilog'])} Verilog files for library {lib_name} "
+                f"Wrote {len(source_files['verilog'])} SystemVerilog files for library {lib_name} "
                 f"to {verilog_output_file}"
             )
         else:
-            logger.debug(f"No Verilog source files for library {lib_name}, skipping file creation.")
+            logger.debug(
+                f"No SystemVerilog source files for library {lib_name}, skipping file creation."
+            )
 
         if source_files["vhdl"]:
             with open(vhdl_output_file, "w", encoding="utf-8") as f:

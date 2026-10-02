@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cocotb Python runner, simple project: one Verilog module on Icarus Verilog.
+"""cocotb Python runner, simple project: one SystemVerilog module on Icarus Verilog.
 
 Runs ohsh, reads the source list for the `work` library and hands it to cocotb's
 ``cocotb_tools.runner`` API (cocotb >= 2.0).

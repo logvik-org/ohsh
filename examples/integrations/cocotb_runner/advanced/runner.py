@@ -4,7 +4,7 @@
 1. The VHDL accumulator, spread over three libraries, on NVC. Each library is
    built with ``runner.build(hdl_library=...)`` in the order ohsh wrote to
    libraries.src.
-2. The Verilog counter, whose settings come from a ``.vh`` header, on Icarus
+2. The SystemVerilog counter, whose settings come from a ``.vh`` header, on Icarus
    Verilog. The header is listed in the manifest, so ohsh puts it in the source
    list before the file that uses it.
 """

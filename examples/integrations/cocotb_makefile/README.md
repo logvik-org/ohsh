@@ -8,7 +8,7 @@ example's directory.
 
 ## Simple: [`simple/Makefile`](simple/Makefile)
 
-The Verilog `counter` from the simple project on Icarus Verilog. Its sources are
+The SystemVerilog `counter` from the simple project on Icarus Verilog. Its sources are
 in the `work` library, so `VERILOG_SOURCES` is just `work_verilog.src`:
 
 ```make

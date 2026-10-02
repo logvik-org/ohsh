@@ -8,7 +8,7 @@ Run them with `python runner.py` in the example's directory.
 
 ## Simple: [`simple/runner.py`](simple/runner.py)
 
-The Verilog `counter` from the simple project on Icarus Verilog:
+The SystemVerilog `counter` from the simple project on Icarus Verilog:
 
 ```python
 sources = read_src(BUILD / "work_verilog.src")
@@ -31,7 +31,7 @@ Two runs on the advanced project:
    runner.test(hdl_toplevel="accumulator", hdl_toplevel_library="dsp_lib", ...)
    ```
 
-2. The Verilog `counter`, whose settings come from the header `counter_defs.vh`,
+2. The SystemVerilog `counter`, whose settings come from the header `counter_defs.vh`,
    on Icarus Verilog. The header is listed in the manifest before `counter.v`,
    so it comes first in `work_verilog.src`.
 

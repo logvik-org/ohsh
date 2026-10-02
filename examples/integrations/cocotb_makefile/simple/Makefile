@@ -1,4 +1,4 @@
-# cocotb Makefile flow, simple project: one Verilog module on Icarus Verilog.
+# cocotb Makefile flow, simple project: one SystemVerilog module on Icarus Verilog.
 #
 # ohsh writes the source lists while make reads this file, and VERILOG_SOURCES
 # comes straight from the list for the `work` library.

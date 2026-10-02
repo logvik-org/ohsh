@@ -41,7 +41,7 @@ def test_run_writes_ordered_src_files(tmp_path, make_module):
     assert work_v == [str(tmp_path / "top" / "top.v")]
     assert work_vhd == [str(tmp_path / "top" / "top_pkg.vhd")]
     assert math_vhd == [str(tmp_path / "adder" / "adder.vhd")]
-    # A dependency-only library with no Verilog gets no Verilog .src file.
+    # A dependency-only library with no SystemVerilog gets no SystemVerilog .src file.
     assert not (out / "math_lib_verilog.src").exists()
 
 

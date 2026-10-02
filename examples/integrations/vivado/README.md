@@ -21,5 +21,5 @@ ohsh -t ../../../projects/advanced -w dsp_lib -o build accumulator
 ```
 
 The script reads each library's files with `read_vhdl -library <library>` in
-the order of `libraries.src`. Verilog has no libraries in Vivado synthesis, so
-any Verilog files are read globally.
+the order of `libraries.src`. SystemVerilog has no libraries in Vivado synthesis, so
+any SystemVerilog files are read globally.

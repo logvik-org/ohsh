@@ -33,7 +33,7 @@ proc read_library_order {path} {
     return $libraries
 }
 
-# VHDL goes into named libraries, in library order. Verilog is global.
+# VHDL goes into named libraries, in library order. SystemVerilog is global.
 foreach lib [read_library_order build/libraries.src] {
     read_src build/${lib}_vhdl.src    vhdl    $lib
     read_src build/${lib}_verilog.src verilog $lib

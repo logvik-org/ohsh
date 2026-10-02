@@ -1,7 +1,7 @@
 # Example projects
 
 Two small HDL projects that the [integration examples](../integrations) resolve
-with ohsh. Both have the same VHDL `accumulator` and Verilog `counter`
+with ohsh. Both have the same VHDL `accumulator` and SystemVerilog `counter`
 interfaces, so the shared testbenches in [`../testbenches`](../testbenches)
 work with either.
 
@@ -13,7 +13,7 @@ Every module is in one library, the default `work`.
 |---|---|---|
 | `adder` | VHDL | |
 | `accumulator` | VHDL | `adder` (`work`) |
-| `counter` | Verilog | |
+| `counter` | SystemVerilog | |
 
 ```bash
 ohsh -t simple -o build accumulator
@@ -31,7 +31,7 @@ Modules spread over three libraries, the top one named with `-w`:
 | `adder` | VHDL | `math_lib` | `util_pkg` (`util_lib`) |
 | `acc_register` | VHDL | top library | |
 | `accumulator` | VHDL | top library | `adder` (`math_lib`), `acc_register` (`work`) |
-| `counter` | Verilog, with header `counter_defs.vh` | top library | |
+| `counter` | SystemVerilog, with header `counter_defs.vh` | top library | |
 
 The accumulator's manifest lists `acc_register` under `work`, which ohsh maps to
 whatever library the accumulator itself is compiled into, here the one given

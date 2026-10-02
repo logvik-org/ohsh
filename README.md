@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/logvik-org/ohsh/blob/main/LICENSE)
 
 **ohsh** is a small, deliberately humble command-line tool that figures out, in
-the right order, which HDL (Verilog / SystemVerilog / VHDL) source files your
+the right order, which HDL (SystemVerilog and VHDL) source files your
 design needs - by reading simple per-module `manifest.json` files and resolving
 their dependencies.
 
@@ -21,7 +21,7 @@ libraries?"* - and hands you plain `.src` lists you can feed anywhere.
 - Auto-discovers HDL module manifests anywhere under a project tree.
 - Resolves module dependencies recursively, across libraries.
 - Detects circular dependencies and exits with an error naming the cycle.
-- Emits ordered, per-library source lists for Verilog and VHDL.
+- Emits ordered, per-library source lists for SystemVerilog and VHDL.
 - Writes the order to compile the libraries in.
 - Validates that every referenced source file actually exists.
 - Pure Python, zero runtime dependencies.
@@ -49,7 +49,7 @@ ohsh [OPTIONS] MODULE
 ohsh will:
 1. Search for all `manifest*.json` files starting from `--top-dir`.
 2. Resolve dependencies for `MODULE` (the top-level).
-3. Generate ordered Verilog and VHDL source lists per library.
+3. Generate ordered SystemVerilog and VHDL source lists per library.
 4. Write them as `<lib>_verilog.src` / `<lib>_vhdl.src` in the output directory.
 5. Write the library compile order to `libraries.src`.
 
@@ -111,7 +111,7 @@ It writes `work_vhdl.src` with the sources in compile order:
 ```
 
 and `libraries.src` with the libraries to compile (here only `work`). Modules
-with Verilog sources go to `<lib>_verilog.src` in the same way. See
+with SystemVerilog sources go to `<lib>_verilog.src` in the same way. See
 [the manifest file format](https://github.com/logvik-org/ohsh/blob/main/docs/manifest-format.md)
 for dependencies across libraries.
 
