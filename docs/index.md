@@ -33,6 +33,10 @@ own manifest and ohsh lists only the files under it.
 ohsh. A manifest next to the submodule lists the files you use, in their own
 library, and every module that needs them names that library.
 
+**Manifests don't have to be written by hand.** ohsh can read the HDL sources
+and [create, fix and check the manifests](manifest-actions.md) for you. This is
+best effort, so review what it writes.
+
 ## Documentation
 
 - [Getting started](getting-started.md): install ohsh, write manifests, add

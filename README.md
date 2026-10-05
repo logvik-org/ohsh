@@ -31,6 +31,7 @@ tool projects or parse your HDL.
 - Emits ordered, per-library source lists for SystemVerilog and VHDL.
 - Writes the order to compile the libraries in.
 - Checks that every listed source file exists.
+- Creates, fixes and checks manifests by reading the HDL sources (best effort).
 - Pure Python with no runtime dependencies.
 
 ## Installation
