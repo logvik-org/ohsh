@@ -214,7 +214,7 @@ reads every file named `manifest*.json`, so name it `manifest_tb.json` next to
 [discovery and validation](manifest-format.md#discovery-and-validation).
 
 The lists then hold only the files that testbench needs, so the simulator
-compiles a few dozen files instead of the whole project.
+compiles only those files instead of the whole project.
 The top-level design is a module too, so the synthesis flow uses the same manifests.
 
 A common setup is a small Makefile next to each testbench that runs ohsh before
