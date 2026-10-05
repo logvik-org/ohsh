@@ -1,8 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
+from __future__ import annotations
+
+import argparse
 import json
 import logging
 import pathlib
 import sys
+from typing import NoReturn
 
 from .utils import (
     EXIT_CANNOT_CREATE_OUTPUT,
@@ -14,11 +18,11 @@ from .utils import (
     EXIT_NO_INPUT,
     CircularDependencyError,
     InvalidManifestError,
+    Manifest,
     MissingManifestError,
     discover_manifests,
     extract_dependencies,
     find_duplicate_modules,
-    find_manifest,
     order_libraries,
     remove_duplicates_keeping_first,
     to_absolute_path,
@@ -34,12 +38,17 @@ LIBRARY_ORDER_FILE_NAME = "libraries.src"
 logger = logging.getLogger(__name__)
 
 
-def _exit_with_error(message, code):
+def _exit_with_error(message: str, code: int) -> NoReturn:
     logger.error(message)
     sys.exit(code)
 
 
-def run(args, cwd):
+def run(args: argparse.Namespace, cwd: pathlib.Path) -> None:
+    """Resolve ``args.module`` and write its source lists to ``args.output``.
+
+    ``args`` holds the options defined by ``cli.build_parser``. On any error the
+    process exits with one of the ``EXIT_*`` codes.
+    """
     module = args.module
     top_dir = args.top_dir
     work = args.work
@@ -58,7 +67,7 @@ def run(args, cwd):
     all_manifest_files = discover_manifests(top_dir)
 
     # parse all manifest files
-    manifest_data = []
+    manifest_data: list[Manifest] = []
     for manifest_file in all_manifest_files:
         try:
             with open(manifest_file, encoding="utf-8") as file:
@@ -85,7 +94,9 @@ def run(args, cwd):
             EXIT_DUPLICATE_MODULE,
         )
 
-    top_manifest = find_manifest(manifest_data, module)
+    manifests_by_module = {manifest["module"]: manifest for manifest in manifest_data}
+
+    top_manifest = manifests_by_module.get(module)
     if top_manifest is None:
         _exit_with_error(
             f"The specified module {module} was not found in any manifest.", EXIT_MODULE_NOT_FOUND
@@ -94,7 +105,7 @@ def run(args, cwd):
 
     # Extract dependencies recursively
     try:
-        dependencies = extract_dependencies(manifest_data, top_manifest, work)
+        dependencies = extract_dependencies(manifests_by_module, top_manifest, work)
     except CircularDependencyError as e:
         _exit_with_error(f"Circular dependency detected: {e}", EXIT_CIRCULAR_DEPENDENCY)
     except MissingManifestError as e:
@@ -109,20 +120,20 @@ def run(args, cwd):
 
     logger.debug(f"Complete module list: {dependencies}")
 
-    library_order = order_libraries(manifest_data, dependencies)
+    library_order = order_libraries(manifests_by_module, dependencies)
     logger.info(f"Library compile order: {', '.join(library_order)}")
 
     # Extract source file list from all modules in the final dependencies list
-    source_files_by_lib = {}
+    source_files_by_lib: dict[str, dict[str, list[str]]] = {}
     for lib_name, module in dependencies:
         # Separate SystemVerilog and VHDL files
         systemverilog_sources = []
         vhdl_sources = []
 
-        manifest = find_manifest(manifest_data, module)
+        manifest = manifests_by_module[module]
         manifest_path = pathlib.Path(manifest["manifest_path"]).parent
-        sources = [str(manifest_path / source) for source in manifest.get("sources", [])]
-        for source in sources:
+        module_sources = [str(manifest_path / source) for source in manifest.get("sources", [])]
+        for source in module_sources:
             extension = pathlib.Path(source).suffix.lower()
             if extension in SYSTEMVERILOG_EXTENSIONS:
                 systemverilog_sources.append(source)

@@ -8,6 +8,14 @@ repos:
         args: [--fix]
       - id: ruff-format
 
+  # Pinned to the last release that installs on Python 3.9, which ohsh still
+  # supports and a dev environment may use.
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.19.1
+    hooks:
+      - id: mypy
+        files: ^ohsh/
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:

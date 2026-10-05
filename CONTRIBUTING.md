@@ -69,8 +69,10 @@ warning, like the Read the Docs build and CI.
 
 - All lint checks run through [pre-commit](https://pre-commit.com), which also
   pins their versions in `.pre-commit-config.yaml`: Python code is formatted and
-  linted with [ruff](https://docs.astral.sh/ruff/) (config in `pyproject.toml`),
-  shell scripts are checked with shellcheck, and workflows with actionlint.
+  linted with [ruff](https://docs.astral.sh/ruff/) and type-checked with
+  [mypy](https://mypy-lang.org) in strict mode (config for both in
+  `pyproject.toml`), shell scripts are checked with shellcheck, and workflows
+  with actionlint.
 - Keep ohsh dependency-free at runtime (standard library only).
 - Add a `# SPDX-License-Identifier: Apache-2.0` header to new modules in `ohsh/`.
 

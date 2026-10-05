@@ -9,6 +9,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - Lowered the minimum Python version from 3.9 to 3.6. Installing from source
   still needs Python 3.9 or newer.
+### Added
+- Type annotations across `ohsh`, checked with mypy in strict mode as part of
+  the lint checks, and a `py.typed` marker so type checkers use them in code
+  that imports `ohsh`.
 
 ## [0.1.2] - 2026-10-02
 
