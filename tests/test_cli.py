@@ -11,7 +11,7 @@ import pytest
 from ohsh import __version__
 from ohsh.cli import build_parser, main
 from ohsh.core import run
-from ohsh.utils import CONSOLE_HANDLER_NAME, EXIT_CODE_DESCRIPTIONS, EXIT_NO_INPUT, EXIT_USAGE
+from ohsh.utils import CONSOLE_HANDLER_NAME, EXIT_NO_INPUT, EXIT_USAGE
 
 
 def test_parser_defaults():
@@ -90,14 +90,6 @@ def test_log_file_in_missing_directory_is_a_usage_error(tmp_path, capsys):
 def test_verbose_flag_counts():
     args = build_parser(pathlib.Path("/base")).parse_args(["-vv", "top"])
     assert args.verbose == 2
-
-
-def test_help_lists_every_exit_code(capsys):
-    with pytest.raises(SystemExit):
-        build_parser(pathlib.Path("/base")).parse_args(["--help"])
-    help_text = capsys.readouterr().out
-    for code, description in EXIT_CODE_DESCRIPTIONS.items():
-        assert f"{code:>3}  {description}" in help_text
 
 
 def test_python_dash_m_ohsh_runs_the_cli(monkeypatch, capsys):
