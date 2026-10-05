@@ -36,10 +36,10 @@ def test_parser_all_options():
     assert args.log_file == pathlib.Path("x.log")
 
 
-def test_module_is_required():
-    parser = build_parser(pathlib.Path("/base"))
+def test_module_is_required(monkeypatch):
+    monkeypatch.setattr("sys.argv", ["ohsh"])
     with pytest.raises(SystemExit) as exc:
-        parser.parse_args([])
+        main()
     assert exc.value.code == EXIT_USAGE
 
 

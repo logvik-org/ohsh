@@ -20,6 +20,7 @@ from .utils import (
     InvalidManifestError,
     Manifest,
     MissingManifestError,
+    StrPath,
     discover_manifests,
     extract_dependencies,
     find_duplicate_modules,
@@ -44,12 +45,12 @@ SourcesByLanguage = Dict[str, List[str]]
 logger = logging.getLogger(__name__)
 
 
-def _exit_with_error(message: str, code: int) -> NoReturn:
+def exit_with_error(message: str, code: int) -> NoReturn:
     logger.error(message)
     sys.exit(code)
 
 
-def _load_manifests(top_dir: pathlib.Path) -> List[Manifest]:
+def load_manifests(top_dir: pathlib.Path) -> List[Manifest]:
     manifests: List[Manifest] = []
     for manifest_file in discover_manifests(top_dir):
         try:
@@ -57,48 +58,64 @@ def _load_manifests(top_dir: pathlib.Path) -> List[Manifest]:
                 manifest = json.load(file)
             validate_manifest(manifest)
         except (json.JSONDecodeError, UnicodeDecodeError) as e:
-            _exit_with_error(f"Error parsing JSON from {manifest_file}: {e}", EXIT_DATA_ERROR)
+            exit_with_error(f"Error parsing JSON from {manifest_file}: {e}", EXIT_DATA_ERROR)
         except InvalidManifestError as e:
-            _exit_with_error(f"Invalid manifest {manifest_file}: {e}", EXIT_DATA_ERROR)
+            exit_with_error(f"Invalid manifest {manifest_file}: {e}", EXIT_DATA_ERROR)
         except OSError as e:
-            _exit_with_error(f"File error reading {manifest_file}: {e}", EXIT_NO_INPUT)
+            exit_with_error(f"File error reading {manifest_file}: {e}", EXIT_NO_INPUT)
         manifest["manifest_path"] = str(manifest_file.resolve())
         manifests.append(manifest)
         logger.debug(f"Parsed manifest file: {manifest_file}")
     return manifests
 
 
-def _index_manifests_by_module(manifests: List[Manifest]) -> Dict[str, Manifest]:
+def resolve_top_dir(cwd: pathlib.Path, top_dir: StrPath) -> pathlib.Path:
+    absolute_top_dir = to_absolute_path(cwd, top_dir)
+    if not validate_top_dir(absolute_top_dir):
+        exit_with_error(
+            f"The specified top-level directory {absolute_top_dir} does not exist "
+            "or is not a directory.",
+            EXIT_NO_INPUT,
+        )
+    return absolute_top_dir
+
+
+def index_manifests_by_module(manifests: List[Manifest]) -> Dict[str, Manifest]:
     duplicates = find_duplicate_modules(manifests)
     if duplicates:
         listing = "\n".join(
             f"  {name}: {', '.join(sorted(paths))}" for name, paths in sorted(duplicates.items())
         )
-        _exit_with_error(
+        exit_with_error(
             f"Each module must be declared in exactly one manifest, but these are not:\n{listing}",
             EXIT_DUPLICATE_MODULE,
         )
     return {manifest["module"]: manifest for manifest in manifests}
 
 
+def find_manifest(manifests_by_module: Dict[str, Manifest], module: str) -> Manifest:
+    manifest = manifests_by_module.get(module)
+    if manifest is None:
+        exit_with_error(
+            f"The specified module {module} was not found in any manifest.",
+            EXIT_MODULE_NOT_FOUND,
+        )
+    logger.debug(f"Found module {module} in manifest.")
+    return manifest
+
+
 def _resolve_module_list(
     manifests_by_module: Dict[str, Manifest], top_module: str, work: str
 ) -> List[Dependency]:
     """Return every module needed to build ``top_module``, ending with ``top_module`` itself."""
-    top_manifest = manifests_by_module.get(top_module)
-    if top_manifest is None:
-        _exit_with_error(
-            f"The specified module {top_module} was not found in any manifest.",
-            EXIT_MODULE_NOT_FOUND,
-        )
-    logger.debug(f"Found module {top_module} in manifest.")
+    top_manifest = find_manifest(manifests_by_module, top_module)
 
     try:
         dependencies = extract_dependencies(manifests_by_module, top_manifest, work)
     except CircularDependencyError as e:
-        _exit_with_error(f"Circular dependency detected: {e}", EXIT_CIRCULAR_DEPENDENCY)
+        exit_with_error(f"Circular dependency detected: {e}", EXIT_CIRCULAR_DEPENDENCY)
     except MissingManifestError as e:
-        _exit_with_error(f"Missing dependency: {e}", EXIT_MANIFEST_NOT_FOUND)
+        exit_with_error(f"Missing dependency: {e}", EXIT_MANIFEST_NOT_FOUND)
 
     dependencies = remove_duplicates_keeping_first(dependencies)
     logger.debug(f"Dependencies for module {top_module}: {dependencies}")
@@ -108,7 +125,7 @@ def _resolve_module_list(
     return module_list
 
 
-def _find_language(source: str) -> Optional[str]:
+def find_language(source: str) -> Optional[str]:
     extension = pathlib.Path(source).suffix.lower()
     for language, extensions in EXTENSIONS_BY_LANGUAGE.items():
         if extension in extensions:
@@ -128,7 +145,7 @@ def _collect_sources_by_library(
         )
         for relative_source in manifest.get("sources", []):
             source = str(manifest_dir / relative_source)
-            language = _find_language(source)
+            language = find_language(source)
             if language is None:
                 logger.warning(f"Skipping {source} in module {module}: unknown file extension")
                 continue
@@ -155,7 +172,7 @@ def _exit_if_sources_missing(sources_by_library: Dict[str, SourcesByLanguage]) -
         if not pathlib.Path(source).exists()
     ]
     if missing_files:
-        _exit_with_error(f"The following source files do not exist: {missing_files}", EXIT_NO_INPUT)
+        exit_with_error(f"The following source files do not exist: {missing_files}", EXIT_NO_INPUT)
 
 
 def _write_lines(output_file: pathlib.Path, lines: List[str]) -> None:
@@ -173,7 +190,7 @@ def _write_source_lists(
     try:
         output_dir.mkdir(parents=True, exist_ok=True)
     except OSError as e:
-        _exit_with_error(
+        exit_with_error(
             f"Cannot create output directory {output_dir}: {e}", EXIT_CANNOT_CREATE_OUTPUT
         )
 
@@ -203,14 +220,8 @@ def run(args: argparse.Namespace, cwd: pathlib.Path) -> None:
     ``args`` holds the options defined by ``cli.build_parser``. On any error the
     process exits with one of the ``EXIT_*`` codes.
     """
-    top_dir = to_absolute_path(cwd, args.top_dir)
-    if not validate_top_dir(top_dir):
-        _exit_with_error(
-            f"The specified top-level directory {top_dir} does not exist or is not a directory.",
-            EXIT_NO_INPUT,
-        )
-
-    manifests_by_module = _index_manifests_by_module(_load_manifests(top_dir))
+    top_dir = resolve_top_dir(cwd, args.top_dir)
+    manifests_by_module = index_manifests_by_module(load_manifests(top_dir))
     module_list = _resolve_module_list(manifests_by_module, args.module, args.work)
 
     library_order = order_libraries(manifests_by_module, module_list)

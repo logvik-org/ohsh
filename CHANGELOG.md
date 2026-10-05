@@ -6,6 +6,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- `--create` writes a manifest for every source directory that has none,
+  with the dependencies and source order it reads from the sources. It shows
+  each manifest and asks before writing it. `--exclude` skips directories and
+  `--yes` writes everything without asking.
+- `--fix` adds missing dependencies to existing manifests and sorts their
+  sources into compile order.
+- `--check` reports the manifests `--fix` would change, useful for CI.
+
 ## [0.2.1] - 2026-10-05
 
 ### Fixed

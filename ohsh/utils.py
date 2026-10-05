@@ -34,6 +34,7 @@ EXIT_MODULE_NOT_FOUND = 100
 EXIT_MANIFEST_NOT_FOUND = 101
 EXIT_CIRCULAR_DEPENDENCY = 102
 EXIT_DUPLICATE_MODULE = 103
+EXIT_MANIFEST_OUTDATED = 104
 
 EXIT_CODE_DESCRIPTIONS = {
     EXIT_SUCCESS: "success",
@@ -46,6 +47,7 @@ EXIT_CODE_DESCRIPTIONS = {
     EXIT_MANIFEST_NOT_FOUND: "a dependency has no manifest",
     EXIT_CIRCULAR_DEPENDENCY: "modules depend on each other in a loop",
     EXIT_DUPLICATE_MODULE: "a module name is declared in more than one manifest",
+    EXIT_MANIFEST_OUTDATED: "--check found a manifest that does not match its sources",
 }
 
 
