@@ -1,12 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
-from __future__ import annotations
 
 import argparse
 import json
 import logging
 import pathlib
 import sys
-from typing import NoReturn
+from typing import Dict, List, NoReturn, Optional
 
 from .utils import (
     EXIT_CANNOT_CREATE_OUTPUT,
@@ -40,7 +39,7 @@ LANGUAGE_DISPLAY_NAMES = {"systemverilog": "SystemVerilog", "vhdl": "VHDL"}
 LIBRARY_ORDER_FILE_NAME = "libraries.src"
 
 # Source file paths of one library, keyed by language.
-SourcesByLanguage = dict[str, list[str]]
+SourcesByLanguage = Dict[str, List[str]]
 
 logger = logging.getLogger(__name__)
 
@@ -50,8 +49,8 @@ def _exit_with_error(message: str, code: int) -> NoReturn:
     sys.exit(code)
 
 
-def _load_manifests(top_dir: pathlib.Path) -> list[Manifest]:
-    manifests: list[Manifest] = []
+def _load_manifests(top_dir: pathlib.Path) -> List[Manifest]:
+    manifests: List[Manifest] = []
     for manifest_file in discover_manifests(top_dir):
         try:
             with open(manifest_file, encoding="utf-8") as file:
@@ -69,7 +68,7 @@ def _load_manifests(top_dir: pathlib.Path) -> list[Manifest]:
     return manifests
 
 
-def _index_manifests_by_module(manifests: list[Manifest]) -> dict[str, Manifest]:
+def _index_manifests_by_module(manifests: List[Manifest]) -> Dict[str, Manifest]:
     duplicates = find_duplicate_modules(manifests)
     if duplicates:
         listing = "\n".join(
@@ -83,8 +82,8 @@ def _index_manifests_by_module(manifests: list[Manifest]) -> dict[str, Manifest]
 
 
 def _resolve_module_list(
-    manifests_by_module: dict[str, Manifest], top_module: str, work: str
-) -> list[Dependency]:
+    manifests_by_module: Dict[str, Manifest], top_module: str, work: str
+) -> List[Dependency]:
     """Return every module needed to build ``top_module``, ending with ``top_module`` itself."""
     top_manifest = manifests_by_module.get(top_module)
     if top_manifest is None:
@@ -109,7 +108,7 @@ def _resolve_module_list(
     return module_list
 
 
-def _find_language(source: str) -> str | None:
+def _find_language(source: str) -> Optional[str]:
     extension = pathlib.Path(source).suffix.lower()
     for language, extensions in EXTENSIONS_BY_LANGUAGE.items():
         if extension in extensions:
@@ -118,9 +117,9 @@ def _find_language(source: str) -> str | None:
 
 
 def _collect_sources_by_library(
-    manifests_by_module: dict[str, Manifest], module_list: list[Dependency]
-) -> dict[str, SourcesByLanguage]:
-    sources_by_library: dict[str, SourcesByLanguage] = {}
+    manifests_by_module: Dict[str, Manifest], module_list: List[Dependency]
+) -> Dict[str, SourcesByLanguage]:
+    sources_by_library: Dict[str, SourcesByLanguage] = {}
     for lib_name, module in module_list:
         manifest = manifests_by_module[module]
         manifest_dir = pathlib.Path(manifest["manifest_path"]).parent
@@ -147,7 +146,7 @@ def _collect_sources_by_library(
     return sources_by_library
 
 
-def _exit_if_sources_missing(sources_by_library: dict[str, SourcesByLanguage]) -> None:
+def _exit_if_sources_missing(sources_by_library: Dict[str, SourcesByLanguage]) -> None:
     missing_files = [
         source
         for library_sources in sources_by_library.values()
@@ -159,7 +158,7 @@ def _exit_if_sources_missing(sources_by_library: dict[str, SourcesByLanguage]) -
         _exit_with_error(f"The following source files do not exist: {missing_files}", EXIT_NO_INPUT)
 
 
-def _write_lines(output_file: pathlib.Path, lines: list[str]) -> None:
+def _write_lines(output_file: pathlib.Path, lines: List[str]) -> None:
     with open(output_file, "w", encoding="utf-8") as f:
         for line in lines:
             f.write(f"{line}\n")
@@ -167,8 +166,8 @@ def _write_lines(output_file: pathlib.Path, lines: list[str]) -> None:
 
 def _write_source_lists(
     output_dir: pathlib.Path,
-    sources_by_library: dict[str, SourcesByLanguage],
-    library_order: list[str],
+    sources_by_library: Dict[str, SourcesByLanguage],
+    library_order: List[str],
 ) -> None:
     """Write one source list per library and language, plus the library compile order."""
     try:

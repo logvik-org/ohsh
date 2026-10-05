@@ -1,19 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 
-from __future__ import annotations
-
 import logging
 import os
 import pathlib
-from collections.abc import Hashable, Iterable
-from typing import Any, TypeVar
+from typing import Any, Dict, Hashable, Iterable, List, Optional, Set, Tuple, TypeVar, Union
 
 logger = logging.getLogger(__name__)
 
+# Annotations use the typing generics and no `X | Y` unions because ohsh runs on
+# Python 3.6, where the built-in forms fail at import time.
+StrPath = Union[str, "os.PathLike[str]"]
 # A parsed manifest file, plus the "manifest_path" key that run() adds.
-Manifest = dict[str, Any]
+Manifest = Dict[str, Any]
 # A (library, module) pair.
-Dependency = tuple[str, str]
+Dependency = Tuple[str, str]
 
 HashableT = TypeVar("HashableT", bound=Hashable)
 
@@ -50,7 +50,7 @@ EXIT_CODE_DESCRIPTIONS = {
 
 
 class CircularDependencyError(Exception):
-    def __init__(self, cycle: list[str]) -> None:
+    def __init__(self, cycle: List[str]) -> None:
         self.cycle = cycle
         super().__init__(" -> ".join(cycle))
 
@@ -88,14 +88,14 @@ def validate_manifest(manifest: object) -> None:
         raise InvalidManifestError('"dependencies" must map library names to lists of module names')
 
 
-def remove_duplicates_keeping_first(items: Iterable[HashableT]) -> list[HashableT]:
+def remove_duplicates_keeping_first(items: Iterable[HashableT]) -> List[HashableT]:
     # A dict keeps its keys unique and in insertion order, which a set would not.
     return list(dict.fromkeys(items))
 
 
-def find_duplicate_modules(manifest_data: list[Manifest]) -> dict[str, list[str]]:
+def find_duplicate_modules(manifest_data: List[Manifest]) -> Dict[str, List[str]]:
     """Return {module: [manifest paths]} for every module declared more than once."""
-    paths_by_module: dict[str, list[str]] = {}
+    paths_by_module: Dict[str, List[str]] = {}
     for manifest in manifest_data:
         paths_by_module.setdefault(manifest["module"], []).append(manifest["manifest_path"])
     return {module: paths for module, paths in paths_by_module.items() if len(paths) > 1}
@@ -107,8 +107,8 @@ def resolve_library_name(declared_library: str, current_library: str) -> str:
 
 
 def extract_dependencies(
-    manifests_by_module: dict[str, Manifest], top_manifest: Manifest, work: str
-) -> list[Dependency]:
+    manifests_by_module: Dict[str, Manifest], top_manifest: Manifest, work: str
+) -> List[Dependency]:
     """Return every module ``top_manifest`` depends on, directly or indirectly.
 
     The result is a list of (library, module) pairs in compile order: each module
@@ -117,9 +117,9 @@ def extract_dependencies(
     order, so it raises ``CircularDependencyError`` naming the modules in the cycle.
     A dependency without a manifest raises ``MissingManifestError``.
     """
-    collected_deps: list[Dependency] = []
-    dependency_chain: list[str] = []
-    resolved: set[Dependency] = set()
+    collected_deps: List[Dependency] = []
+    dependency_chain: List[str] = []
+    resolved: Set[Dependency] = set()
 
     def _collect_dependencies_of(manifest: Manifest, library: str) -> None:
         module_name: str = manifest["module"]
@@ -156,8 +156,8 @@ def extract_dependencies(
 
 
 def order_libraries(
-    manifests_by_module: dict[str, Manifest], dependencies: list[Dependency]
-) -> list[str]:
+    manifests_by_module: Dict[str, Manifest], dependencies: List[Dependency]
+) -> List[str]:
     """Return the libraries used in ``dependencies`` in compile order.
 
     Each library comes after the libraries its modules depend on. When libraries
@@ -166,7 +166,7 @@ def order_libraries(
     can still use.
     """
     libraries = remove_duplicates_keeping_first(library for library, _ in dependencies)
-    used_libraries: dict[str, set[str]] = {library: set() for library in libraries}
+    used_libraries: Dict[str, Set[str]] = {library: set() for library in libraries}
     for library, module in dependencies:
         manifest = manifests_by_module[module]
         for declared_library, modules in manifest.get("dependencies", {}).items():
@@ -174,7 +174,7 @@ def order_libraries(
             if modules and used_library != library:
                 used_libraries[library].add(used_library)
 
-    ordered: list[str] = []
+    ordered: List[str] = []
     while len(ordered) < len(libraries):
         remaining = [library for library in libraries if library not in ordered]
         ready = [library for library in remaining if used_libraries[library] <= set(ordered)]
@@ -191,8 +191,8 @@ def order_libraries(
 
 
 def _find_library_loop(
-    start: str, used_libraries: dict[str, set[str]], ordered: list[str]
-) -> list[str]:
+    start: str, used_libraries: Dict[str, Set[str]], ordered: List[str]
+) -> List[str]:
     # Every library still unordered uses at least one other unordered library,
     # so following those edges from any of them must eventually revisit one.
     path = [start]
@@ -203,11 +203,11 @@ def _find_library_loop(
         path.append(next_library)
 
 
-def validate_top_dir(top_dir: str | os.PathLike[str]) -> bool:
+def validate_top_dir(top_dir: StrPath) -> bool:
     return pathlib.Path(top_dir).is_dir()
 
 
-def to_absolute_path(cwd: str | os.PathLike[str], path: str | os.PathLike[str]) -> pathlib.Path:
+def to_absolute_path(cwd: StrPath, path: StrPath) -> pathlib.Path:
     """Return ``path`` as an absolute path, resolving a relative one against ``cwd``."""
     path = pathlib.Path(path)
     if not path.is_absolute():
@@ -215,9 +215,7 @@ def to_absolute_path(cwd: str | os.PathLike[str], path: str | os.PathLike[str]) 
     return path
 
 
-def configure_logging(
-    verbosity: int = 0, log_file: str | os.PathLike[str] | None = None
-) -> logging.Logger:
+def configure_logging(verbosity: int = 0, log_file: Optional[StrPath] = None) -> logging.Logger:
     """Configure logging for the ``ohsh`` package.
 
     Handlers are attached to the package logger (``ohsh``) so that messages from
@@ -254,7 +252,7 @@ def configure_logging(
     return pkg_logger
 
 
-def discover_manifests(top_dir: str | os.PathLike[str]) -> list[pathlib.Path]:
+def discover_manifests(top_dir: StrPath) -> List[pathlib.Path]:
     logger.debug(f"Discovering manifest files in {top_dir}")
     manifest_files = list(pathlib.Path(top_dir).rglob("manifest*.json"))
     for manifest in manifest_files:
