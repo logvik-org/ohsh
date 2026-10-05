@@ -26,10 +26,8 @@ ohsh my_top_module
 testbenches, your VUnit runs and your Vivado or Quartus build. A new dependency
 is added once, in one manifest, instead of in every tool's file list.
 
-**Compile only what a testbench needs.** Give each testbench its own manifest
-and ohsh lists just the files under it, not the whole project. In one FPGA
-project with about 1100 HDL files, a unit testbench compiles 35 of them and the
-full design 165.
+**Compile only what the design or the testbench needs.** Give each testbench its
+own manifest and ohsh lists just the files under it, not the whole project.
 
 **Third-party code stays untouched.** Vendor IP and libraries pulled in as git
 submodules don't need to know about ohsh. A manifest next to the submodule lists
