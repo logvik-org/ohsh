@@ -160,7 +160,8 @@ project/
     └── manifest.json
 ```
 
-`submodules/manifest_ipbus.json`:
+`submodules/manifest_ipbus.json` (ohsh picks up any file named
+`manifest*.json`):
 
 ```json
 {
@@ -207,6 +208,11 @@ and the modules it tests, and run ohsh with its name:
 ```bash
 ohsh -t ../.. slow_control_tb
 ```
+
+The testbench manifest can sit in the same directory as the module's own. ohsh
+reads every file named `manifest*.json`, so name it `manifest_tb.json` next to
+`manifest.json`. See
+[discovery and validation](manifest-format.md#discovery-and-validation).
 
 The lists then hold only the files that testbench needs, so the simulator
 compiles a few dozen files instead of the whole project. In one FPGA project

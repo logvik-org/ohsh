@@ -1,6 +1,6 @@
 # Manifest file format
 
-Each module gets a `manifest.json` next to its sources:
+Each module gets a manifest file, usually `manifest.json`, next to its sources:
 
 ```json
 {
@@ -47,6 +47,11 @@ them, split it into two modules.
 
 ## Discovery and validation
 
-ohsh reads every `manifest*.json` file under `--top-dir` and stops with exit
-code 65 if one is not valid JSON or does not have this structure. Unknown keys
-are ignored.
+ohsh searches `--top-dir` and all its subdirectories for files named
+`manifest*.json`. Any name that matches is read, so one directory can hold
+several manifests, for example `manifest.json` for a module and
+`manifest_tb.json` for its testbench. Each file still describes exactly one
+module.
+
+ohsh stops if a manifest is not valid JSON or does not have this structure.
+Unknown keys are ignored.
