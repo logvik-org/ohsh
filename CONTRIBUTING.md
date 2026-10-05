@@ -5,6 +5,9 @@ process is light.
 
 ## Development setup
 
+Development needs Python 3.9 or newer, although ohsh itself runs on 3.6: the
+build and lint tools have dropped the older versions.
+
 ```bash
 git clone https://github.com/logvik-org/ohsh.git
 cd ohsh
@@ -49,7 +52,7 @@ The make targets use `.venv` directly, so they work without activating it. When
 3. Update `CHANGELOG.md` under the `Unreleased` section.
 4. Keep commits focused and write clear commit messages.
 
-CI runs the pre-commit checks, the test matrix (Python 3.9-3.14, plus an
+CI runs the pre-commit checks, the test matrix (Python 3.6-3.14, plus an
 experimental 3.15 pre-release leg), a package build, and the end-to-end
 integration examples. PRs need a green pipeline to merge.
 

@@ -6,6 +6,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- Lowered the minimum Python version from 3.9 to 3.6. Installing from source
+  still needs Python 3.9 or newer.
+
 ## [0.1.2] - 2026-10-02
 
 ### Added

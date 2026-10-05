@@ -39,7 +39,7 @@ libraries?"* - and hands you plain `.src` lists you can feed anywhere.
 pip install ohsh
 ```
 
-Or from a clone:
+Or from a clone, which needs Python 3.9 or newer:
 
 ```bash
 git clone https://github.com/logvik-org/ohsh.git
