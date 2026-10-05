@@ -1,5 +1,6 @@
 """End-to-end tests for ohsh.core.run via the CLI parser."""
 
+import json
 import pathlib
 
 from ohsh.cli import build_parser
@@ -53,6 +54,30 @@ def test_run_puts_dependency_before_dependent_in_same_library(tmp_path, make_mod
     assert (out / "work_vhdl.src").read_text().splitlines() == [
         str(tmp_path / "counter" / "counter.vhd"),
         str(tmp_path / "top" / "top.vhd"),
+    ]
+
+
+def test_run_writes_file_shared_by_two_modules_once(tmp_path):
+    for source in ("pkg.vhd", "adder.vhd", "adder_tb.vhd"):
+        (tmp_path / source).touch()
+    (tmp_path / "manifest.json").write_text(
+        json.dumps({"module": "adder", "sources": ["pkg.vhd", "adder.vhd"]})
+    )
+    (tmp_path / "manifest_tb.json").write_text(
+        json.dumps(
+            {
+                "module": "adder_tb",
+                "sources": ["pkg.vhd", "adder_tb.vhd"],
+                "dependencies": {"work": ["adder"]},
+            }
+        )
+    )
+    out = tmp_path / "out"
+    assert _run(tmp_path, "adder_tb", out) == 0
+    assert (out / "work_vhdl.src").read_text().splitlines() == [
+        str(tmp_path / "pkg.vhd"),
+        str(tmp_path / "adder.vhd"),
+        str(tmp_path / "adder_tb.vhd"),
     ]
 
 

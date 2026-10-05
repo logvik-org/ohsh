@@ -15,6 +15,7 @@ from ohsh.utils import (
     extract_dependencies,
     find_duplicate_modules,
     order_libraries,
+    remove_duplicates_keeping_first,
     to_absolute_path,
     validate_manifest,
     validate_top_dir,
@@ -26,6 +27,11 @@ def _manifest(module, sources=None, dependencies=None):
     if dependencies is not None:
         m["dependencies"] = dependencies
     return m
+
+
+def test_remove_duplicates_keeping_first_keeps_first_occurrence_order():
+    sources = ["pkg.vhd", "a.vhd", "pkg.vhd", "b.vhd", "a.vhd"]
+    assert remove_duplicates_keeping_first(sources) == ["pkg.vhd", "a.vhd", "b.vhd"]
 
 
 def test_extract_dependencies_order_and_dedup():
