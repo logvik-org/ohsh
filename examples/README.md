@@ -14,21 +14,21 @@ examples are in [`testbenches/`](testbenches).
 
 | Tool | Simple | Advanced | Verified |
 |------|--------|----------|----------|
-| [cocotb (Makefile)](integrations/cocotb_makefile) | [simple](integrations/cocotb_makefile/simple) | [advanced](integrations/cocotb_makefile/advanced) | ✅ CI |
-| [cocotb (Python runner)](integrations/cocotb_runner) | [simple](integrations/cocotb_runner/simple) | [advanced](integrations/cocotb_runner/advanced) | ✅ CI |
-| [VUnit](integrations/vunit) | [simple](integrations/vunit/simple) | [advanced](integrations/vunit/advanced) | ✅ CI |
-| [GHDL](integrations/ghdl) | [simple](integrations/ghdl/simple) | [advanced](integrations/ghdl/advanced) | ✅ CI |
-| [NVC](integrations/nvc) | [simple](integrations/nvc/simple) | [advanced](integrations/nvc/advanced) | ✅ CI |
-| [UVVM](integrations/uvvm) | [simple](integrations/uvvm/simple) | [advanced](integrations/uvvm/advanced) | ✅ CI |
-| [hog](integrations/hog) | [simple](integrations/hog/simple) | [advanced](integrations/hog/advanced) | ✅ CI (list files) |
-| [Questa / ModelSim](integrations/questa) | [simple](integrations/questa/simple) | [advanced](integrations/questa/advanced) | ⚠️ doc |
-| [Vivado](integrations/vivado) | [simple](integrations/vivado/simple) | [advanced](integrations/vivado/advanced) | ⚠️ doc |
-| [Quartus](integrations/quartus) | [simple](integrations/quartus/simple) | [advanced](integrations/quartus/advanced) | ⚠️ doc |
+| [cocotb (Makefile)](integrations/cocotb_makefile) | [simple](integrations/cocotb_makefile/simple) | [advanced](integrations/cocotb_makefile/advanced) | CI |
+| [cocotb (Python runner)](integrations/cocotb_runner) | [simple](integrations/cocotb_runner/simple) | [advanced](integrations/cocotb_runner/advanced) | CI |
+| [VUnit](integrations/vunit) | [simple](integrations/vunit/simple) | [advanced](integrations/vunit/advanced) | CI |
+| [GHDL](integrations/ghdl) | [simple](integrations/ghdl/simple) | [advanced](integrations/ghdl/advanced) | CI |
+| [NVC](integrations/nvc) | [simple](integrations/nvc/simple) | [advanced](integrations/nvc/advanced) | CI |
+| [UVVM](integrations/uvvm) | [simple](integrations/uvvm/simple) | [advanced](integrations/uvvm/advanced) | CI |
+| [hog](integrations/hog) | [simple](integrations/hog/simple) | [advanced](integrations/hog/advanced) | CI (list files) |
+| [Questa / ModelSim](integrations/questa) | [simple](integrations/questa/simple) | [advanced](integrations/questa/advanced) | docs only |
+| [Vivado](integrations/vivado) | [simple](integrations/vivado/simple) | [advanced](integrations/vivado/advanced) | docs only |
+| [Quartus](integrations/quartus) | [simple](integrations/quartus/simple) | [advanced](integrations/quartus/advanced) | docs only |
 
-**✅ CI** means both examples run on every pull request in
+**CI** means both examples run on every pull request in
 [`.github/workflows/integration.yml`](../.github/workflows/integration.yml),
 with self-checking testbenches that fail if a source list is wrong. For hog, CI
-checks the generated list files with hog's own reader. **⚠️ doc** examples are
+checks the generated list files with hog's own reader. **docs only** examples are
 checked against the vendor's documented commands, but can't run on a public CI
 runner because the tools are licensed.
 

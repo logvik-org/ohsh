@@ -13,15 +13,15 @@
 [![Python](https://img.shields.io/pypi/pyversions/ohsh.svg)](https://pypi.org/project/ohsh/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/logvik-org/ohsh/blob/main/LICENSE)
 
-**ohsh** is a small, deliberately humble command-line tool that figures out, in
-the right order, which HDL (SystemVerilog and VHDL) source files your
-design needs - by reading simple per-module `manifest.json` files and resolving
-their dependencies.
+**ohsh** is a humble command-line tool that works out which HDL source files
+(SystemVerilog and VHDL) a design needs and in what order to compile them. Each
+module gets a `manifest.json` that lists its sources and the modules it depends
+on. ohsh reads the manifests and writes plain `.src` file lists, one per
+library and language.
 
-It is a *companion* to the big build flows (like [hog](https://hog.readthedocs.io),
-Vivado, Quartus, Questa, cocotb, VUnit, …), not a replacement for them. ohsh
-just answers one question well - *"what files, in what order, for which
-libraries?"* - and hands you plain `.src` lists you can feed anywhere.
+ohsh works alongside build flows such as [hog](https://hog.readthedocs.io),
+Vivado, Quartus, Questa, cocotb and VUnit. It does not run simulators, manage
+tool projects or parse your HDL.
 
 ## Features
 
@@ -30,8 +30,8 @@ libraries?"* - and hands you plain `.src` lists you can feed anywhere.
 - Detects circular dependencies and exits with an error naming the cycle.
 - Emits ordered, per-library source lists for SystemVerilog and VHDL.
 - Writes the order to compile the libraries in.
-- Validates that every referenced source file actually exists.
-- Pure Python, zero runtime dependencies.
+- Checks that every listed source file exists.
+- Pure Python with no runtime dependencies.
 
 ## Installation
 
@@ -148,5 +148,3 @@ Licensed under the **Apache License 2.0**. See [LICENSE](https://github.com/logv
 ## Author
 
 **Ola Groettvik** - [GitHub](https://github.com/olagrottvik)
-
-Contributions, issues, and suggestions are welcome!
