@@ -166,3 +166,7 @@ Licensed under the **Apache License 2.0**. See [LICENSE](https://github.com/logv
 ## Author
 
 **Ola Groettvik** - [GitHub](https://github.com/olagrottvik)
+
+### AI assistance
+
+ohsh started as a hand-written script. Most later development was done with AI assistance, with all changes reviewed and tested by the author.
