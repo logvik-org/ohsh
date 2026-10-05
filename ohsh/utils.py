@@ -76,6 +76,11 @@ def validate_manifest(manifest):
         raise InvalidManifestError('"dependencies" must map library names to lists of module names')
 
 
+def remove_duplicates_keeping_first(items):
+    # A dict keeps its keys unique and in insertion order, which a set would not.
+    return list(dict.fromkeys(items))
+
+
 def find_duplicate_modules(manifest_data):
     """Return {module: [manifest paths]} for every module declared more than once."""
     paths_by_module = {}
@@ -148,7 +153,7 @@ def order_libraries(manifest_data, dependencies):
     and a best-effort order is returned, which tools that sort files themselves
     can still use.
     """
-    libraries = list(dict.fromkeys(library for library, _ in dependencies))
+    libraries = remove_duplicates_keeping_first(library for library, _ in dependencies)
     used_libraries = {library: set() for library in libraries}
     for library, module in dependencies:
         manifest = find_manifest(manifest_data, module)

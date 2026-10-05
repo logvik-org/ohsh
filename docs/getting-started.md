@@ -1,9 +1,9 @@
 # Getting started
 
-This page takes you from installing ohsh to compiling its output with a
-simulator. It uses a three-module project, the same one the
-[examples](https://github.com/logvik-org/ohsh/tree/main/examples/projects/simple)
-use.
+This page installs ohsh, describes a three-module project with manifests and
+compiles the output with a simulator. The project is the
+[simple example](https://github.com/logvik-org/ohsh/tree/main/examples/projects/simple)
+from the repository.
 
 ## Install
 
@@ -144,10 +144,9 @@ Loop over `libraries.src` and compile each library's lists in turn. The
 
 ## Third-party libraries
 
-ohsh is most useful once a design pulls in code from elsewhere: vendor IP,
-libraries from other groups, open-source cores. Keep such code exactly as it
-comes, for example as a git submodule, and put a manifest *next to* it instead
-of inside it. The manifest's paths point into the submodule and list the files
+Designs often pull in code from elsewhere, such as vendor IP, libraries from
+other groups or open-source cores. Keep that code unmodified, for example as a
+git submodule, and put a manifest next to it instead of inside it. The manifest's paths point into the submodule and list the files
 you use, in compile order:
 
 ```
@@ -160,7 +159,8 @@ project/
     └── manifest.json
 ```
 
-`submodules/manifest_ipbus.json`:
+`submodules/manifest_ipbus.json` (ohsh picks up any file named
+`manifest*.json`):
 
 ```json
 {
@@ -208,11 +208,14 @@ and the modules it tests, and run ohsh with its name:
 ohsh -t ../.. slow_control_tb
 ```
 
+The testbench manifest can sit in the same directory as the module's own. ohsh
+reads every file named `manifest*.json`, so name it `manifest_tb.json` next to
+`manifest.json`. See
+[discovery and validation](manifest-format.md#discovery-and-validation).
+
 The lists then hold only the files that testbench needs, so the simulator
-compiles a few dozen files instead of the whole project. In one FPGA project
-with about 1100 HDL files, most of them in third-party submodules, a unit
-testbench compiles 35 files while the full design compiles 165. The full design
-is just another module, so the synthesis flow uses the same manifests.
+compiles only those files instead of the whole project.
+The top-level design is a module too, so the synthesis flow uses the same manifests.
 
 A common setup is a small Makefile next to each testbench that runs ohsh before
 the simulator. See the [cocotb Makefile example](https://github.com/logvik-org/ohsh/tree/main/examples/integrations/cocotb_makefile).

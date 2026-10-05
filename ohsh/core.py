@@ -20,6 +20,7 @@ from .utils import (
     find_duplicate_modules,
     find_manifest,
     order_libraries,
+    remove_duplicates_keeping_first,
     to_absolute_path,
     validate_manifest,
     validate_top_dir,
@@ -100,7 +101,7 @@ def run(args, cwd):
         _exit_with_error(f"Missing dependency: {e}", EXIT_MANIFEST_NOT_FOUND)
 
     # Remove duplicate entries
-    dependencies = list(dict.fromkeys(dependencies))
+    dependencies = remove_duplicates_keeping_first(dependencies)
     logger.debug(f"Dependencies for module {module}: {dependencies}")
 
     # Append the top manifest module with the work library to the dependencies list
@@ -140,10 +141,12 @@ def run(args, cwd):
                 "vhdl": vhdl_sources,
             }
 
-    # Remove duplicate source files while preserving order within each library
+    # Two modules in one library may list the same file, which must be compiled only once.
+    # `sources` is the dict stored in source_files_by_lib, not a copy, so assigning to its
+    # keys updates source_files_by_lib itself.
     for lib_name, sources in source_files_by_lib.items():
-        sources["systemverilog"] = list(dict.fromkeys(sources["systemverilog"]))
-        sources["vhdl"] = list(dict.fromkeys(sources["vhdl"]))
+        sources["systemverilog"] = remove_duplicates_keeping_first(sources["systemverilog"])
+        sources["vhdl"] = remove_duplicates_keeping_first(sources["vhdl"])
         logger.debug(
             f"Source files for library {lib_name}: SystemVerilog: {sources['systemverilog']}, VHDL: {sources['vhdl']}"
         )
