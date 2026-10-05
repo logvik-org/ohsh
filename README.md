@@ -50,6 +50,9 @@ pip install .
 
 ## Usage
 
+The [Getting started](https://ohsh.readthedocs.io/en/latest/getting-started.html)
+guide walks through a small project from install to compiled sources.
+
 ```bash
 ohsh [OPTIONS] MODULE
 ```
