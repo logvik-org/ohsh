@@ -1,7 +1,8 @@
 # Getting started
 
-This page installs ohsh, describes a three-module project with manifests and
-compiles the output with a simulator. The project is the
+This page installs ohsh, describes a three-module project with manifests,
+shows how ohsh can generate those manifests, and compiles the output with a
+simulator. The project is the
 [simple example](https://github.com/logvik-org/ohsh/tree/main/examples/projects/simple)
 from the repository.
 
@@ -63,6 +64,98 @@ project/
 
 `work` means "the same library as the module that uses it". The
 [manifest format](manifest-format.md) page has every field.
+
+## Let ohsh write the manifests
+
+The manifests above can also be generated. ohsh has three options that read the
+sources and create or update manifests. See [Create, fix and check manifests](manifest-actions.md).
+
+### Create the manifests
+
+In a project without manifests, run `--create`:
+
+```bash
+cd project
+ohsh --create
+```
+
+ohsh prints each manifest and asks before it writes the file:
+
+```
+accumulator/manifest.json
+  {
+    "module": "accumulator",
+    "sources": [
+      "accumulator.vhd"
+    ],
+    "dependencies": {
+      "work": [
+        "adder"
+      ]
+    }
+  }
+Create accumulator/manifest.json? [y]es, [n]o, [a]ll, [q]uit:
+```
+
+The dependency on the adder comes from the line `add_i : entity work.adder` in
+`accumulator.vhd`. At the end ohsh prints a summary:
+
+```
+Created 3 of 3 proposed manifests
+Nothing depends on these new modules (top-levels or testbenches): accumulator, counter
+```
+
+These are the same three manifests as in the previous section. Check that the
+modules are split and named the way you want, since ohsh simply makes one
+module per directory. `--create` skips directories that already have a
+manifest, so you can run it again when you add a directory.
+
+### Update them when the sources change
+
+Suppose `accumulator.vhd` now also instantiates the counter:
+
+```vhdl
+u_counter : entity work.counter port map (clk => clk, rst => rst, count => open);
+```
+
+The manifest of the accumulator needs a new dependency. Run `--fix` to add it:
+
+```bash
+ohsh --fix
+```
+
+```
+Fixed accumulator/manifest.json
+  missing dependency: counter (library work)
+```
+
+`--fix` also puts the `sources` of a module in compile order, for example a
+package before the file that uses it. It never removes a dependency. To limit
+it to one module and its dependencies, give the module name, as in
+`ohsh --fix accumulator`.
+
+### Check them
+
+`--check` reports what `--fix` would change, and writes nothing:
+
+```bash
+ohsh --check
+```
+
+```
+All 3 manifests match their sources
+```
+
+Had you run it before `--fix`, the output would have been:
+
+```
+accumulator/manifest.json
+  missing dependency: counter (library work)
+1 of 3 manifests need fixing, run ohsh --fix
+```
+
+In that case the exit code is 104, which makes `--check` useful in CI. It
+accepts a module name in the same way as `--fix`.
 
 ## Run ohsh
 

@@ -72,6 +72,23 @@ ohsh will:
 | `--version`         | Print version and exit.                                                |              |
 | `-h`, `--help`      | Show help and exit.                                                    |              |
 
+### Manifest actions
+
+These options work on the manifests under `--top-dir` instead of writing source
+lists. They read the sources to find which design units each file declares and
+uses. `--fix` and `--check` work on all modules, or on `MODULE` and its
+dependencies when one is given. See
+[Create, fix and check manifests](https://ohsh.readthedocs.io/en/latest/manifest-actions.html).
+
+| Option              | Description                                                            | Default      |
+|---------------------|------------------------------------------------------------------------|--------------|
+| `--create`          | Write a manifest for every source directory that has none.             |              |
+| `--fix`             | Add missing dependencies to the manifests and sort their sources.      |              |
+| `--check`           | Report manifests that `--fix` would change, exit 104 if there are any. |              |
+| `--exclude PATTERN` | With `--create`, skip directories matching this glob pattern.          | none         |
+| `-y`, `--yes`       | With `--create`, write every manifest without asking.                  | ask          |
+| `--no-deps`         | With `--fix` or `--check` and `MODULE`, leave its dependencies alone.  |              |
+
 ### Example
 
 Give each module a `manifest.json` next to its sources:
@@ -137,6 +154,7 @@ The full documentation is at [ohsh.readthedocs.io](https://ohsh.readthedocs.io):
 - [Getting started](https://ohsh.readthedocs.io/en/latest/getting-started.html)
 - [Manifest file format](https://ohsh.readthedocs.io/en/latest/manifest-format.html)
 - [Integrations with simulators and build tools](https://ohsh.readthedocs.io/en/latest/integrations.html)
+- [Create, fix and check manifests](https://ohsh.readthedocs.io/en/latest/manifest-actions.html)
 - [Exit codes](https://ohsh.readthedocs.io/en/latest/exit-codes.html)
 - [Contributing and development](https://github.com/logvik-org/ohsh/blob/main/CONTRIBUTING.md)
 

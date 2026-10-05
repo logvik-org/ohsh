@@ -39,6 +39,8 @@ library, and every module that needs them names that library.
   third-party libraries and compile the result.
 - [Manifest file format](manifest-format.md): every field of a manifest, and
   what order things go in.
+- [Create, fix and check manifests](manifest-actions.md): let ohsh create manifests
+  for an existing source tree, and keep them in line with the sources.
 - [Integrations](integrations.md): runnable examples for simulators and build
   tools.
 - [Exit codes](exit-codes.md): what each exit code means.
@@ -61,6 +63,7 @@ Home <self>
 
 getting-started
 manifest-format
+manifest-actions
 integrations
 exit-codes
 ```
