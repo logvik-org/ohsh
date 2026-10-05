@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
+
 import argparse
 import pathlib
 
@@ -8,14 +10,14 @@ from .core import run
 from .utils import configure_logging
 
 
-def log_file_path(value):
+def log_file_path(value: str) -> pathlib.Path:
     path = pathlib.Path(value)
     if not path.parent.is_dir():
         raise argparse.ArgumentTypeError(f"directory does not exist: {path.parent}")
     return path
 
 
-def build_parser(cwd):
+def build_parser(cwd: pathlib.Path) -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="ohsh",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -62,7 +64,7 @@ def build_parser(cwd):
     return parser
 
 
-def main():
+def main() -> None:
     cwd = pathlib.Path.cwd()
     parser = build_parser(cwd)
     args = parser.parse_args()

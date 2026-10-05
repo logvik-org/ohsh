@@ -6,9 +6,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-05
+
 ### Changed
 - Lowered the minimum Python version from 3.9 to 3.6. Installing from source
   still needs Python 3.9 or newer.
+
+### Added
+- Type annotations across `ohsh`, checked with mypy in strict mode as part of
+  the lint checks, and a `py.typed` marker so type checkers use them in code
+  that imports `ohsh`.
 
 ## [0.1.2] - 2026-10-02
 
@@ -36,7 +43,8 @@ First release.
 - Integration examples for cocotb, VUnit, GHDL, NVC, UVVM, hog, Questa, Vivado
   and Quartus.
 
-[Unreleased]: https://github.com/logvik-org/ohsh/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/logvik-org/ohsh/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/logvik-org/ohsh/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/logvik-org/ohsh/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/logvik-org/ohsh/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/logvik-org/ohsh/releases/tag/v0.1.0

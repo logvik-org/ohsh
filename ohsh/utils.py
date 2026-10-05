@@ -1,9 +1,21 @@
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
+
 import logging
+import os
 import pathlib
+from collections.abc import Hashable, Iterable
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
+
+# A parsed manifest file, plus the "manifest_path" key that run() adds.
+Manifest = dict[str, Any]
+# A (library, module) pair.
+Dependency = tuple[str, str]
+
+HashableT = TypeVar("HashableT", bound=Hashable)
 
 CONSOLE_HANDLER_NAME = "ohsh-console"
 CONSOLE_LEVEL_BY_VERBOSITY = {0: logging.WARNING, 1: logging.INFO}
@@ -38,13 +50,13 @@ EXIT_CODE_DESCRIPTIONS = {
 
 
 class CircularDependencyError(Exception):
-    def __init__(self, cycle):
+    def __init__(self, cycle: list[str]) -> None:
         self.cycle = cycle
         super().__init__(" -> ".join(cycle))
 
 
 class MissingManifestError(Exception):
-    def __init__(self, module, required_by):
+    def __init__(self, module: str, required_by: str) -> None:
         self.module = module
         self.required_by = required_by
         super().__init__(f"no manifest found for module {module} (required by {required_by})")
@@ -54,11 +66,11 @@ class InvalidManifestError(Exception):
     pass
 
 
-def _is_list_of_strings(value):
+def _is_list_of_strings(value: object) -> bool:
     return isinstance(value, list) and all(isinstance(item, str) for item in value)
 
 
-def validate_manifest(manifest):
+def validate_manifest(manifest: object) -> None:
     """Raise ``InvalidManifestError`` naming the first structural problem in ``manifest``.
 
     ``sources`` and ``dependencies`` are optional. Unknown keys are ignored.
@@ -76,29 +88,27 @@ def validate_manifest(manifest):
         raise InvalidManifestError('"dependencies" must map library names to lists of module names')
 
 
-def remove_duplicates_keeping_first(items):
+def remove_duplicates_keeping_first(items: Iterable[HashableT]) -> list[HashableT]:
     # A dict keeps its keys unique and in insertion order, which a set would not.
     return list(dict.fromkeys(items))
 
 
-def find_duplicate_modules(manifest_data):
+def find_duplicate_modules(manifest_data: list[Manifest]) -> dict[str, list[str]]:
     """Return {module: [manifest paths]} for every module declared more than once."""
-    paths_by_module = {}
+    paths_by_module: dict[str, list[str]] = {}
     for manifest in manifest_data:
         paths_by_module.setdefault(manifest["module"], []).append(manifest["manifest_path"])
     return {module: paths for module, paths in paths_by_module.items() if len(paths) > 1}
 
 
-def find_manifest(manifest_data, module):
-    return next((m for m in manifest_data if m.get("module") == module), None)
-
-
-def resolve_library_name(declared_library, current_library):
+def resolve_library_name(declared_library: str, current_library: str) -> str:
     # In a manifest, 'work' means the library the module itself is compiled into.
     return current_library if declared_library == "work" else declared_library
 
 
-def extract_dependencies(manifest_data, top_manifest, work):
+def extract_dependencies(
+    manifests_by_module: dict[str, Manifest], top_manifest: Manifest, work: str
+) -> list[Dependency]:
     """Return every module ``top_manifest`` depends on, directly or indirectly.
 
     The result is a list of (library, module) pairs in compile order: each module
@@ -107,12 +117,12 @@ def extract_dependencies(manifest_data, top_manifest, work):
     order, so it raises ``CircularDependencyError`` naming the modules in the cycle.
     A dependency without a manifest raises ``MissingManifestError``.
     """
-    collected_deps = []
-    dependency_chain = []
-    resolved = set()
+    collected_deps: list[Dependency] = []
+    dependency_chain: list[str] = []
+    resolved: set[Dependency] = set()
 
-    def _collect_dependencies_of(manifest, library):
-        module_name = manifest.get("module")
+    def _collect_dependencies_of(manifest: Manifest, library: str) -> None:
+        module_name: str = manifest["module"]
         # The same module reached through another library resolves its 'work'
         # dependencies differently, so only skip exact (library, module) repeats.
         if (library, module_name) in resolved:
@@ -129,7 +139,7 @@ def extract_dependencies(manifest_data, top_manifest, work):
                     raise CircularDependencyError(dependency_chain[cycle_start:] + [module])
 
                 # Recurse first so deeper dependencies are collected before this one.
-                dep_manifest = find_manifest(manifest_data, module)
+                dep_manifest = manifests_by_module.get(module)
                 if dep_manifest is None:
                     raise MissingManifestError(module, required_by=module_name)
                 _collect_dependencies_of(dep_manifest, lib_name)
@@ -145,7 +155,9 @@ def extract_dependencies(manifest_data, top_manifest, work):
     return collected_deps
 
 
-def order_libraries(manifest_data, dependencies):
+def order_libraries(
+    manifests_by_module: dict[str, Manifest], dependencies: list[Dependency]
+) -> list[str]:
     """Return the libraries used in ``dependencies`` in compile order.
 
     Each library comes after the libraries its modules depend on. When libraries
@@ -154,15 +166,15 @@ def order_libraries(manifest_data, dependencies):
     can still use.
     """
     libraries = remove_duplicates_keeping_first(library for library, _ in dependencies)
-    used_libraries = {library: set() for library in libraries}
+    used_libraries: dict[str, set[str]] = {library: set() for library in libraries}
     for library, module in dependencies:
-        manifest = find_manifest(manifest_data, module)
+        manifest = manifests_by_module[module]
         for declared_library, modules in manifest.get("dependencies", {}).items():
             used_library = resolve_library_name(declared_library, library)
             if modules and used_library != library:
                 used_libraries[library].add(used_library)
 
-    ordered = []
+    ordered: list[str] = []
     while len(ordered) < len(libraries):
         remaining = [library for library in libraries if library not in ordered]
         ready = [library for library in remaining if used_libraries[library] <= set(ordered)]
@@ -178,7 +190,9 @@ def order_libraries(manifest_data, dependencies):
     return ordered
 
 
-def _find_library_loop(start, used_libraries, ordered):
+def _find_library_loop(
+    start: str, used_libraries: dict[str, set[str]], ordered: list[str]
+) -> list[str]:
     # Every library still unordered uses at least one other unordered library,
     # so following those edges from any of them must eventually revisit one.
     path = [start]
@@ -189,11 +203,11 @@ def _find_library_loop(start, used_libraries, ordered):
         path.append(next_library)
 
 
-def validate_top_dir(top_dir):
+def validate_top_dir(top_dir: str | os.PathLike[str]) -> bool:
     return pathlib.Path(top_dir).is_dir()
 
 
-def to_absolute_path(cwd, path):
+def to_absolute_path(cwd: str | os.PathLike[str], path: str | os.PathLike[str]) -> pathlib.Path:
     """Return ``path`` as an absolute path, resolving a relative one against ``cwd``."""
     path = pathlib.Path(path)
     if not path.is_absolute():
@@ -201,7 +215,9 @@ def to_absolute_path(cwd, path):
     return path
 
 
-def configure_logging(verbosity=0, log_file=None):
+def configure_logging(
+    verbosity: int = 0, log_file: str | os.PathLike[str] | None = None
+) -> logging.Logger:
     """Configure logging for the ``ohsh`` package.
 
     Handlers are attached to the package logger (``ohsh``) so that messages from
@@ -238,7 +254,7 @@ def configure_logging(verbosity=0, log_file=None):
     return pkg_logger
 
 
-def discover_manifests(top_dir):
+def discover_manifests(top_dir: str | os.PathLike[str]) -> list[pathlib.Path]:
     logger.debug(f"Discovering manifest files in {top_dir}")
     manifest_files = list(pathlib.Path(top_dir).rglob("manifest*.json"))
     for manifest in manifest_files:

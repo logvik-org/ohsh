@@ -77,6 +77,9 @@ version = { attr = "ohsh.__version__" }
 where = ["."]
 include = ["ohsh*"]
 
+[tool.setuptools.package-data]
+ohsh = ["py.typed"]
+
 [tool.ruff]
 line-length = 100
 # The oldest version ruff can target. ohsh supports 3.6, which only the CI test
@@ -87,6 +90,11 @@ target-version = "py37"
 select = ["E", "F", "W", "I", "UP", "B"]
 # UP021 and UP022 rewrite subprocess calls to arguments that Python 3.6 lacks.
 ignore = ["E501", "UP021", "UP022"]
+
+[tool.mypy]
+files = ["ohsh"]
+python_version = "3.9"
+strict = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -29,6 +29,10 @@ def _manifest(module, sources=None, dependencies=None):
     return m
 
 
+def _by_module(manifests):
+    return {manifest["module"]: manifest for manifest in manifests}
+
+
 def test_remove_duplicates_keeping_first_keeps_first_occurrence_order():
     sources = ["pkg.vhd", "a.vhd", "pkg.vhd", "b.vhd", "a.vhd"]
     assert remove_duplicates_keeping_first(sources) == ["pkg.vhd", "a.vhd", "b.vhd"]
@@ -42,7 +46,7 @@ def test_extract_dependencies_order_and_dedup():
         _manifest("c"),
     ]
     top = data[0]
-    deps = extract_dependencies(data, top, "work")
+    deps = extract_dependencies(_by_module(data), top, "work")
     # c must come before a and b (compile order), and appear only once.
     assert deps == [("work", "c"), ("work", "a"), ("work", "b")]
 
@@ -55,7 +59,7 @@ def test_extract_dependencies_work_remap_for_nested():
         _manifest("a", dependencies={"work": ["b"]}),
         _manifest("b"),
     ]
-    deps = extract_dependencies(data, data[0], "work")
+    deps = extract_dependencies(_by_module(data), data[0], "work")
     assert deps == [("mylib", "b"), ("mylib", "a")]
 
 
@@ -78,7 +82,7 @@ def test_extract_dependencies_walks_shared_module_once():
         _manifest("b", dependencies={"work": ["c"]}),
         shared,
     ]
-    extract_dependencies(data, data[0], "work")
+    extract_dependencies(_by_module(data), data[0], "work")
     assert shared.dependency_reads == 1
 
 
@@ -88,7 +92,7 @@ def test_extract_dependencies_same_module_in_two_libraries():
         _manifest("a", dependencies={"work": ["b"]}),
         _manifest("b"),
     ]
-    deps = extract_dependencies(data, data[0], "work")
+    deps = extract_dependencies(_by_module(data), data[0], "work")
     assert deps == [("work", "b"), ("work", "a"), ("lib2", "b"), ("lib2", "a")]
 
 
@@ -99,14 +103,14 @@ def test_extract_dependencies_circular_raises_with_cycle_path():
         _manifest("b", dependencies={"work": ["a"]}),
     ]
     with pytest.raises(CircularDependencyError) as excinfo:
-        extract_dependencies(data, data[0], "work")
+        extract_dependencies(_by_module(data), data[0], "work")
     assert excinfo.value.cycle == ["a", "b", "a"]
 
 
 def test_extract_dependencies_self_dependency_raises():
     data = [_manifest("a", dependencies={"work": ["a"]})]
     with pytest.raises(CircularDependencyError):
-        extract_dependencies(data, data[0], "work")
+        extract_dependencies(_by_module(data), data[0], "work")
 
 
 def test_extract_dependencies_missing_manifest_names_requiring_module():
@@ -115,14 +119,14 @@ def test_extract_dependencies_missing_manifest_names_requiring_module():
         _manifest("a", dependencies={"work": ["ghost"]}),
     ]
     with pytest.raises(MissingManifestError) as excinfo:
-        extract_dependencies(data, data[0], "work")
+        extract_dependencies(_by_module(data), data[0], "work")
     assert excinfo.value.module == "ghost"
     assert excinfo.value.required_by == "a"
 
 
 def _library_order(data, work="work"):
-    deps = extract_dependencies(data, data[0], work) + [(work, data[0]["module"])]
-    return order_libraries(data, deps)
+    deps = extract_dependencies(_by_module(data), data[0], work) + [(work, data[0]["module"])]
+    return order_libraries(_by_module(data), deps)
 
 
 def test_order_libraries_puts_used_library_first():
