@@ -58,9 +58,31 @@ jobs:
       - name: Run tests
         run: pytest --cov=ohsh --cov-report=term-missing
 
+  # setup-python has no builds this old for the current runners, and setuptools
+  # cannot build ohsh on them, so the wheel is built on the runner and tested in
+  # the official Python images.
+  test-old-python:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.6.8", "3.7", "3.8"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: pip install build
+      - name: Build the wheel
+        run: python -m build --wheel
+      - name: Install the wheel and run tests
+        run: |
+          docker run --rm -v "$PWD:/src:ro" -w /src "python:${{ matrix.python-version }}" \
+            sh -c 'pip install "$(ls dist/*.whl)[test]" && pytest -p no:cacheprovider'
+
   build:
     runs-on: ubuntu-latest
-    needs: [lint, test]
+    needs: [lint, test, test-old-python]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0

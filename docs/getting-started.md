@@ -7,7 +7,7 @@ use.
 
 ## Install
 
-ohsh needs Python 3.9 or newer and has no other dependencies.
+ohsh needs Python 3.6 or newer and has no other dependencies.
 
 ```bash
 pip install ohsh

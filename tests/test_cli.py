@@ -117,6 +117,11 @@ def test_errors_exit_cleanly_without_site_builtins(tmp_path):
         f"sys.argv = ['ohsh', '-t', {str(tmp_path / 'missing')!r}, 'top']; "
         "from ohsh.cli import main; main()"
     )
-    completed = subprocess.run([sys.executable, "-S", "-c", script], capture_output=True, text=True)
+    completed = subprocess.run(
+        [sys.executable, "-S", "-c", script],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+    )
     assert completed.returncode == EXIT_NO_INPUT
     assert "does not exist" in completed.stderr

@@ -1,3 +1,5 @@
+# setuptools 77 needs Python 3.9, so building or installing from source does
+# too. Older Pythons install the wheel, which has no such limit.
 [build-system]
 requires = ["setuptools>=77.0"]
 build-backend = "setuptools.build_meta"
@@ -12,7 +14,7 @@ authors = [
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE", "NOTICE"]
-requires-python = ">=3.9"
+requires-python = ">=3.6"
 keywords = ["hdl", "verilog", "vhdl", "systemverilog", "fpga", "eda", "dependency", "manifest", "hog"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -20,6 +22,9 @@ classifiers = [
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -38,9 +43,14 @@ Issues = "https://github.com/logvik-org/ohsh/issues"
 Changelog = "https://github.com/logvik-org/ohsh/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-dev = [
+# Kept apart from dev, whose release and lint tools need a newer Python than
+# the oldest one the tests run on.
+test = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
+]
+dev = [
+    "ohsh[test]",
     "build>=1.0",
     "twine>=5.0",
     "pre-commit>=3.0",
@@ -69,11 +79,14 @@ include = ["ohsh*"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+# The oldest version ruff can target. ohsh supports 3.6, which only the CI test
+# jobs check.
+target-version = "py37"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B"]
-ignore = ["E501"]
+# UP021 and UP022 rewrite subprocess calls to arguments that Python 3.6 lacks.
+ignore = ["E501", "UP021", "UP022"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
