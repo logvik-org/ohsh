@@ -5,7 +5,7 @@ import pathlib
 
 from . import __version__
 from .core import run
-from .utils import EXIT_CODE_DESCRIPTIONS, configure_logging
+from .utils import configure_logging
 
 
 def log_file_path(value):
@@ -15,16 +15,10 @@ def log_file_path(value):
     return path
 
 
-def format_exit_codes():
-    lines = [f"  {code:>3}  {description}" for code, description in EXIT_CODE_DESCRIPTIONS.items()]
-    return "exit codes:\n" + "\n".join(lines)
-
-
 def build_parser(cwd):
     parser = argparse.ArgumentParser(
         prog="ohsh",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=format_exit_codes(),
         description="Resolve HDL module manifests into ordered, per-library source lists.",
     )
     parser.add_argument("module", help="name of the top-level module")
