@@ -1,6 +1,7 @@
 """End-to-end tests for ohsh.core.run via the CLI parser."""
 
 import json
+import os
 import pathlib
 
 from ohsh.cli import build_parser
@@ -87,6 +88,43 @@ def test_run_writes_library_order(tmp_path, make_module):
     out = tmp_path / "out"
     assert _run(tmp_path, "top", out) == 0
     assert (out / "libraries.src").read_text().splitlines() == ["math_lib", "work"]
+
+
+def test_run_writes_paths_relative_to_given_dir(tmp_path, make_module):
+    make_module("dep", ["dep.vhd"])
+    make_module("top", ["top.sv"], {"work": ["dep"]})
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out, extra=["--relative-to", str(tmp_path)]) == 0
+    assert (out / "work_vhdl.src").read_text().splitlines() == [os.path.join("dep", "dep.vhd")]
+    assert (out / "work_systemverilog.src").read_text().splitlines() == [
+        os.path.join("top", "top.sv")
+    ]
+
+
+def test_run_writes_parent_path_for_source_outside_relative_dir(tmp_path, make_module):
+    make_module("top", ["top.vhd"])
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out, extra=["--relative-to", str(out)]) == 0
+    assert (out / "work_vhdl.src").read_text().splitlines() == [
+        os.path.join("..", "top", "top.vhd")
+    ]
+
+
+def test_run_resolves_relative_dir_against_cwd(tmp_path, make_module, monkeypatch):
+    make_module("top", ["top.vhd"])
+    out = tmp_path / "out"
+    monkeypatch.chdir(tmp_path / "top")
+    assert _run(tmp_path, "top", out, extra=["--relative-to", ".."]) == 0
+    assert (out / "work_vhdl.src").read_text().splitlines() == [os.path.join("top", "top.vhd")]
+
+
+def test_run_relative_paths_follow_symlinked_dir(tmp_path, make_module):
+    make_module("top", ["top.vhd"])
+    link = tmp_path.parent / (tmp_path.name + "_link")
+    link.symlink_to(tmp_path, target_is_directory=True)
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out, extra=["--relative-to", str(link)]) == 0
+    assert (out / "work_vhdl.src").read_text().splitlines() == [os.path.join("top", "top.vhd")]
 
 
 def test_run_creates_missing_output_dir(tmp_path, make_module):

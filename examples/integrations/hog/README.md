@@ -9,12 +9,12 @@ project needs Vivado or Quartus, which CI can't run.
 reads its sources from list files in `Top/<project>/list/`. hog takes the
 library from the list file's name (`math_lib.src` holds the files of
 `math_lib`) and reads each entry **relative to the repository root**. ohsh
-writes absolute paths, so they have to be converted:
+writes such paths with `--relative-to`, and each list is then copied to its hog
+name:
 
 ```bash
-while IFS= read -r f; do
-  realpath --relative-to="$REPO_ROOT" "$f"
-done < build/math_lib_vhdl.src > Top/demo/list/math_lib.src
+ohsh -t "$REPO_ROOT" -o build --relative-to "$REPO_ROOT" top
+cp build/math_lib_vhdl.src Top/demo/list/math_lib.src
 ```
 
 hog also needs to know the top module. It reads it from a `top=<entity>`

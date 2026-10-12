@@ -197,6 +197,17 @@ Three options cover most uses:
 So `ohsh -t project -o build accumulator` does the same from anywhere and keeps
 the output in `build/`.
 
+Absolute paths only hold on the machine that wrote them. To commit the lists,
+or to use them from another checkout or inside a container, add
+`--relative-to DIR`. `ohsh --relative-to . accumulator` writes:
+
+```
+adder/adder.vhd
+accumulator/accumulator.vhd
+```
+
+A source outside `DIR` gets a path that starts with `../`.
+
 ## Compile the result
 
 Each line of a `.src` file is one path, so a shell loop is enough to feed them
