@@ -15,8 +15,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the file that declares the top module.
 
 ### Changed
-- The hog integration examples use `--format hog` instead of converting the
-  plain lists in the shell.
+- The hog integration examples are laid out like hog projects. Each has a
+  `pre-creation.tcl` that runs ohsh with `--format hog`, replacing the shell
+  conversion of the plain lists.
 
 ## [0.3.0] - 2026-10-05
 

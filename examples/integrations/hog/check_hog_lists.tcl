@@ -1,17 +1,23 @@
-# Check that hog reads ohsh-generated list files as intended: every file listed
-# exists and lands in the library named after its list file, and exactly one
-# file carries the top=<top> property. This uses hog's own ReadListFile, so it
-# runs in plain tclsh without Vivado or Quartus.
+# Run a hog project's pre-creation.tcl the way hog would, then check that hog
+# reads the list files it wrote as intended: every file listed exists and lands
+# in the library named after its list file, and exactly one file carries the
+# top=<top> property. This uses hog's own ReadListFile, so it runs in plain
+# tclsh without Vivado or Quartus.
 #
-# Usage: tclsh check_hog_lists.tcl <hog_root> <repo_root> <top> <list_file>...
+# Usage: tclsh check_hog_lists.tcl <hog_root> <repo_root> <top> <project_dir>
 
 # hog only loads tcllib's cmdline itself when running inside Quartus.
 package require cmdline
 
-lassign $argv hog_root repo_root top
-set list_files [lrange $argv 3 end]
+lassign $argv hog_root repo_root top project_dir
 set argv {}
 source [file join $hog_root Tcl hog.tcl]
+
+# The one variable of hog's project creation that pre-creation.tcl relies on.
+namespace eval globalSettings {}
+set globalSettings::repo_path $repo_root
+source [file join $project_dir pre-creation.tcl]
+set list_files [glob -directory [file join $project_dir list] *.src]
 
 proc count_entries {list_file} {
     set fp [open $list_file r]

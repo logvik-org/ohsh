@@ -1,0 +1,9 @@
+# hog sources this file before it reads the list files, so running ohsh here
+# keeps them in step with the manifests every time the project is created.
+set repo_path $globalSettings::repo_path
+set list_dir [file join [file dirname [info script]] list]
+
+# exec treats anything on stderr as a failure, which would turn an ohsh warning
+# into a failed project creation. 2>@1 leaves that to the exit code.
+puts [exec ohsh --format hog -t $repo_path/projects/advanced -o $list_dir \
+    --relative-to $repo_path -w dsp_lib accumulator 2>@1]
