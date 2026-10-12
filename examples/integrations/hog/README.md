@@ -134,12 +134,57 @@ What to expect afterwards:
 - The file only runs when the project is created. A project that is already
   open in Vivado or Quartus keeps its old file list until you create it again.
 
-## Step 4: Keep the generated lists out of git
+## Step 4: Decide whether the lists go in git
 
-hog now writes the lists itself every time it creates the project, so they are
-build output and do not belong in git. The manifests are what you commit.
+hog now writes the lists itself every time it creates the project. Whether you
+also keep them in git is up to you. Both ways work, and you can change your
+mind later.
 
-Add this to the `.gitignore` in the root of the repository:
+### Option A: commit the lists
+
+This is how hog projects usually work, and it needs nothing more than:
+
+```bash
+git add Top/demo/list
+git commit -m "Add hog list files"
+```
+
+- **For:** every hog command finds the lists in a fresh clone, also the ones
+  that do not create the project. A change to the file list shows up in code
+  review.
+- **Against:** the lists can fall behind the manifests. The hook from step 3
+  then rewrites them, which leaves the repository with uncommitted changes.
+  hog reports that with a critical warning and sets the version and commit
+  hash in the firmware to 0. The build still uses the correct files. Commit
+  the updated lists to get rid of the warning.
+
+That warning is easy to miss. To stop a merge request with out-of-date lists
+before hog even starts, add a CI job that runs this from the root of the
+repository:
+
+```bash
+ohsh --format hog -t . -o Top/demo/list --relative-to . -w demo top_demo
+if [ -n "$(git status --porcelain Top/demo/list)" ]; then
+  git status --short Top/demo/list
+  echo "hog list files are out of date: run ohsh and commit the result" >&2
+  exit 1
+fi
+```
+
+| Line | Meaning |
+|------|---------|
+| `ohsh --format hog ...` | The command from step 1. It rewrites the list files from the manifests as they are in this commit. |
+| `git status --porcelain Top/demo/list` | Lists every file in the list directory that now differs from what is committed, including new files. It prints nothing when the committed lists were correct. |
+| `if [ -n "$(...)" ]; then` | True when that list is not empty, so when at least one list file changed or is new. |
+| `git status --short Top/demo/list` | Shows which list files are out of date, so the job log says what to fix. |
+| `echo "..." >&2` | Explains the failure. |
+| `exit 1` | Makes the job fail. |
+
+### Option B: ignore the lists
+
+The lists are build output that the hook recreates, so you can also leave them
+out of git and only commit the manifests. Add this to the `.gitignore` in the
+root of the repository:
 
 ```
 # Written by ohsh from the manifests, see Top/demo/pre-creation.tcl
@@ -154,30 +199,40 @@ git rm --cached Top/demo/list/*.src
 git commit -m "Stop tracking generated hog list files"
 ```
 
+- **For:** the lists cannot fall behind, and there is nothing to keep in sync
+  or to review twice.
+- **Against:** a fresh clone has no generated lists until the project is
+  created. A hog command that reads the lists without creating the project
+  needs the command from step 1 to run first.
+
+The pattern ignores every `.src` file in the directory. If you have a
+hand-written one (see below), add an exception for it on the next line of the
+`.gitignore`:
+
+```
+!Top/demo/list/ips.src
+```
+
+With this option, `git clean -fX Top/demo/list` removes every ignored file in
+the directory, which is exactly the generated lists. That is a quick way to get
+rid of the list of a library that is no longer used.
+
+### Lists you still write by hand
+
 ohsh only knows about HDL sources. Everything else stays in list files that you
-write by hand, and those do belong in git:
+write yourself and commit, whichever option you chose:
 
-- Constraints, in `.con` files. The pattern above does not touch them.
-- Simulation sources, in `.sim` files. Not touched either.
+- Constraints, in `.con` files.
+- Simulation sources, in `.sim` files.
 - IP cores (`.xci`) and other non-HDL sources, in a `.src` file of their own,
-  for example `ips.src`. The pattern above would ignore that file too, so add
-  an exception for it on the next line of the `.gitignore`:
+  for example `ips.src`.
 
-  ```
-  !Top/demo/list/ips.src
-  ```
-
-Three things to keep in mind:
+Two things to keep in mind:
 
 - ohsh overwrites the `.src` files it writes, so do not add your own lines to
   them. Put those in a separate list file such as `ips.src`.
 - ohsh does not delete the list file of a library that is no longer used.
-  `git clean -fX Top/demo/list` removes every ignored file in the directory,
-  which is exactly the generated lists. The next project creation writes the
-  current ones.
-- A fresh clone has no generated lists until the project is created. A hog
-  command that reads the lists without creating the project needs the command
-  from step 1 to run first.
+  Remove it yourself.
 
 ## The examples in this directory
 
@@ -203,7 +258,8 @@ Run one with `./run.sh` in its directory. The script:
    checks that every file lands in its library and that one file carries the
    `top` property.
 
-The lists land in `Top/demo/list/`, which this repository ignores as in step 4.
+The lists land in `Top/demo/list/`, which this repository ignores (option B in
+step 4).
 The `examples` directory plays the role of the repository root here, so the
 paths in the lists start with `projects/`.
 
