@@ -16,7 +16,11 @@ source [file join $hog_root Tcl hog.tcl]
 # The one variable of hog's project creation that pre-creation.tcl relies on.
 namespace eval globalSettings {}
 set globalSettings::repo_path $repo_root
+# Vivado runs the hook with PYTHONHOME set to its own Python. A directory with
+# no Python in it has the same effect on a hook that passes the variable on.
+set env(PYTHONHOME) $project_dir
 source [file join $project_dir pre-creation.tcl]
+unset env(PYTHONHOME)
 set list_files [glob -directory [file join $project_dir list] *.src]
 
 proc count_entries {list_file} {
