@@ -38,5 +38,5 @@ debug.log
 *.swp
 .DS_Store
 
-# Written by the hog examples
-examples/integrations/hog/*/Top/*/list/
+# Written by ohsh in the hog examples
+examples/integrations/hog/*/Top/*/list/*.src
