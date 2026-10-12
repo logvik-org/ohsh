@@ -54,6 +54,12 @@ def build_parser(cwd: pathlib.Path) -> argparse.ArgumentParser:
         default=cwd,
         help="directory for the .src lists and libraries.src, created if missing (default: current directory)",
     )
+    parser.add_argument(
+        "--relative-to",
+        default=None,
+        metavar="DIR",
+        help="write the source paths relative to DIR instead of as absolute paths",
+    )
     actions = parser.add_argument_group(
         "manifest actions",
         "Work on the manifests under --top-dir instead of writing source lists. "

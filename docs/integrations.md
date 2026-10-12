@@ -3,7 +3,9 @@
 <img class="mascot" src="_static/mascot-running.png" alt="The ohsh dog running off with source files">
 
 A `.src` list is a text file with one absolute path per line, so most tools can
-read it directly or through a short loop. Runnable, self-checking examples live
+read it directly or through a short loop. For a tool that resolves the entries
+against a directory of its own, such as hog, `--relative-to DIR` writes them
+relative to `DIR` instead. Runnable, self-checking examples live
 in [`examples/`](https://github.com/logvik-org/ohsh/tree/main/examples). Each
 tool has a simple example (one library) and an advanced one (three libraries
 compiled in the order of `libraries.src`). The examples marked "CI" run in CI.

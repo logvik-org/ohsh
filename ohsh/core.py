@@ -3,6 +3,7 @@
 import argparse
 import json
 import logging
+import os
 import pathlib
 import sys
 from typing import Dict, List, NoReturn, Optional
@@ -175,6 +176,18 @@ def _exit_if_sources_missing(sources_by_library: Dict[str, SourcesByLanguage]) -
         exit_with_error(f"The following source files do not exist: {missing_files}", EXIT_NO_INPUT)
 
 
+def _relativize_sources(
+    sources_by_library: Dict[str, SourcesByLanguage], base_dir: pathlib.Path
+) -> Dict[str, SourcesByLanguage]:
+    return {
+        lib_name: {
+            language: [os.path.relpath(source, base_dir) for source in sources]
+            for language, sources in library_sources.items()
+        }
+        for lib_name, library_sources in sources_by_library.items()
+    }
+
+
 def _write_lines(output_file: pathlib.Path, lines: List[str]) -> None:
     with open(output_file, "w", encoding="utf-8") as f:
         for line in lines:
@@ -229,4 +242,9 @@ def run(args: argparse.Namespace, cwd: pathlib.Path) -> None:
 
     sources_by_library = _collect_sources_by_library(manifests_by_module, module_list)
     _exit_if_sources_missing(sources_by_library)
+    if args.relative_to is not None:
+        # Source paths come from resolved manifest paths, so the base has to be
+        # resolved too or a symlink in it would give wrong ../ entries.
+        base_dir = to_absolute_path(cwd, args.relative_to).resolve()
+        sources_by_library = _relativize_sources(sources_by_library, base_dir)
     _write_source_lists(pathlib.Path(args.output), sources_by_library, library_order)

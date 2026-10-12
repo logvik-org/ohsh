@@ -21,6 +21,7 @@ def test_parser_defaults():
     assert args.work == "work"
     assert args.verbose == 0
     assert args.log_file is None
+    assert args.relative_to is None
     assert pathlib.Path(args.top_dir) == pathlib.Path("/base")
 
 
