@@ -4,4 +4,4 @@
 Resolve HDL module manifests into ordered, per-library source lists.
 """
 
-__version__ = "0.4.0rc1"
+__version__ = "0.4.0"
