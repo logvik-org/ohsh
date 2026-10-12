@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# hog, simple project: one library. hog takes the library name from the list
-# file name, so the ohsh output for `demo_lib` becomes list/demo_lib.src.
+# hog, simple project: one library, written by ohsh as list/demo_lib.src.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -21,31 +20,10 @@ fi
 # Top/<project>/list/. Here the examples directory plays the repository.
 REPO_ROOT="$EXAMPLES"
 LIST_DIR="$BUILD/Top/demo/list"
-mkdir -p "$LIST_DIR"
 
-# hog reads list-file entries relative to the repository root, while ohsh
-# writes absolute paths.
-write_hog_list() {  # <ohsh .src file> <hog list file>
-  while IFS= read -r f; do
-    realpath --relative-to="$REPO_ROOT" "$f"
-  done < "$1" > "$2"
-}
-
-# hog takes the top module from a top=<entity> property on the top file's
-# entry. Without it hog assumes the top is called top_<project>.
-mark_hog_top() {  # <top entity> <hog list file>
-  local top_file
-  top_file="$(cd "$REPO_ROOT" && xargs grep -liE "^\s*(entity|module)\s+$1\b" < "$2" || true)"
-  if [ -z "$top_file" ]; then
-    echo "Top $1 not found in $2" >&2
-    exit 1
-  fi
-  sed -i "s#^$top_file\$#& top=$1#" "$2"
-}
-
-ohsh -t "$EXAMPLES/projects/simple" -w demo_lib -o "$BUILD" accumulator
-write_hog_list "$BUILD/demo_lib_vhdl.src" "$LIST_DIR/demo_lib.src"
-mark_hog_top accumulator "$LIST_DIR/demo_lib.src"
+# hog reads list-file entries relative to the repository root.
+ohsh --format hog -t "$EXAMPLES/projects/simple" -w demo_lib -o "$LIST_DIR" \
+  --relative-to "$REPO_ROOT" accumulator
 
 tclsh "$HERE/../check_hog_lists.tcl" "$HOG_ROOT" "$REPO_ROOT" accumulator "$LIST_DIR"/*.src
 echo "hog simple example: PASS"

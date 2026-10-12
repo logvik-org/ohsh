@@ -6,7 +6,7 @@ import logging
 import os
 import pathlib
 import sys
-from typing import Dict, List, NoReturn, Optional
+from typing import Dict, List, NoReturn, Optional, Tuple
 
 from .utils import (
     EXIT_CANNOT_CREATE_OUTPUT,
@@ -188,10 +188,19 @@ def _relativize_sources(
     }
 
 
-def _write_lines(output_file: pathlib.Path, lines: List[str]) -> None:
+def write_lines(output_file: pathlib.Path, lines: List[str]) -> None:
     with open(output_file, "w", encoding="utf-8") as f:
         for line in lines:
             f.write(f"{line}\n")
+
+
+def create_output_dir(output_dir: pathlib.Path) -> None:
+    try:
+        output_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        exit_with_error(
+            f"Cannot create output directory {output_dir}: {e}", EXIT_CANNOT_CREATE_OUTPUT
+        )
 
 
 def _write_source_lists(
@@ -200,13 +209,7 @@ def _write_source_lists(
     library_order: List[str],
 ) -> None:
     """Write one source list per library and language, plus the library compile order."""
-    try:
-        output_dir.mkdir(parents=True, exist_ok=True)
-    except OSError as e:
-        exit_with_error(
-            f"Cannot create output directory {output_dir}: {e}", EXIT_CANNOT_CREATE_OUTPUT
-        )
-
+    create_output_dir(output_dir)
     for lib_name in library_order:
         for language, sources in sources_by_library[lib_name].items():
             display_name = LANGUAGE_DISPLAY_NAMES[language]
@@ -217,22 +220,20 @@ def _write_source_lists(
                 )
                 continue
             output_file = output_dir / f"{lib_name}_{language}.src"
-            _write_lines(output_file, sources)
+            write_lines(output_file, sources)
             logger.info(
                 f"Wrote {len(sources)} {display_name} files for library {lib_name} to {output_file}"
             )
 
     library_order_file = output_dir / LIBRARY_ORDER_FILE_NAME
-    _write_lines(library_order_file, library_order)
+    write_lines(library_order_file, library_order)
     logger.info(f"Wrote library compile order to {library_order_file}")
 
 
-def run(args: argparse.Namespace, cwd: pathlib.Path) -> None:
-    """Resolve ``args.module`` and write its source lists to ``args.output``.
-
-    ``args`` holds the options defined by ``cli.build_parser``. On any error the
-    process exits with one of the ``EXIT_*`` codes.
-    """
+def resolve_sources(
+    args: argparse.Namespace, cwd: pathlib.Path
+) -> Tuple[List[str], Dict[str, SourcesByLanguage]]:
+    """Return the library compile order and the absolute source paths of each library."""
     top_dir = resolve_top_dir(cwd, args.top_dir)
     manifests_by_module = index_manifests_by_module(load_manifests(top_dir))
     module_list = _resolve_module_list(manifests_by_module, args.module, args.work)
@@ -242,9 +243,25 @@ def run(args: argparse.Namespace, cwd: pathlib.Path) -> None:
 
     sources_by_library = _collect_sources_by_library(manifests_by_module, module_list)
     _exit_if_sources_missing(sources_by_library)
-    if args.relative_to is not None:
-        # Source paths come from resolved manifest paths, so the base has to be
-        # resolved too or a symlink in it would give wrong ../ entries.
-        base_dir = to_absolute_path(cwd, args.relative_to).resolve()
+    return library_order, sources_by_library
+
+
+def resolve_relative_base(args: argparse.Namespace, cwd: pathlib.Path) -> Optional[pathlib.Path]:
+    if args.relative_to is None:
+        return None
+    # Source paths come from resolved manifest paths, so the base has to be
+    # resolved too or a symlink in it would give wrong ../ entries.
+    return to_absolute_path(cwd, args.relative_to).resolve()
+
+
+def run(args: argparse.Namespace, cwd: pathlib.Path) -> None:
+    """Resolve ``args.module`` and write its source lists to ``args.output``.
+
+    ``args`` holds the options defined by ``cli.build_parser``. On any error the
+    process exits with one of the ``EXIT_*`` codes.
+    """
+    library_order, sources_by_library = resolve_sources(args, cwd)
+    base_dir = resolve_relative_base(args, cwd)
+    if base_dir is not None:
         sources_by_library = _relativize_sources(sources_by_library, base_dir)
     _write_source_lists(pathlib.Path(args.output), sources_by_library, library_order)

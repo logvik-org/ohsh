@@ -9,11 +9,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - `--relative-to DIR` writes the source paths relative to `DIR` instead of as
   absolute paths, for lists that are committed or read by a tool that resolves
-  them against a directory of its own, such as hog.
+  them against a directory of its own.
+- `--format hog` writes the list files of a hog project: one `<library>.src`
+  per library with paths relative to the repository root and `top=<entity>` on
+  the file that declares the top module.
 
-### Fixed
-- The hog integration examples mark the top file with `top=<entity>` in its
-  list file. hog gave a critical message without it.
+### Changed
+- The hog integration examples use `--format hog` instead of converting the
+  plain lists in the shell.
 
 ## [0.3.0] - 2026-10-05
 

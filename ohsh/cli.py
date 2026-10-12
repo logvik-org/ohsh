@@ -6,6 +6,7 @@ import pathlib
 from . import __version__
 from .authoring import check_manifests, create_manifests, fix_manifests
 from .core import run
+from .hog import write_hog_lists
 from .utils import configure_logging
 
 
@@ -15,6 +16,8 @@ def log_file_path(value: str) -> pathlib.Path:
         raise argparse.ArgumentTypeError(f"directory does not exist: {path.parent}")
     return path
 
+
+WRITERS_BY_FORMAT = {"plain": run, "hog": write_hog_lists}
 
 # In the order they run when several are given: each one works on what the one before left.
 MANIFEST_ACTIONS = [
@@ -59,6 +62,14 @@ def build_parser(cwd: pathlib.Path) -> argparse.ArgumentParser:
         default=None,
         metavar="DIR",
         help="write the source paths relative to DIR instead of as absolute paths",
+    )
+    parser.add_argument(
+        "--format",
+        choices=sorted(WRITERS_BY_FORMAT),
+        default="plain",
+        help="what to write: one list per library and language plus libraries.src (plain), "
+        "or the list files of a hog project, which needs --relative-to with the root of "
+        "the repository (default: plain)",
     )
     actions = parser.add_argument_group(
         "manifest actions",
@@ -132,10 +143,12 @@ def main() -> None:
         parser.error("--create takes no module, it works on every directory under --top-dir")
     if args.no_deps and (args.module is None or not requested_actions):
         parser.error("--no-deps needs a module and --fix or --check")
+    if args.format == "hog" and args.relative_to is None:
+        parser.error("--format hog needs --relative-to with the root of the repository")
     # Only the command line configures logging, so programs that call run()
     # directly keep control of where ohsh log messages go.
     configure_logging(verbosity=args.verbose, log_file=args.log_file)
     for action in requested_actions:
         action(args, cwd)
     if not requested_actions:
-        run(args, cwd)
+        WRITERS_BY_FORMAT[args.format](args, cwd)
