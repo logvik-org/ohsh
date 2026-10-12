@@ -84,35 +84,10 @@ If ohsh warns that no source declares the top module, the entity is named
 differently from the module in the manifest. No `top=` is written in that case,
 and hog falls back to its default, an entity called `top_<project>`.
 
-## Step 3: Commit the list files
+The command works, but you would have to run it again whenever a manifest
+changes. Step 3 makes hog do that for you.
 
-hog expects its list files to be in git:
-
-```bash
-git add Top/demo/list
-git commit -m "Add hog list files"
-```
-
-ohsh only knows about HDL sources. Everything else stays in list files that you
-write by hand, next to the generated ones:
-
-- IP cores (`.xci`) and other non-HDL sources, in a `.src` file of their own,
-  for example `ips.src`.
-- Constraints, in `.con` files.
-- Simulation sources, in `.sim` files.
-
-Two things to keep in mind:
-
-- ohsh overwrites the `.src` files it writes, so do not add your own lines to
-  them. Put those in a separate list file.
-- ohsh does not delete the list file of a library that is no longer used.
-  Remove it yourself.
-
-You can stop here. hog now builds from the generated lists. The catch is that
-you must run the command from step 1 again whenever a manifest changes. Steps 4
-and 5 take care of that.
-
-## Step 4: Let hog run ohsh
+## Step 3: Let hog run ohsh
 
 hog looks for a file called `Top/<project>/pre-creation.tcl`. If it exists, hog
 runs it every time it creates the project, before it reads the list files. Put
@@ -146,7 +121,7 @@ Then commit the file:
 
 ```bash
 git add Top/demo/pre-creation.tcl
-git commit -m "Regenerate hog list files with ohsh"
+git commit -m "Generate hog list files with ohsh"
 ```
 
 What to expect afterwards:
@@ -156,43 +131,53 @@ What to expect afterwards:
   stops with an error.
 - `env` is a Linux and macOS program. On Windows, leave out
   `env -u PYTHONHOME -u PYTHONPATH`.
-- If the committed lists were up to date, nothing changes.
-- If they were out of date, ohsh rewrites them and the repository now has
-  uncommitted changes. hog reports that with a critical warning and sets the
-  version and commit hash in the firmware to 0. The build still uses the
-  correct files. Commit the updated lists to get rid of the warning.
 - The file only runs when the project is created. A project that is already
   open in Vivado or Quartus keeps its old file list until you create it again.
 
-## Step 5: Make CI fail on out-of-date lists
+## Step 4: Keep the generated lists out of git
 
-The critical warning in step 4 is easy to miss. To stop a merge request with
-out-of-date lists before hog even starts, add a CI job that runs this from the
-root of the repository:
+hog now writes the lists itself every time it creates the project, so they are
+build output and do not belong in git. The manifests are what you commit.
 
-```bash
-ohsh --format hog -t . -o Top/demo/list --relative-to . -w demo top_demo
-if [ -n "$(git status --porcelain Top/demo/list)" ]; then
-  git status --short Top/demo/list
-  echo "hog list files are out of date: run ohsh and commit the result" >&2
-  exit 1
-fi
+Add this to the `.gitignore` in the root of the repository:
+
+```
+# Written by ohsh from the manifests, see Top/demo/pre-creation.tcl
+Top/demo/list/*.src
 ```
 
-Line by line:
+If the lists are already in git, take them out. This keeps the files on disk
+and only stops git from tracking them:
 
-| Line | Meaning |
-|------|---------|
-| `ohsh --format hog ...` | The command from step 1. It rewrites the list files from the manifests as they are in this commit. |
-| `git status --porcelain Top/demo/list` | Lists every file in the list directory that now differs from what is committed. It prints nothing when the committed lists were correct. |
-| `if [ -n "$(...)" ]; then` | True when that list is not empty, so when at least one list file changed or is new. |
-| `git status --short Top/demo/list` | Shows which list files are out of date, so the job log says what to fix. |
-| `echo "..." >&2` | Explains the failure. |
-| `exit 1` | Makes the job fail. |
+```bash
+git rm --cached Top/demo/list/*.src
+git commit -m "Stop tracking generated hog list files"
+```
 
-`git status` is used here and not `git diff`, because `git diff` ignores files
-that git does not track yet. The list file of a newly added library is such a
-file.
+ohsh only knows about HDL sources. Everything else stays in list files that you
+write by hand, and those do belong in git:
+
+- Constraints, in `.con` files. The pattern above does not touch them.
+- Simulation sources, in `.sim` files. Not touched either.
+- IP cores (`.xci`) and other non-HDL sources, in a `.src` file of their own,
+  for example `ips.src`. The pattern above would ignore that file too, so add
+  an exception for it on the next line of the `.gitignore`:
+
+  ```
+  !Top/demo/list/ips.src
+  ```
+
+Three things to keep in mind:
+
+- ohsh overwrites the `.src` files it writes, so do not add your own lines to
+  them. Put those in a separate list file such as `ips.src`.
+- ohsh does not delete the list file of a library that is no longer used.
+  `git clean -fX Top/demo/list` removes every ignored file in the directory,
+  which is exactly the generated lists. The next project creation writes the
+  current ones.
+- A fresh clone has no generated lists until the project is created. A hog
+  command that reads the lists without creating the project needs the command
+  from step 1 to run first.
 
 ## The examples in this directory
 
@@ -218,9 +203,9 @@ Run one with `./run.sh` in its directory. The script:
    checks that every file lands in its library and that one file carries the
    `top` property.
 
-The lists land in `Top/demo/list/`, which this repository ignores. In your own
-project they are committed (step 3). The `examples` directory plays the role of
-the repository root here, so the paths in the lists start with `projects/`.
+The lists land in `Top/demo/list/`, which this repository ignores as in step 4.
+The `examples` directory plays the role of the repository root here, so the
+paths in the lists start with `projects/`.
 
 What the examples do not check is that hog itself calls `pre-creation.tcl`.
 That needs a full project creation in Vivado or Quartus, which CI cannot run.
