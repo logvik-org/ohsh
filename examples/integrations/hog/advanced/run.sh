@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
-# hog, advanced project: one hog list file per library in libraries.src.
+# hog, advanced project: runs the project's pre-creation.tcl the way hog would and
+# checks the list files it writes with hog's own reader.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 EXAMPLES="$(cd "$HERE/../../.." && pwd)"
-BUILD="$HERE/build"
-rm -rf "$BUILD"
-mkdir -p "$BUILD"
 
 # hog is cloned once into the shared hog/build directory and reused by both
 # examples. Set HOG_ROOT to use an existing checkout instead.
@@ -16,14 +14,11 @@ if [ ! -d "$HOG_ROOT/Tcl" ]; then
   git clone --depth 1 --branch "$HOG_VERSION" https://gitlab.com/hog-cern/Hog.git "$HOG_ROOT"
 fi
 
-# In a real hog project this is your repository root, and the list files go in
-# Top/<project>/list/. Here the examples directory plays the repository.
+# In a real hog project Top/ sits in the repository root. Here the examples
+# directory plays the repository, so the entries read projects/advanced/...
 REPO_ROOT="$EXAMPLES"
-LIST_DIR="$BUILD/Top/demo/list"
+PROJECT_DIR="$HERE/Top/demo"
+rm -rf "$PROJECT_DIR/list"
 
-# hog reads list-file entries relative to the repository root.
-ohsh --format hog -t "$EXAMPLES/projects/advanced" -w dsp_lib -o "$LIST_DIR" \
-  --relative-to "$REPO_ROOT" accumulator
-
-tclsh "$HERE/../check_hog_lists.tcl" "$HOG_ROOT" "$REPO_ROOT" accumulator "$LIST_DIR"/*.src
+tclsh "$HERE/../check_hog_lists.tcl" "$HOG_ROOT" "$REPO_ROOT" accumulator "$PROJECT_DIR"
 echo "hog advanced example: PASS"
