@@ -6,6 +6,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+- The hog integration examples mark the top file with `top=<entity>` in its
+  list file. hog gave a critical message without it.
+
 ## [0.3.0] - 2026-10-05
 
 ### Added

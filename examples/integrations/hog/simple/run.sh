@@ -31,8 +31,21 @@ write_hog_list() {  # <ohsh .src file> <hog list file>
   done < "$1" > "$2"
 }
 
+# hog takes the top module from a top=<entity> property on the top file's
+# entry. Without it hog assumes the top is called top_<project>.
+mark_hog_top() {  # <top entity> <hog list file>
+  local top_file
+  top_file="$(cd "$REPO_ROOT" && xargs grep -liE "^\s*(entity|module)\s+$1\b" < "$2" || true)"
+  if [ -z "$top_file" ]; then
+    echo "Top $1 not found in $2" >&2
+    exit 1
+  fi
+  sed -i "s#^$top_file\$#& top=$1#" "$2"
+}
+
 ohsh -t "$EXAMPLES/projects/simple" -w demo_lib -o "$BUILD" accumulator
 write_hog_list "$BUILD/demo_lib_vhdl.src" "$LIST_DIR/demo_lib.src"
+mark_hog_top accumulator "$LIST_DIR/demo_lib.src"
 
-tclsh "$HERE/../check_hog_lists.tcl" "$HOG_ROOT" "$REPO_ROOT" "$LIST_DIR"/*.src
+tclsh "$HERE/../check_hog_lists.tcl" "$HOG_ROOT" "$REPO_ROOT" accumulator "$LIST_DIR"/*.src
 echo "hog simple example: PASS"

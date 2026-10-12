@@ -1,7 +1,8 @@
 # hog
 
 Status: **✅ both examples run in CI** (`.github/workflows/integration.yml`). They check the list files with hog's own reader
-(`ReadListFile` in `hog.tcl`), which runs in plain `tclsh`. Creating a full hog
+(`ReadListFile` in `hog.tcl`), which runs in plain `tclsh`: every file must land
+in its library, and one file must carry the `top` property. Creating a full hog
 project needs Vivado or Quartus, which CI can't run.
 
 [hog (HDL on git)](https://hog.readthedocs.io) drives the FPGA build flow and
@@ -14,6 +15,16 @@ writes absolute paths, so they have to be converted:
 while IFS= read -r f; do
   realpath --relative-to="$REPO_ROOT" "$f"
 done < build/math_lib_vhdl.src > Top/demo/list/math_lib.src
+```
+
+hog also needs to know the top module. It reads it from a `top=<entity>`
+property on the top file's entry, and assumes `top_<project>` when no entry has
+one, which gives a critical message for any other name. ohsh only lists paths,
+so the examples append the property to the file that declares the top entity:
+
+```
+projects/simple/adder/adder.vhd
+projects/simple/accumulator/accumulator.vhd top=accumulator
 ```
 
 Run the examples with `./run.sh` in the example's directory. hog is cloned once
