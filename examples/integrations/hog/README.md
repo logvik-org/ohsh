@@ -125,7 +125,8 @@ Create `Top/demo/pre-creation.tcl` with this content:
 set repo_path $globalSettings::repo_path
 set list_dir [file join [file dirname [info script]] list]
 
-puts [exec ohsh --format hog -t $repo_path -o $list_dir \
+puts [exec env -u PYTHONHOME -u PYTHONPATH \
+    ohsh --format hog -t $repo_path -o $list_dir \
     --relative-to $repo_path -w demo top_demo 2>@1]
 ```
 
@@ -135,7 +136,8 @@ Line by line:
 |------|---------|
 | `set repo_path $globalSettings::repo_path` | hog keeps the root of the repository in `globalSettings::repo_path`. This copies it to a shorter name. |
 | `set list_dir [file join [file dirname [info script]] list]` | `[info script]` is the path of this file, and `file dirname` gives the directory it is in, `Top/demo`. Adding `list` gives `Top/demo/list`. The file finds its own project this way, so it can be copied to another project unchanged. |
-| `exec ohsh --format hog ...` | Runs the command from step 1. `-t` and `--relative-to` get the repository root from hog, because hog does not always start in that directory. `-o` gets the list directory from the line above. |
+| `exec env -u PYTHONHOME -u PYTHONPATH` | `exec` runs a program. `env -u NAME` runs it with the environment variable `NAME` removed. Vivado sets these two variables to the Python it ships with, and with them set no other Python can start. ohsh would stop with `No module named 'encodings'`. Removing them only affects ohsh, not Vivado. |
+| `ohsh --format hog ...` | The command from step 1. `-t` and `--relative-to` get the repository root from hog, because hog does not always start in that directory. `-o` gets the list directory from the line above. |
 | `-w demo top_demo` | The only part to change for your project: your library name and your top module. |
 | `2>@1` | Sends the warnings of ohsh to the same place as its normal output. Tcl would otherwise treat any warning as a failure and stop the project creation. A real error still stops it, because ohsh then exits with an error code. |
 | `puts [...]` | Prints what ohsh said in the hog log. |
@@ -152,6 +154,8 @@ What to expect afterwards:
 - ohsh must be installed wherever hog runs. That includes the machine or
   container image your CI uses. If hog cannot find `ohsh`, the project creation
   stops with an error.
+- `env` is a Linux and macOS program. On Windows, leave out
+  `env -u PYTHONHOME -u PYTHONPATH`.
 - If the committed lists were up to date, nothing changes.
 - If they were out of date, ohsh rewrites them and the repository now has
   uncommitted changes. hog reports that with a critical warning and sets the
@@ -208,7 +212,8 @@ Run one with `./run.sh` in its directory. The script:
 
 1. Clones hog into `hog/build/Hog`, once. Set `HOG_ROOT` to use an existing
    checkout, or `HOG_VERSION` to pick another release.
-2. Runs the example's `pre-creation.tcl` the way hog would, in plain `tclsh`.
+2. Runs the example's `pre-creation.tcl` the way hog would, in plain `tclsh`,
+   with `PYTHONHOME` set the way Vivado sets it.
 3. Reads the list files with hog's own reader (`ReadListFile` in `hog.tcl`) and
    checks that every file lands in its library and that one file carries the
    `top` property.
