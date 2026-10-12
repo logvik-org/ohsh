@@ -49,6 +49,22 @@ If the committed lists were out of date, the regenerated ones leave the
 repository modified, and hog reports that with a critical warning. This hook
 is not part of the CI check below.
 
+The hook only runs when the project is created, and the warning does not stop
+the build. To make out-of-date lists fail CI before hog starts, regenerate them
+in a job of their own and fail on any difference:
+
+```bash
+ohsh --format hog -t . -o Top/demo/list --relative-to . -w dsp_lib accumulator
+if [ -n "$(git status --porcelain Top/demo/list)" ]; then
+  git status --short Top/demo/list
+  echo "hog list files are out of date: run ohsh and commit the result" >&2
+  exit 1
+fi
+```
+
+`git status` is used instead of `git diff` so that the list of a newly added
+library, which git does not track yet, is caught too.
+
 ## Examples
 
 Run the examples with `./run.sh` in the example's directory. hog is cloned once
