@@ -72,6 +72,7 @@ ohsh will:
 | `-w`, `--work`      | Library for the top module, which `work` in its manifest refers to.    | `work`       |
 | `-o`, `--output`    | Directory for the `.src` lists and `libraries.src`, created if missing. | cwd          |
 | `--relative-to DIR` | Write the source paths relative to `DIR`.                              | absolute     |
+| `--format FORMAT`   | `plain` lists, or the list files of a `hog` project.                   | `plain`      |
 | `-v`, `--verbose`   | Show progress (`-v`) or debug details (`-vv`).                         | quiet        |
 | `--log-file PATH`   | Also write logs to a file (no log file is written by default).         | none         |
 | `--version`         | Print version and exit.                                                |              |
