@@ -228,3 +228,46 @@ def test_run_missing_source_file(tmp_path, make_module):
     make_module("top", ["ghost.v"], dependencies={}, create_sources=False)
     out = tmp_path / "out"
     assert _run(tmp_path, "top", out) == EXIT_NO_INPUT
+
+
+def test_run_reads_source_lists_before_sources(tmp_path):
+    vendor = tmp_path / "vendor"
+    vendor.mkdir()
+    (vendor / "compile_order.txt").write_text("# vendor order\n\nsrc/pkg.vhd\nsrc/core.vhd\n")
+    (vendor / "src").mkdir()
+    for name in ("pkg.vhd", "core.vhd"):
+        (vendor / "src" / name).touch()
+    wrapper = tmp_path / "manifests" / "vendor"
+    wrapper.mkdir(parents=True)
+    (wrapper / "wrapper.vhd").touch()
+    (wrapper / "manifest.json").write_text(
+        json.dumps(
+            {
+                "module": "vendor",
+                "source_lists": ["../../vendor/compile_order.txt"],
+                "sources": ["wrapper.vhd"],
+            }
+        )
+    )
+    out = tmp_path / "out"
+
+    assert _run(tmp_path, "vendor", out) == 0
+    assert (out / "work_vhdl.src").read_text().splitlines() == [
+        str(vendor / "src" / "pkg.vhd"),
+        str(vendor / "src" / "core.vhd"),
+        str(wrapper / "wrapper.vhd"),
+    ]
+
+
+def test_run_normalizes_sources_outside_the_manifest_directory(tmp_path, make_module):
+    (tmp_path / "shared.vhd").touch()
+    make_module("top", ["../shared.vhd"], create_sources=False)
+    out = tmp_path / "out"
+    assert _run(tmp_path, "top", out) == 0
+    assert (out / "work_vhdl.src").read_text().splitlines() == [str(tmp_path / "shared.vhd")]
+
+
+def test_run_missing_source_list(tmp_path, caplog):
+    (tmp_path / "manifest.json").write_text('{"module": "top", "source_lists": ["gone.txt"]}')
+    assert _run(tmp_path, "top", tmp_path / "out") == EXIT_NO_INPUT
+    assert "Cannot read source list" in caplog.text

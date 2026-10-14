@@ -17,10 +17,11 @@ from .core import (
     find_manifest,
     index_manifests_by_module,
     load_manifests,
+    manifest_source_paths,
     resolve_top_dir,
 )
 from .scan import ScannedSource, scan_source
-from .utils import EXIT_MANIFEST_OUTDATED, Dependency, Manifest
+from .utils import EXIT_MANIFEST_OUTDATED, Dependency, Manifest, to_absolute_path
 
 # A directory with one of these names holds the sources of the module in its parent.
 SOURCE_DIRECTORY_NAMES = {"hdl", "rtl", "src"}
@@ -39,8 +40,7 @@ class ManifestReview(NamedTuple):
 
 
 def _source_paths(manifest: Manifest) -> List[pathlib.Path]:
-    manifest_dir = pathlib.Path(manifest["manifest_path"]).parent
-    return [manifest_dir / source for source in manifest.get("sources", [])]
+    return [pathlib.Path(source) for source in manifest_source_paths(manifest)]
 
 
 def _scan_modules(manifests: Iterable[Manifest]) -> Dict[str, List[ScannedSource]]:
@@ -117,6 +117,9 @@ def _review_manifest(
 ) -> ManifestReview:
     module = manifest["module"]
     scans = scans_by_module[module]
+    sources = manifest.get("sources", [])
+    # The files of source lists come first and keep the order their list gives them.
+    own_scans = scans[len(scans) - len(sources) :]
     declared = _declared_dependencies(manifest)
     own_units = {unit for scan in scans for unit in scan.declared_units}
     missing: List[Dependency] = []
@@ -146,7 +149,7 @@ def _review_manifest(
             ambiguous_units[unit] = sorted(candidates)
 
     return ManifestReview(
-        sorted_sources=_sort_sources(manifest.get("sources", []), scans),
+        sorted_sources=_sort_sources(sources, own_scans),
         missing_dependencies=missing,
         unreferenced_dependencies=[d for d in declared if d not in referenced],
         ambiguous_units=ambiguous_units,
@@ -217,12 +220,18 @@ def _format_manifest(manifest: Manifest, indent: int) -> str:
 
 
 def _write_manifest(manifest: Manifest, indent: int) -> None:
+    pathlib.Path(manifest["manifest_path"]).parent.mkdir(parents=True, exist_ok=True)
     with open(manifest["manifest_path"], "w", encoding="utf-8") as file:
         file.write(_format_manifest(manifest, indent) + "\n")
 
 
-def _load_sorted_manifests(top_dir: pathlib.Path) -> List[Manifest]:
-    manifests = load_manifests(top_dir)
+def _load_sorted_manifests(*directories: pathlib.Path) -> List[Manifest]:
+    manifests_by_path = {
+        manifest["manifest_path"]: manifest
+        for directory in directories
+        for manifest in load_manifests(directory)
+    }
+    manifests = list(manifests_by_path.values())
     # Called for its check: it exits when two manifests declare the same module.
     index_manifests_by_module(manifests)
     return sorted(manifests, key=lambda manifest: str(manifest["manifest_path"]))
@@ -376,9 +385,17 @@ def _name_modules(
 
 
 def _propose_manifests(
-    top_dir: pathlib.Path, existing_manifests: List[Manifest], exclude_patterns: List[str]
+    top_dir: pathlib.Path,
+    manifest_dir: pathlib.Path,
+    existing_manifests: List[Manifest],
+    exclude_patterns: List[str],
 ) -> List[Tuple[Manifest, List[str]]]:
-    """Return a manifest and the notes about it for each source directory without one."""
+    """Return a manifest and the notes about it for each source directory without one.
+
+    Each manifest goes in the directory under ``manifest_dir`` that matches its
+    source directory under ``top_dir``, so the two are the same when
+    ``manifest_dir`` is ``top_dir``.
+    """
     listed_sources = {
         source.resolve() for manifest in existing_manifests for source in _source_paths(manifest)
     }
@@ -386,14 +403,19 @@ def _propose_manifests(
     names = _name_modules(
         list(sources_by_directory), top_dir, {manifest["module"] for manifest in existing_manifests}
     )
-    proposals: List[Manifest] = [
-        {
-            "module": names[directory],
-            "sources": [source.relative_to(directory).as_posix() for source in sources],
-            "manifest_path": str(directory / NEW_MANIFEST_NAME),
-        }
-        for directory, sources in sources_by_directory.items()
-    ]
+    proposals: List[Manifest] = []
+    for directory, sources in sources_by_directory.items():
+        manifest_parent = manifest_dir / directory.relative_to(top_dir)
+        proposals.append(
+            {
+                "module": names[directory],
+                "sources": [
+                    pathlib.PurePath(os.path.relpath(source, manifest_parent)).as_posix()
+                    for source in sources
+                ],
+                "manifest_path": str(manifest_parent / NEW_MANIFEST_NAME),
+            }
+        )
     reviews = _review_manifests(existing_manifests + proposals)
     for proposal in proposals:
         _apply_review(proposal, reviews[proposal["module"]])
@@ -427,11 +449,18 @@ def create_manifests(args: argparse.Namespace, cwd: pathlib.Path) -> None:
     """Offer a manifest for every source directory under ``args.top_dir`` that has none.
 
     Each manifest is shown and only written after the user agrees, unless
-    ``args.yes`` is set. Existing manifests are never changed.
+    ``args.yes`` is set. Existing manifests are never changed. With
+    ``args.manifest_dir`` set, the manifests are written there instead of next
+    to their sources, and the ones already there count as existing.
     """
     top_dir = resolve_top_dir(cwd, args.top_dir)
-    existing_manifests = _load_sorted_manifests(top_dir)
-    proposals = _propose_manifests(top_dir, existing_manifests, args.exclude)
+    manifest_dir = top_dir
+    if args.manifest_dir is not None:
+        manifest_dir = to_absolute_path(cwd, args.manifest_dir)
+    existing_manifests = _load_sorted_manifests(
+        top_dir, *([manifest_dir] if manifest_dir.is_dir() else [])
+    )
+    proposals = _propose_manifests(top_dir, manifest_dir, existing_manifests, args.exclude)
     if not proposals:
         print("Every HDL source is already listed in a manifest or sits next to one")
         return

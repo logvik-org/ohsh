@@ -159,6 +159,61 @@ def test_create_makes_clashing_directory_names_unique(tmp_path, run_ohsh, write_
     assert _read_manifest(tmp_path / "manifest.json")["module"] == tmp_path.name
 
 
+def test_create_writes_manifests_to_a_separate_directory(
+    accumulator_project, run_ohsh, monkeypatch, capsys
+):
+    monkeypatch.chdir(accumulator_project)
+    vendor_dir = accumulator_project / "vendor"
+    vendor_dir.mkdir()
+    for module_dir in ("adder", "accumulator"):
+        (accumulator_project / module_dir).rename(vendor_dir / module_dir)
+    manifest_dir = accumulator_project / "manifests"
+
+    assert run_ohsh("--create", "--yes", "-t", "vendor", "--manifest-dir", "manifests") == 0
+
+    assert not list(vendor_dir.rglob("manifest.json"))
+    assert _read_manifest(manifest_dir / "adder/manifest.json") == {
+        "module": "adder",
+        "sources": ["../../vendor/adder/adder.vhd"],
+    }
+    assert _read_manifest(manifest_dir / "accumulator/manifest.json") == {
+        "module": "accumulator",
+        "sources": [
+            "../../vendor/accumulator/hdl/acc_pkg.vhd",
+            "../../vendor/accumulator/hdl/accumulator.vhd",
+        ],
+        "dependencies": {"math_lib": ["adder"]},
+    }
+    capsys.readouterr()
+    assert run_ohsh("--create", "--yes", "-t", "vendor", "--manifest-dir", "manifests") == 0
+    assert "already listed" in capsys.readouterr().out
+    assert run_ohsh("--check") == 0
+
+
+def test_fix_leaves_the_order_of_source_lists_alone(tmp_path, run_ohsh, write_sources):
+    write_sources(
+        {
+            "vendor/order.txt": "core.vhd\npkg.vhd\n",
+            "vendor/core.vhd": "use work.vendor_pkg.all;\nentity core is\nend entity;\n",
+            "vendor/pkg.vhd": "package vendor_pkg is\nend package;\n",
+            "vendor/top.vhd": "use work.top_pkg.all;\nentity top is\nend entity;\n",
+            "vendor/top_pkg.vhd": "package top_pkg is\nend package;\n",
+        }
+    )
+    manifest = {
+        "module": "vendor",
+        "source_lists": ["order.txt"],
+        "sources": ["top.vhd", "top_pkg.vhd"],
+    }
+    _write_manifest(tmp_path / "vendor/manifest.json", manifest)
+
+    assert run_ohsh("--fix") == 0
+    assert _read_manifest(tmp_path / "vendor/manifest.json") == {
+        **manifest,
+        "sources": ["top_pkg.vhd", "top.vhd"],
+    }
+
+
 def test_check_reports_missing_dependencies_and_source_order(accumulator_project, run_ohsh, capsys):
     _write_manifest(
         accumulator_project / "adder/manifest.json", {"module": "adder", "sources": ["adder.vhd"]}
@@ -316,6 +371,7 @@ def test_actions_run_in_order(accumulator_project, run_ohsh):
         ["--create", "accumulator"],
         ["--fix", "--no-deps"],
         ["--no-deps", "accumulator"],
+        ["--manifest-dir", "manifests", "--check"],
     ],
 )
 def test_options_that_do_not_go_together_are_usage_errors(run_ohsh, argv):

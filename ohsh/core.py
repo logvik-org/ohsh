@@ -134,18 +134,44 @@ def find_language(source: str) -> Optional[str]:
     return None
 
 
+def _read_source_list(source_list: pathlib.Path) -> List[str]:
+    """Return the source paths a compile-order file lists, relative to the file's directory.
+
+    Blank lines and lines starting with ``#`` are skipped.
+    """
+    try:
+        lines = source_list.read_text(encoding="utf-8").splitlines()
+    except OSError as e:
+        exit_with_error(f"Cannot read source list {source_list}: {e}", EXIT_NO_INPUT)
+    entries = [line.strip() for line in lines]
+    return [
+        str(source_list.parent / entry) for entry in entries if entry and not entry.startswith("#")
+    ]
+
+
+def manifest_source_paths(manifest: Manifest) -> List[str]:
+    """Return the sources of ``manifest`` in compile order: its source lists first, then ``sources``."""
+    manifest_dir = pathlib.Path(manifest["manifest_path"]).parent
+    listed_sources = [
+        source
+        for source_list in manifest.get("source_lists", [])
+        for source in _read_source_list(manifest_dir / source_list)
+    ]
+    own_sources = [str(manifest_dir / source) for source in manifest.get("sources", [])]
+    # Sources outside the manifest's directory are given as ../ paths, which
+    # would otherwise end up as they are in the output.
+    return [os.path.normpath(source) for source in listed_sources + own_sources]
+
+
 def _collect_sources_by_library(
     manifests_by_module: Dict[str, Manifest], module_list: List[Dependency]
 ) -> Dict[str, SourcesByLanguage]:
     sources_by_library: Dict[str, SourcesByLanguage] = {}
     for lib_name, module in module_list:
-        manifest = manifests_by_module[module]
-        manifest_dir = pathlib.Path(manifest["manifest_path"]).parent
         library_sources = sources_by_library.setdefault(
             lib_name, {language: [] for language in EXTENSIONS_BY_LANGUAGE}
         )
-        for relative_source in manifest.get("sources", []):
-            source = str(manifest_dir / relative_source)
+        for source in manifest_source_paths(manifests_by_module[module]):
             language = find_language(source)
             if language is None:
                 logger.warning(f"Skipping {source} in module {module}: unknown file extension")

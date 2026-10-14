@@ -93,6 +93,7 @@ dependencies when one is given. See
 | `--check`           | Report manifests that `--fix` would change, exit 104 if there are any. |              |
 | `--exclude PATTERN` | With `--create`, skip directories matching this glob pattern.          | none         |
 | `-y`, `--yes`       | With `--create`, write every manifest without asking.                  | ask          |
+| `--manifest-dir DIR`| With `--create`, write the manifests under `DIR`, not next to the sources. | next to the sources |
 | `--no-deps`         | With `--fix` or `--check` and `MODULE`, leave its dependencies alone.  |              |
 
 ### Example

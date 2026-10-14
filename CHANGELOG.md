@@ -6,6 +6,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- `source_lists` in a manifest reads the module's sources from text files that
+  list them in compile order, such as the `compile_order.txt` that Open Logic
+  ships.
+- `--manifest-dir DIR` makes `--create` write the manifests under `DIR` instead
+  of next to the sources, for a library you don't own, such as a git submodule.
+
+### Changed
+- Source paths that leave the manifest's directory with `../` are written
+  without the `..` parts.
+
 ## [0.4.0] - 2026-10-12
 
 ### Added

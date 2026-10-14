@@ -23,6 +23,10 @@ Each module gets a manifest file, usually `manifest.json`, next to its sources:
   Files ending in `.v`, `.sv`, `.svp`, `.vh` or `.svh` go to the SystemVerilog list,
   and `.vhd`, `.vhdl` or `.vo` to the VHDL list, regardless of case. Other files
   are skipped with a warning.
+- `source_lists` (optional): list of text files that list source files, one
+  per line, relative to the list file. Blank lines and lines starting with `#`
+  are skipped. Use it for a library that ships its own compile order, see
+  [below](#libraries-that-ship-a-compile-order).
 - `dependencies` (optional): modules this one needs, as lists grouped by
   library. The special library `work` is remapped to whatever `--work` (or the
   resolving library) is.
@@ -45,6 +49,29 @@ other.
 So ohsh orders the modules, and you order the files inside each module. When a
 module's files would need another module compiled in between them, split it
 into two modules.
+
+## Libraries that ship a compile order
+
+Some HDL libraries list their files in compile order in a text file, such as
+the `compile_order.txt` of [Open Logic](https://github.com/open-logic/open-logic).
+`source_lists` reads the sources from such a file instead of repeating them in
+the manifest, so the manifest stays correct when the library is updated. The
+manifest does not have to be in the library's directory: a library included as
+a git submodule can get its manifest from your own repository.
+
+```json
+{
+  "module": "open_logic",
+  "source_lists": ["../../lib/open-logic/compile_order.txt"]
+}
+```
+
+The files of the source lists come first, in the order they are listed, and
+then the files of `sources`. `--fix` only sorts `sources` and leaves the order
+of a source list alone.
+
+Paths in `sources` and in source lists may start with `../` to point outside
+the manifest's directory. ohsh writes them without the `..` parts.
 
 ## Discovery and validation
 
