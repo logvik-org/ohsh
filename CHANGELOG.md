@@ -6,6 +6,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-14
+
 ### Added
 - `source_lists` in a manifest reads the module's sources from text files that
   list them in compile order, such as the `compile_order.txt` that Open Logic
@@ -86,7 +88,8 @@ First release.
 - Integration examples for cocotb, VUnit, GHDL, NVC, UVVM, hog, Questa, Vivado
   and Quartus.
 
-[Unreleased]: https://github.com/logvik-org/ohsh/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/logvik-org/ohsh/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/logvik-org/ohsh/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/logvik-org/ohsh/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/logvik-org/ohsh/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/logvik-org/ohsh/compare/v0.2.0...v0.2.1
