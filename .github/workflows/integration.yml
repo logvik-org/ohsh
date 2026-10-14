@@ -43,8 +43,8 @@ jobs:
       - name: Run the examples
         run: scripts/run-examples.sh
 
-  # A hog project with Open Logic as a submodule, in a repository of its own so
-  # that hog owns the repository root as it does in a real project.
+  # A hog project with Open Logic and colibri as submodules, in a repository of
+  # its own so that hog owns the repository root as it does in a real project.
   demo:
     runs-on: ubuntu-24.04
     steps:
@@ -54,7 +54,12 @@ jobs:
         with:
           repository: logvik-org/ohsh-demo
           path: ohsh-demo
-          submodules: recursive
+          submodules: true
+
+      # Recursive would also fetch colibri's own UVVM and style guide
+      # submodules, which the demo does not use.
+      - name: Fetch the submodules of Open Logic
+        run: git -C ohsh-demo/lib/open-logic submodule update --init --depth 1
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
