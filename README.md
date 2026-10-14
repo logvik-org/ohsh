@@ -163,6 +163,7 @@ The full documentation is at [ohsh.readthedocs.io](https://ohsh.readthedocs.io):
 - [Integrations with simulators and build tools](https://ohsh.readthedocs.io/en/latest/integrations.html)
 - [Create, fix and check manifests](https://ohsh.readthedocs.io/en/latest/manifest-actions.html)
 - [Exit codes](https://ohsh.readthedocs.io/en/latest/exit-codes.html)
+- [ohsh-demo](https://github.com/logvik-org/ohsh-demo), a hog project with third-party libraries as git submodules
 - [Contributing and development](https://github.com/logvik-org/ohsh/blob/main/CONTRIBUTING.md)
 
 ## License
