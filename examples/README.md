@@ -35,11 +35,13 @@ runner because the tools are licensed.
 ## A larger project
 
 [ohsh-demo](https://github.com/logvik-org/ohsh-demo) is a hog repository with
-hog, [Open Logic](https://github.com/open-logic/open-logic) and
-[colibri](https://gitlab.cern.ch/colibri/colibri) as git submodules. It shows
-two ways to give a third-party library manifests without changing its files,
-`source_lists` and `--create --manifest-dir`, and runs its testbench with GHDL,
-NVC and hog's own GHDL simulation. CI runs it against every pull request in the `demo` job of
+hog, [Open Logic](https://github.com/open-logic/open-logic),
+[colibri](https://gitlab.cern.ch/colibri/colibri),
+[UVVM](https://github.com/UVVM/UVVM) and [OSVVM](https://github.com/OSVVM/OSVVM)
+as git submodules. It gives each library manifests without changing its files:
+with `source_lists`, with `--create --manifest-dir`, or by hand. It runs plain,
+UVVM, OSVVM and VUnit testbenches with GHDL and NVC, and hog's own GHDL
+simulation. CI runs it against every pull request in the `demo` job of
 [`integration.yml`](../.github/workflows/integration.yml).
 
 ## Running the examples

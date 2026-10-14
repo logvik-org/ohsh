@@ -43,8 +43,9 @@ jobs:
       - name: Run the examples
         run: scripts/run-examples.sh
 
-  # A hog project with Open Logic and colibri as submodules, in a repository of
-  # its own so that hog owns the repository root as it does in a real project.
+  # A hog project with Open Logic, colibri, UVVM and OSVVM as submodules, in a
+  # repository of its own so that hog owns the repository root as it does in a
+  # real project.
   demo:
     runs-on: ubuntu-24.04
     steps:
@@ -65,8 +66,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install ohsh
-        run: pip install .
+      - name: Install ohsh + VUnit
+        run: pip install ".[examples]"
 
       - name: Install tcllib
         run: sudo apt-get update && sudo apt-get install -y tcllib
