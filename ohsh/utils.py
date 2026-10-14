@@ -75,7 +75,7 @@ def _is_list_of_strings(value: object) -> bool:
 def validate_manifest(manifest: object) -> None:
     """Raise ``InvalidManifestError`` naming the first structural problem in ``manifest``.
 
-    ``sources`` and ``dependencies`` are optional. Unknown keys are ignored.
+    ``sources``, ``source_lists`` and ``dependencies`` are optional. Unknown keys are ignored.
     """
     if not isinstance(manifest, dict):
         raise InvalidManifestError("the top level must be a JSON object")
@@ -83,6 +83,8 @@ def validate_manifest(manifest: object) -> None:
         raise InvalidManifestError('"module" must be a non-empty string')
     if not _is_list_of_strings(manifest.get("sources", [])):
         raise InvalidManifestError('"sources" must be a list of file names')
+    if not _is_list_of_strings(manifest.get("source_lists", [])):
+        raise InvalidManifestError('"source_lists" must be a list of file names')
     dependencies = manifest.get("dependencies", {})
     if not isinstance(dependencies, dict) or not all(
         _is_list_of_strings(modules) for modules in dependencies.values()

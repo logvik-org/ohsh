@@ -32,6 +32,15 @@ checks the generated list files with hog's own reader. **docs only** examples ar
 checked against the vendor's documented commands, but can't run on a public CI
 runner because the tools are licensed.
 
+## A larger project
+
+[ohsh-demo](https://github.com/logvik-org/ohsh-demo) is a hog repository with
+hog and [Open Logic](https://github.com/open-logic/open-logic) as git
+submodules. It shows how to give a third-party library manifests without
+changing its files, and runs its testbench with GHDL, NVC and hog's own GHDL
+simulation. CI runs it against every pull request in the `demo` job of
+[`integration.yml`](../.github/workflows/integration.yml).
+
 ## Running the examples
 
 The Python frameworks (cocotb, VUnit) come with the `examples` extra, pinned to

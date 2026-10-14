@@ -234,6 +234,13 @@ Two things to keep in mind:
 - ohsh does not delete the list file of a library that is no longer used.
   Remove it yourself.
 
+## A complete hog repository
+
+[ohsh-demo](https://github.com/logvik-org/ohsh-demo) puts all of the above
+together in a repository of its own, with hog and Open Logic as git submodules.
+It commits the lists (option A), checks them in CI, and runs hog's GHDL
+simulation from them with `./Hog/Do SIMULATION`, which works without Vivado.
+
 ## The examples in this directory
 
 Status: **✅ both examples run in CI** (`.github/workflows/integration.yml`).

@@ -176,6 +176,7 @@ def test_validate_manifest_accepts_minimal_manifest():
         ({"module": ""}, '"module"'),
         ({"module": "top", "sources": "a.v"}, '"sources"'),
         ({"module": "top", "sources": ["a.v", 3]}, '"sources"'),
+        ({"module": "top", "source_lists": "order.txt"}, '"source_lists"'),
         ({"module": "top", "dependencies": ["a"]}, '"dependencies"'),
         ({"module": "top", "dependencies": {"work": "a"}}, '"dependencies"'),
     ],

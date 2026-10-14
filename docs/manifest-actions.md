@@ -70,6 +70,26 @@ ohsh divides the sources into modules by these rules:
 One module per directory will not suit every project. Rename, merge or split
 the modules afterwards where needed.
 
+### Manifests for a library you don't own
+
+A third-party library, for example one included as a git submodule, usually has
+no manifests, and writing them into its directory would change files you don't
+own. `--manifest-dir` writes the manifests into a directory of your own instead:
+
+```bash
+ohsh --create -t lib/colibri/src --manifest-dir manifests/colibri
+```
+
+Each manifest goes to the place under `--manifest-dir` that matches its source
+directory under `--top-dir`, and lists its sources as paths from there, such as
+`../../../lib/colibri/src/fifo/fifo.vhd`. Manifests already in `--manifest-dir`
+count as existing, so running the command again only adds what is new.
+Afterwards, point `--top-dir` at a directory that holds both the manifests and
+your own modules, usually the root of the repository.
+
+If the library ships its own compile order, a single manifest with
+[`source_lists`](manifest-format.md) can be simpler.
+
 ## `--fix`
 
 `--fix` compares each manifest with its sources and updates it in two ways:

@@ -100,6 +100,13 @@ def build_parser(cwd: pathlib.Path) -> argparse.ArgumentParser:
         "this glob pattern (repeatable)",
     )
     actions.add_argument(
+        "--manifest-dir",
+        default=None,
+        metavar="DIR",
+        help="with --create, write the manifests under DIR, in the same layout as their "
+        "source directories under --top-dir, instead of next to the sources",
+    )
+    actions.add_argument(
         "-y",
         "--yes",
         action="store_true",
@@ -141,6 +148,8 @@ def main() -> None:
         parser.error("give a module to resolve, or at least one of --create, --fix and --check")
     if args.create and args.module is not None:
         parser.error("--create takes no module, it works on every directory under --top-dir")
+    if args.manifest_dir is not None and not args.create:
+        parser.error("--manifest-dir needs --create")
     if args.no_deps and (args.module is None or not requested_actions):
         parser.error("--no-deps needs a module and --fix or --check")
     if args.format == "hog" and args.relative_to is None:
