@@ -238,8 +238,9 @@ Two things to keep in mind:
 
 [ohsh-demo](https://github.com/logvik-org/ohsh-demo) puts all of the above
 together in a repository of its own, with hog and Open Logic as git submodules.
-It commits the lists (option A), checks them in CI, and runs hog's GHDL
-simulation from them with `./Hog/Do SIMULATION`, which works without Vivado.
+It ignores the lists (option B), writes them by running `pre-creation.tcl`
+the way hog does, and runs hog's GHDL simulation from them with
+`./Hog/Do SIMULATION`, which works without Vivado or a project.
 
 ## The examples in this directory
 
