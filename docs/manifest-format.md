@@ -73,6 +73,14 @@ of a source list alone.
 Paths in `sources` and in source lists may start with `../` to point outside
 the manifest's directory. ohsh writes them without the `..` parts.
 
+[ohsh-demo](https://github.com/logvik-org/ohsh-demo) does this for two libraries included as git submodules:
+[Open Logic](https://github.com/logvik-org/ohsh-demo#open-logic-one-manifest-that-reads-the-librarys-compile-order)
+with one manifest, and
+[UVVM](https://github.com/logvik-org/ohsh-demo#uvvm-one-manifest-per-library-each-reading-its-compile-order)
+with one manifest for each of its libraries. For
+[OSVVM](https://github.com/logvik-org/ohsh-demo#osvvm-a-manifest-written-by-hand), whose compile order is a script
+rather than a list, it shows a manifest written by hand instead.
+
 ## Discovery and validation
 
 ohsh searches `--top-dir` and all its subdirectories for files named

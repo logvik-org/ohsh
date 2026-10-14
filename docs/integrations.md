@@ -27,6 +27,11 @@ vendor's documentation but can't run on a public CI runner.
 | [Vivado](https://github.com/logvik-org/ohsh/tree/main/examples/integrations/vivado) | [simple](https://github.com/logvik-org/ohsh/tree/main/examples/integrations/vivado/simple) | [advanced](https://github.com/logvik-org/ohsh/tree/main/examples/integrations/vivado/advanced) | docs only |
 | [Quartus](https://github.com/logvik-org/ohsh/tree/main/examples/integrations/quartus) | [simple](https://github.com/logvik-org/ohsh/tree/main/examples/integrations/quartus/simple) | [advanced](https://github.com/logvik-org/ohsh/tree/main/examples/integrations/quartus/advanced) | docs only |
 
+[ohsh-demo](https://github.com/logvik-org/ohsh-demo) puts several of these together in a repository of its own: a
+hog project with Open Logic, colibri, UVVM and OSVVM as git submodules, and
+testbenches run with GHDL, NVC, VUnit and hog's own GHDL simulation. ohsh's CI
+runs it against every pull request.
+
 For example, feeding ohsh output to GHDL:
 
 ```bash

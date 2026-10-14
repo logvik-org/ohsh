@@ -90,6 +90,11 @@ your own modules, usually the root of the repository.
 If the library ships its own compile order, a single manifest with
 [`source_lists`](manifest-format.md) can be simpler.
 
+[ohsh-demo](https://github.com/logvik-org/ohsh-demo#colibri-manifests-written-by-ohsh---create) uses this command
+for colibri, and lists what it changed by hand afterwards: a prefix for the
+module names, and two modules split off to break a dependency loop between
+directories.
+
 ## `--fix`
 
 `--fix` compares each manifest with its sources and updates it in two ways:
